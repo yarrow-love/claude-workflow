@@ -11,6 +11,7 @@ You are the [architect](.claude/agents/architect/CLAUDE.md) in dialog with the o
    - **Todos** — open orders carried forward into the next mission or archived with cause (the `_done`/`_cancelled` semantics).
    - **Proposals** — adopted-and-consumed or dead proposals archive with the mission; standing proposals persist in `work/proposals/`.
    - **Footguns** — the ledger archives whole; the *next* mission's settlement triages entries (carried / designed-around / watch).
+   - **Design** — `work/design/` archives whole (canon, system, design sessions); the next mission's settlement triages (carried / redesigned / watch).
    - **Runbooks** — carried / retired / watch.
    - **Docs & research** — walk `docs/` and `docs/research/`: each item **carried** (proven valuable for the project's lifetime — stays) or **archived** (mission-scoped, stale, or never proved relevant — moves to `work/missions/<v>/docs/`). The working tree stays lean because agents grep the working tree.
 3. **Archive the session store** — sweep the mission's artifacts for `sessions:` stamps (`git grep -h '@play/' -- '*.md'` and kin), verify every referenced transcript exists in `work/sessions/`, backfill stragglers (`/archive`); then `git mv work/sessions/` content for this mission into the archive.

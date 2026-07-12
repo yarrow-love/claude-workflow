@@ -6,7 +6,7 @@ Operational facts for agent roles working **on this repo** (the canonical workfl
 
 - **What this is**: the canonical, project-generic Claude agentic workflow — `.claude/` is the product, `work/` is its own live work system. See root `CLAUDE.md` for the two-hats rule (genericity is the acceptance test for `.claude/` changes).
 - **Quality gate** (documentation-and-tooling repo — the gate fits the artifact):
-  1. Reference resolution — every path referenced in `.claude/` resolves: `grep -rhoE '(\.claude/bin|work|docs|src|tmp)/[A-Za-z0-9._/<>-]+' .claude --include='*.md' | sed 's/[.,)`:]*$//' | grep -vE '<|>' | sort -u` and check existence. Sanctioned lazy-creates (created by their commands, not scaffolded): `tmp/*` (runtime stream logs), `work/MISSION.md` (at `/plan` mission tier), `work/todos/BACKLOG.md` (at first `/triage`), the design container (default `src/design/`, at the founding `/design` — and never in a repo without a UI).
+  1. Reference resolution — every path referenced in `.claude/` resolves: `grep -rhoE '(\.claude/bin|work|docs|src|tmp)/[A-Za-z0-9._/<>-]+' .claude --include='*.md' | sed 's/[.,)`:]*$//' | grep -vE '<|>' | sort -u` and check existence. Sanctioned lazy-creates (created by their commands, not scaffolded): `tmp/*` (runtime stream logs), `work/MISSION.md` (at `/plan` mission tier), `work/todos/BACKLOG.md` (at first `/triage`), `work/design/` (at the founding `/design` — and never in a repo without a UI).
   2. Tooling smoke test — `bun .claude/bin/session-archive` and `bun .claude/bin/consult` with no args print usage and exit 1; `cd work/sessions && sha256sum -c MANIFEST`.
   3. `/initialize` passes (the full audit; BASELINE integrity, hooks resolve, scaffold conformance).
 - **Session callbacks**: stamp per `work/README.md` § The callback grammar. Machine: `play`.
@@ -15,7 +15,7 @@ Operational facts for agent roles working **on this repo** (the canonical workfl
 
 ## Front-end surface (manager, inspector, designer, implementer)
 
-- **None.** This repo has no application UI; `interface` scope does not occur, the inspector is never dispatched, and the designer's remit is limited to documentation shape. (In a consuming project, this section carries: the serve recipe, target URLs, auth bootstrap, test posture, and the **design container location** — default `src/design/` — plus the external design tool in use, per `designer.md`.)
+- **None.** This repo has no application UI; `interface` scope does not occur, the inspector is never dispatched, and the designer's remit is limited to documentation shape. (In a consuming project, this section carries: the serve recipe, target URLs, auth bootstrap, test posture, the app-side token home, and the external design tool in use, per `designer.md` — the design container itself is fixed convention: `work/design/`.)
 
 ## Runtime evidence (investigator)
 

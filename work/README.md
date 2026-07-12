@@ -12,7 +12,8 @@ Determinations record: [`work/todos/_done/agentic-workflow/1.determinations.md`]
 | `todos/` | Active work orders (+ `bugs/`, `_done/`, `_cancelled/`, `BACKLOG.md`, phased series subdirectories) | Convention: [`todos/README.md`](todos/README.md) |
 | `proposals/` | Pre-decision design thinking (+ `_deferred/`, `_rejected/`) | Adopted-and-consumed or dead proposals archive with the closing mission; standing proposals persist |
 | `milestones/` | The active mission's phased roadmap (`<n>.<name>/` with `MILESTONE.md` + phase docs) | Archived whole at mission close |
-| `missions/` | Closed missions, archived whole and in-repo (`<v>/` with `MISSION.md`, `closing.md`, and the mission's todos/milestones/proposals/footguns/runbooks/docs/sessions) | Append-only institutional memory; `missions/README.md` is the ledger |
+| `missions/` | Closed missions, archived whole and in-repo (`<v>/` with `MISSION.md`, `closing.md`, and the mission's todos/milestones/proposals/design/footguns/runbooks/docs/sessions) | Append-only institutional memory; `missions/README.md` is the ledger |
+| `design/` | The active mission's design authority: `DESIGN.md` (canon), `system/` (distilled assets), `sessions/<date>.<slug>/` (design sessions: `BRIEF.md` + outbound `current-state/` + returns) | Mission-versioned: created at the founding `/design` (an MVP mission may never create it); triaged at mission open (carried / redesigned / watch); archived at close |
 | `footguns/` | The active mission's footgun ledger | Triaged at mission open (carried / designed-around / watch); archived at close |
 | `runbooks/` | Operational procedure docs + operator-applied config payloads | Mission-versioned; triaged at open (carried / retired / watch) |
 | `sessions/` | The durable transcript archive behind callback stamps (`<machine>/<uuid>.jsonl.gz` + `MANIFEST`) | Archive-on-stamp + `/archive` sweeps; moved into the closing mission's archive |
@@ -21,7 +22,7 @@ Determinations record: [`work/todos/_done/agentic-workflow/1.determinations.md`]
 
 Retired: `objectives/` — real objectives live in `todos/` and `milestones/`; proto-ideas in `notes/` and `proposals/`.
 
-**The orientation-doc convention**: every tier's container carries one ALL-CAPS orientation document — root: `README.md` (human onramp) + `CLAUDE.md` (agent entry, harness-fixed name); `work/PROJECT.md` (project supplement); `work/MISSION.md` (active mission charter); `work/milestones/<n>.<name>/MILESTONE.md` (milestone index); the design container's `DESIGN.md` (design canon) and per-hand-off `BRIEF.md` (location: `work/PROJECT.md`). The caps name marks "read this first for this tier." Lowercase `README.md` documents a *directory* (todos/, sessions/, footguns/), and artifacts (`closing.md`, phase docs) stay lowercase.
+**The orientation-doc convention**: every tier's container carries one ALL-CAPS orientation document — root: `README.md` (human onramp) + `CLAUDE.md` (agent entry, harness-fixed name); `work/PROJECT.md` (project supplement); `work/MISSION.md` (active mission charter); `work/milestones/<n>.<name>/MILESTONE.md` (milestone index); `work/design/DESIGN.md` (design canon) and per-design-session `BRIEF.md`. The caps name marks "read this first for this tier." Lowercase `README.md` documents a *directory* (todos/, sessions/, footguns/), and artifacts (`closing.md`, phase docs) stay lowercase.
 
 ## The tier ladder
 
@@ -48,7 +49,7 @@ The metaphor is corporate, and deliberately so: judgment escalates *upward*, and
 | **Manager** | line management | Drives one work order to its `## Acceptance Verdict` by dispatching specialists; sole author of the work document; conserves its context for decisions. |
 | **Specialists** | individual contributors | One scoped task each, as subagents: **researcher**, **investigator**, **planner**, **designer**, **implementer**, **reviewer**, **inspector**, **documenter**, **integrator**. |
 
-The **Planner** and the **Architect** are the same competency at different tiers: the Planner authors the implementation-plan section of one work order, as a dispatched subagent pinned to the flagship model; the Architect authors the specs those work orders descend from, interactively, with the operator in the dialog. The **Designer** carries the same split for design: authority mode (`/design`, operator-run, judgment-closed — authors the design canon and hand-off briefs) vs subagent mode (scoped in-build investigation). The **Integrator** merges worktree branches back to trunk (renamed from "resolver" to break the collision with bug *resolution*).
+The **Planner** and the **Architect** are the same competency at different tiers: the Planner authors the implementation-plan section of one work order, as a dispatched subagent pinned to the flagship model; the Architect authors the specs those work orders descend from, interactively, with the operator in the dialog. The **Designer** carries the same split for design: authority mode (`/design`, operator-run, judgment-closed — authors the design canon and session briefs) vs subagent mode (scoped in-build investigation). The **Integrator** merges worktree branches back to trunk (renamed from "resolver" to break the collision with bug *resolution*).
 
 Deferred: a **work-queue tier** above the Executor (triage → dispatch across the standing queue) — seeded at `proposals/_deferred/26-07-11.work-queue-tier.md`; the Operator plays this role today.
 
@@ -63,7 +64,7 @@ Commands are **verbs**; agents are **nouns**. Two core verbs are polymorphic on 
 | `/triage [scope]` | Manager | Reconcile the todos inbox with current reality; rewrite `BACKLOG.md` |
 | `/investigate <question\|bug>` | Investigator | Trace a codebase question or bug to a definitive answer |
 | `/research <question>` | Researcher | External/web research → report in `docs/research/` |
-| `/design [target]` | Designer (authority mode — operator-run) | **Judgment-closed** design dialog: found/refresh the canon (`DESIGN.md` + `system/`), design a surface into a hand-off brief, or reconcile a returned pull. Never implements |
+| `/design [target]` | Designer (authority mode — operator-run) | **Judgment-closed** design session: found/refresh the canon (`work/design/`), design a surface into a session brief, or reconcile a returned pull. Never implements |
 | `/document <scope>` | Manager (dispatches Documenter) | Audit and revise documentation drift |
 | `/close <mission>` | Architect-tier dialog | Mission close: closing report, full triage (todos/proposals/footguns/**docs & research**), archive, tag. **Operator-invoked only.** |
 | `/archive` | — | Sweep + backfill the transcript archive; checkpoint for inactive-but-open missions |
