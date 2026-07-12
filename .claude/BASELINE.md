@@ -35,7 +35,7 @@ Baseline keys: `permissions.allow` entries `Bash(claude:*)` (child-session dispa
 ## Bootstrap procedure (new repo)
 
 1. Copy the manifest set into `<repo>/.claude/`.
-2. Scaffold the work system: `work/{README.md,todos/{README.md,bugs/,_done/,_cancelled/},proposals/{_deferred/,_rejected/},milestones/README.md,missions/,design/README.md,footguns/README.md,notes/,runbooks/}` — copy the READMEs and stubs from this repo; they are project-generic (the design/footguns/milestones stubs are instructive mandates for directories that start empty).
+2. Scaffold the work system: `work/{README.md,todos/{README.md,bugs/,_done/,_cancelled/},proposals/{_deferred/,_rejected/},milestones/README.md,missions/,design/{README.md,system/README.md,sessions/README.md},footguns/README.md,notes/,runbooks/}` — copy the READMEs and stubs from this repo; they are project-generic (the design/footguns/milestones stubs are instructive mandates for directories that start empty).
 3. Author `work/PROJECT.md` (the supplement — per-project, use this repo's as the shape exemplar) and root `CLAUDE.md`.
 4. Run `/initialize`; repair gaps (`/configure` once it exists).
 
