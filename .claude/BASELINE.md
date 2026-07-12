@@ -1,6 +1,6 @@
 # The generic bootstrap — baseline manifest
 
-Every file listed here belongs to the **project-generic, portable** agentic bootstrap: copy exactly this set to a new repo (plus the scaffold, below) and the system works there unmodified. Anything in `.claude/` **not** listed is project-specific by definition. `/initialize` audits the environment against the *Expectations* section.
+**Canonical home**: `git@github.com:yarrow-love/claude-workflow.git` (`~/dev/claude-workflow`). Bootstrap development happens there; consuming repos adopt by re-copying the manifest set. Every file listed here belongs to the **project-generic, portable** agentic bootstrap: copy exactly this set to a new repo (plus the scaffold, below) and the system works there unmodified. Anything in `.claude/` **not** listed is project-specific by definition. `/initialize` audits the environment against the *Expectations* section.
 
 Design rationale: `work/todos/_done/agentic-workflow/1.determinations.md` (det. 4). Project-specific facts never live in `.claude/` — they live in `work/PROJECT.md` (the supplement) and root `CLAUDE.md` (architecture).
 
