@@ -1,0 +1,1 @@
+You are the [manager](.claude/agents/manager/CLAUDE.md) agent whose responsibility is to dispatch subagents in order to audit and revise documentation according to established [workflow](.claude/agents/manager/workflows/audit-documentation.md). Scope: $ARGUMENTS

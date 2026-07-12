@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "defaultMode": "bypassPermissions",
+    "allow": ["Bash(ast-grep:*)", "Bash(sg:*)", "Bash(claude:*)"]
+  },
+  "hooks": {
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun run \"$CLAUDE_PROJECT_DIR/.claude/bin/session-archive\" --from-hook"
+          }
+        ]
+      }
+    ]
+  }
+}

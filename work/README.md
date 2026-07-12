@@ -1,0 +1,114 @@
+# The work system
+
+`work/` is the **process** container: everything about how work is planned, executed, recorded, and archived. `docs/` is the **knowledge** container: reference material, research, architecture. The split is load-bearing — agents grep the working tree, so what lives here is always relevant to the *active* mission, and what has served its purpose archives into `work/missions/<v>/` rather than polluting the active workspace.
+
+Determinations record: [`work/todos/_done/agentic-workflow/1.determinations.md`](todos/_done/agentic-workflow/1.determinations.md) (locked 26-07-11). Design corpus: [`work/proposals/26-07-05.agentic-workflow/`](proposals/26-07-05.agentic-workflow/).
+
+## Layout
+
+| Path | Holds | Lifecycle |
+| --- | --- | --- |
+| `MISSION.md` | The active mission's charter (objective, scope, non-goals, success **and failure** criteria) | Written at mission open (`/plan` mission tier); archived at `/close` |
+| `todos/` | Active work orders (+ `bugs/`, `_done/`, `_cancelled/`, `BACKLOG.md`, phased series subdirectories) | Convention: [`todos/README.md`](todos/README.md) |
+| `proposals/` | Pre-decision design thinking (+ `_deferred/`, `_rejected/`) | Adopted-and-consumed or dead proposals archive with the closing mission; standing proposals persist |
+| `milestones/` | The active mission's phased roadmap (`<n>.<name>/` with `MILESTONE.md` + phase docs) | Archived whole at mission close |
+| `missions/` | Closed missions, archived whole and in-repo (`<v>/` with `MISSION.md`, `closing.md`, and the mission's todos/milestones/proposals/footguns/runbooks/docs/sessions) | Append-only institutional memory; `missions/README.md` is the ledger |
+| `footguns/` | The active mission's footgun ledger | Triaged at mission open (carried / designed-around / watch); archived at close |
+| `runbooks/` | Operational procedure docs + operator-applied config payloads | Mission-versioned; triaged at open (carried / retired / watch) |
+| `sessions/` | The durable transcript archive behind callback stamps (`<machine>/<uuid>.jsonl.gz` + `MANIFEST`) | Archive-on-stamp + `/archive` sweeps; moved into the closing mission's archive |
+| `notes/` | Pre-proposal context: ideas not mature enough to propose, observations not settled enough to document | Operator scratch; graduates into proposals or evaporates |
+| `PROJECT.md` | The project supplement: operational facts agents read (quality gate, front-end surface, runtime evidence, per-role notes) | Persists across missions; re-certified like a carried footgun |
+
+Retired: `objectives/` — real objectives live in `todos/` and `milestones/`; proto-ideas in `notes/` and `proposals/`.
+
+**The orientation-doc convention**: every tier's container carries one ALL-CAPS orientation document — root: `README.md` (human onramp) + `CLAUDE.md` (agent entry, harness-fixed name); `work/PROJECT.md` (project supplement); `work/MISSION.md` (active mission charter); `work/milestones/<n>.<name>/MILESTONE.md` (milestone index). The caps name marks "read this first for this tier." Lowercase `README.md` documents a *directory* (todos/, sessions/, footguns/), and artifacts (`closing.md`, phase docs) stay lowercase.
+
+## The tier ladder
+
+Every tier plans, works, and closes the same way, at its own scale:
+
+| Tier | Unit | Planning artifact | Closing artifact | Closing mode |
+| --- | --- | --- | --- | --- |
+| work order | one feature / fix / refactor / chore | `## Implementation Plan` | `## Summary`, filed to `_done/` | criteria-closed (self-closing) |
+| milestone phase | one campaign (≈ one Manager session) | phase doc `## Acceptance` | `## Addendum` | criteria-closed |
+| milestone | one capability | `MILESTONE.md` + phase docs (`/plan <milestone>`) | index status + campaign log | criteria-closed |
+| mission | one version | charter (`work/MISSION.md`) + settlement | closing report (`work/missions/<v>/closing.md`) | **judgment-closed** (`/close`, operator-invoked only) |
+
+**Criteria-closed** tiers close themselves against written acceptance — the automation story. **Judgment-closed** tiers close only by explicit operator decision; the system never proposes or initiates a mission close, and a mission may close `accomplished | failed | superseded` with the same ceremony (failure is first-class). An **open milestone** (`mode: open` frontmatter) is the judgment-closed exception one tier down: a direction statement instead of fixed acceptance, an iteration ledger instead of pre-filed phases; `/execute` refuses it (nothing to converge on).
+
+## The role ladder
+
+The metaphor is corporate, and deliberately so: judgment escalates *upward*, and ultimate authority rests with the human. A military metaphor would imply command flowing down and obedience flowing back; this system's control flow is the opposite where it matters.
+
+| Role | Ladder position | Does |
+| --- | --- | --- |
+| **Operator** | owner | All ultimate judgment: design sign-off, autonomy scope, mission close. The interim work-queue scheduler. |
+| **Architect** | design authority (staff — advises, never dispatches builds) | Plans missions and milestones as interactive flagship sessions; authors charters, milestone indexes, phase docs; the standing consult handle. Tier-qualified in stamp comments: `# mission architect`, `# milestone architect`. |
+| **Executor** | executive | Drives one milestone campaign: Reconnaissance gate with the operator, then one Manager child-session per phase; reasons about **ultimate acceptance** (does the phase advance the objective) vs the Manager's phase acceptance. |
+| **Manager** | line management | Drives one work order to its `## Acceptance Verdict` by dispatching specialists; sole author of the work document; conserves its context for decisions. |
+| **Specialists** | individual contributors | One scoped task each, as subagents: **researcher**, **investigator**, **planner**, **designer**, **implementer**, **reviewer**, **inspector**, **documenter**, **integrator**. |
+
+The **Planner** and the **Architect** are the same competency at different tiers: the Planner authors the implementation-plan section of one work order, as a dispatched subagent pinned to the flagship model; the Architect authors the specs those work orders descend from, interactively, with the operator in the dialog. The **Integrator** merges worktree branches back to trunk (renamed from "resolver" to break the collision with bug *resolution*).
+
+Deferred: a **work-queue tier** above the Executor (triage → dispatch across the standing queue) — seeded at `proposals/_deferred/26-07-11.work-queue-tier.md`; the Operator plays this role today.
+
+## The command family
+
+Commands are **verbs**; agents are **nouns**. Two core verbs are polymorphic on the argument's tier — the directory structure identifies the context, so the operator never chooses between specialized command names:
+
+| Command | Routes to | Does |
+| --- | --- | --- |
+| `/plan <target>` | mission → Architect · milestone dir → Architect · work order → Manager (dispatches Planner) | Produce the tier's planning artifact |
+| `/execute <target>` | milestone dir → Executor · work-order file → Manager (`automatically` switch for headless convergence) | **Advance the document through its workflow from wherever it stands** — the work order is the state machine |
+| `/triage [scope]` | Manager | Reconcile the todos inbox with current reality; rewrite `BACKLOG.md` |
+| `/investigate <question\|bug>` | Investigator | Trace a codebase question or bug to a definitive answer |
+| `/research <question>` | Researcher | External/web research → report in `docs/research/` |
+| `/document <scope>` | Manager (dispatches Documenter) | Audit and revise documentation drift |
+| `/close <mission>` | Architect-tier dialog | Mission close: closing report, full triage (todos/proposals/footguns/**docs & research**), archive, tag. **Operator-invoked only.** |
+| `/archive` | — | Sweep + backfill the transcript archive; checkpoint for inactive-but-open missions |
+| `/initialize` | — | Read-only environment audit against `.claude/BASELINE.md` expectations |
+
+Retired: `/build`, `/resolve`, `/refactor`, `/implement` (→ `/execute`), `/accomplish` (→ `/execute <milestone>`), `/answer` (→ `/investigate` + `/research`), `/schedule` (→ deferred work-queue tier).
+
+## The callback grammar
+
+**Stated here once; referenced everywhere else.**
+
+```
+<role>@<machine>/<session-id>[#<message-id>]
+```
+
+- **role** — the role the session was acting in (ladder names above; tier-qualified by a trailing `# comment` where useful).
+- **machine** — the host owning the session transcript (registry below). Load-bearing: transcripts are machine-local; this is the routing key for any future cross-machine consult.
+- **session-id** — the resume handle. `claude -p --resume <session-id>` **forks** the session at full context (the original transcript is never mutated; parallel consults are safe).
+- **#message-id** *(optional)* — a **citation**, not a resume target: it locates the exact turn in the (archived) transcript, greppable via `zgrep <message-id> work/sessions/<machine>/<uuid>.jsonl.gz`. Include it when a specific statement is being cited; omit otherwise.
+
+Conventions:
+
+- **`sessions:` frontmatter — durable tiers only** (architect / executor / manager: the sessions someone can actually `--resume`). Append-only, each entry the grammar above plus an optional `# role comment`. Append, never rewrite, reorder, or delete. Any agent that touches a work order at any stage records itself — durable sessions here, everything else via the section stamps below.
+- **Per-section stamps** — every `<h2>` section appended to a work document is prefaced by a blockquote stamp: `> <role>@<machine>/<session-id>`. **The role names the act; the session-id names who can answer for it**: a specialist's report carries the specialist's role over the hosting (resumable) session's id — e.g. `> reviewer@play/<manager-session-id>` (the reviewer subagent is reachable back through that session). A session acting outside a dispatched role stamps the capacity it was serving when it wrote. A section revised by a *different* session appends a second stamp line. The `sessions:` list is derivable from the body stamps (dedupe by session-id, which collapses to the durable tiers) — the stamps are the source of truth.
+- **A callback is provenance plus a consult handle, never authority.** Resuming an author answers "what did you intend / why was X rejected"; new design decisions still escalate to the Operator.
+- **Durability** — stamping creates a promise of consultability; `work/sessions/` (archive-on-stamp + `/archive`) is what makes the promise true. Consult via `.claude/bin/consult <handle> "<question>"`, which owns the restore-before-resume ladder.
+
+### Machine registry
+
+| Machine | OS / shell | Repo path | Notes |
+| --- | --- | --- | --- |
+| `play` | Linux (CachyOS) / zsh | `/home/yarrow/dev/claude-workflow` | Single machine today; add a row per machine at bootstrap |
+
+(The registry gains rows — and a remote-consult recipe — when the cross-LAN intercom is adopted; see `proposals/26-07-05.agentic-workflow/26-07-03.cross-lan-agent-calls.md`.)
+
+## Historical rename mapping
+
+Imported documents (notably `work/proposals/`) and old callback stamps retain the previous vocabulary — **they are never rewritten**; read them through this mapping:
+
+| Historical | Current |
+| --- | --- |
+| Orchestrator (`orchestrator@…`) | Manager |
+| resolver (agent) | Integrator |
+| planner at milestone/mission tier (`planner@… # milestone architect`) | Architect (`architect@…`) |
+| `plan-session:` / `plan-machine:` frontmatter | a `sessions:` entry |
+| `agent:` frontmatter list, `role@machine:session` colon grammar | `sessions:` list, slash grammar above |
+| `/build`, `/resolve`, `/accomplish` (in prose) | `/execute` |
+
+Old stamps remain **valid handles**: the role segment is the historical role name; resume them exactly as stamped.

@@ -1,0 +1,40 @@
+# Work Order
+
+The canonical, type-polymorphic workflow for advancing one work order (`type: feature | bug | refactor | chore`) to completion. Invoked as `/execute <work-order>`; the autonomous variant applies the [work-order-automatically](execute-work-order-automatically.md) overrides. Roles and policies (consultation, model tiers, delegation): [manager/CLAUDE.md](../CLAUDE.md). Filing conventions and per-type document structures: `work/todos/README.md`.
+
+## Entry state
+
+**The work order is the state machine — advance it from wherever it stands:**
+
+- **No plan section** → run the full sequence from step 1.
+- **Approved plan present** (a completed plan section, typically via `/plan`; status `planned` or `in-progress`) → set status `in-progress` and enter at step 8. Do not re-investigate or re-plan; the plan was approved when it was written. Post-review consultation still applies (step 10), but there is no step-6 pause to re-run.
+- **`## Progress` ledger present** (a prior automatic-mode run ended mid-flight) → resume at the last logged transition; honor any recorded verdict residuals.
+
+## The sequence
+
+1. **Read the referenced work order.** *bug*: read the report(s) and synthesize duplicate/related reports into one.
+2. **Investigate** (type-specific, read-only):
+   - *feature / refactor*: dispatch researcher to explore the codebase and relevant architecture.
+   - *bug*: dispatch investigator to trace root causes.
+   - *chore*: skip unless the filing leaves genuine unknowns.
+3. **Format the document** — revise the filing section; add the findings section (section names per type: `work/todos/README.md`). Rename/move the file to the dated convention if the filing predates it.
+4. **Interview the user** — raise clarifying questions as needed; await confirmation.
+5. **Dispatch the planner** to develop the plan from the findings — model per the work order's frontmatter `difficulty` (the manager model-tier policy).
+6. **Present the plan brief** with the planner's itemized **Decision points** block (one line per decision: choice, rejected alternative, consequence — recommendation marked); await sign-off. **This is the workflow's one mandatory checkpoint.**
+7. **Write the plan section** to the work order.
+8. **Dispatch implementer subagents** per plan phases — dependent phases sequentially in dependency order; independent phases in parallel (one message, multiple agents).
+9. **Dispatch the reviewer** over all code changes.
+10. **Act on review findings** — resolve mechanical findings directly and record them in the Code Review brief; pause to consult the user only when a finding reopens a design decision (architecture, data model, security trade-off, scope). **Before pausing**, if the work doc's `sessions:` frontmatter carries a consultable planning handle (the last `architect@…` entry, machine-local), run the architect consult per the manager's Planner Callback policy — a *technical* question the operator isn't equipped to answer often is an interpretation question the plan's author can settle; if it resolves as interpretation, proceed without pausing; if it's genuinely a new decision, pause **with the consult's analysis attached**.
+11. **Run the project quality gate** (`work/PROJECT.md`); if it fails, split by judgment: an *obvious* failure (syntax error, missing import, path typo) → hand the gate output straight to the **continued implementer** — no investigator; a *non-obvious* failure → dispatch a **fresh investigator** for diagnosis (failure diagnosis must not inherit the builder's assumptions), then the **continued implementer** executes the fix with the report.
+12. **Verify activation** — trace the change from the user's entry point (CLI command, route, UI interaction) to confirm it is on the active code path. If any env var toggle, conditional branch, or commented-out block gates the new code, remove the gate and the old path.
+13. **Inspect** — if frontmatter `scope` includes `interface` (or implementation touched the project's front-end surface): dispatch the inspector to verify UI outcomes. Target per type: *feature/chore* — acceptance criteria; *bug* — the fix visually functions (the reproduction no longer reproduces); *refactor* — no visual regressions against existing behavior. On FAIL/PARTIAL: dispatch investigator + implementer to resolve, then re-inspect.
+14. **Write the Summary** (include the Front-end Inspection section if the inspector was dispatched).
+15. **Documentation wrap-up — deputize, don't re-derive.** Continue the implementer whose phase touched the affected behavior (SendMessage, context intact) with a "documenter hat" brief: revise the docs affected by *your* change, bound by the documenter's conventions (`documenter.md`: accuracy over completeness, current-state prose, the supplement's never-touch list). Stamp the section `documenter@<machine>/<session>` — the role names the act. Fall back to a **fresh documenter dispatch** only when no suitable continuation exists (implementer context gone, change spans many phases) — brief it richly with the work order's Summary + commit list. Fresh documenter dispatches are the norm for `/document` standing audits, not for wrap-up; rationale: the Dispatch classification table in [manager/CLAUDE.md](../CLAUDE.md).
+16. **Reconcile milestone + footgun ledgers** — if the work completes a milestone phase: update the corresponding `work/milestones/` entry and reconcile the footgun ledger (`work/footguns/` + the CLAUDE.md index — add new, trim resolved) in the same `Document:` commit. *bug*: if the resolved bug closes a footgun entry, delete it or demote it to a runbook/script comment in the same commit.
+17. **File the completed order** to `work/todos/_done/`, preserving the filename. *bug*: first add a descriptive `resolution:` line to the frontmatter and a `## Resolution (<date>)` section to the body.
+18. **Triage bugs filed mid-flow** — list each `work/todos/bugs/<today>.bug.*.md` filed during this workflow with brief notice (severity, scope-of-fix estimate, recommendation). Resolve trivially-resolvable items while context is fresh, riding the adjacent implementer's context when one exists (documented `resolution:` + Resolution section, filed to `_done/`); offer investigation of the rest as an optional follow-up — the user opts in per bug; never investigate automatically. Only bugs genuinely requiring their own `/execute` session remain in `work/todos/bugs/` at session end.
+19. **Commit** changes as related groups (one commit per phase or logical unit). Standing approval — no confirmation required. Imperative `Add:` / `Fix:` / `Update:` / `Organize:` prefixes, Co-Authored-By footer; never `git add -A` or `git add .` (always enumerate paths).
+
+## Format
+
+Document naming, frontmatter vocabulary, and the per-type `<h2>` section structures live in `work/todos/README.md` — follow them exactly. Revise for brevity and consistent voice (the manager authors every section; subagent output is distilled, never pasted); sections separated by `---`; each appended section prefaced by your callback stamp per `work/README.md` § The callback grammar.

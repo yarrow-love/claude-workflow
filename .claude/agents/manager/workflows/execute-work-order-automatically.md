@@ -1,0 +1,26 @@
+# Work Order — Automatic Mode
+
+The autonomous variant of [work-order](execute-work-order.md), invoked as `/execute <work-order> automatically` — typically by an Executor running [execute-milestone](../../executor/workflows/execute-milestone.md), and usable directly. It runs **the same sequence** as the manual workflow, which stays the canonical reference; this file states only the overrides, for every work-order type.
+
+## Premise
+
+This mode assumes the plan's design decisions were already confirmed upstream — at the Executor's Reconnaissance checkpoint, or by an operator invoking it deliberately on a vetted document. It trades the manual workflow's interactive sign-off for autonomous convergence, escalating only on genuine novelty. Do not run this mode against an unspecified or un-vetted objective.
+
+## Overrides on execute-work-order.md
+
+Follow every step of [work-order](execute-work-order.md), with these four changes:
+
+- **Step 6 (pre-implementation sign-off) → escalate-on-novelty.** Do not pause for sign-off; proceed on the confirmed plan. Return control to the caller **only** if a genuinely new design decision surfaces during implementation that the confirmed plan does not cover (architecture, data model, security trade-off, scope). **Before returning control, consult the plan's architect** when the work doc's `sessions:` frontmatter carries a consultable planning callback whose `<machine>` segment matches this host — use the **last** `architect@…` entry (legacy forms: `planner@…` annotated `# milestone architect`, or `plan-session:`/`plan-machine:`): `claude -p --resume <session-id> --model fable "<the specific question; what changed since planning; answer from the plan's intent; flag if this needs a human decision>"` (fall back to `--model opus` if fable is unavailable; prefer `.claude/bin/consult` once available — it owns the restore-before-resume ladder). If the answer resolves the fork as _interpretation of the confirmed plan_ → distill the consult into the work doc and proceed; no escalation. If the architect flags a genuinely new decision, or no consultable session exists → record the question **and the consult's analysis** in the work doc and stop. Never guess past a real fork — and never treat a consult as license for a new design decision; those belong to the caller.
+- **Steps 9–13 (review → resolve → gate → verify activation → inspect) → convergence loop.** Run them as a loop against the order's **target criteria** — *feature/chore*: the Feature Request's acceptance criteria; *bug*: the verification criteria (the reproduction no longer reproduces); *refactor*: the objective's stated invariants + no regressions — not once. Each pass: dispatch the reviewer (and, on `interface` scope, the inspector — which also surfaces UX gaps, not only pass/fail); classify each finding **blocking** or **non-blocking**; resolve blocking findings via the implementer; re-evaluate against the criteria. Continue while blocking findings remain and the **pass budget** (default 3) is unspent. Stop on convergence (a pass yields no new blocking findings), on stall (a blocking finding recurs unresolved → escalate), or on budget exhaustion (→ escalate residuals). Fold non-blocking findings into a pass only while budget remains; otherwise record them as deferred.
+- **Quiet running.** Suppress the interactive status narration and step 18's optional investigation offer. Still file out-of-scope bugs (standing behavior), still run the quality gate, still group commits logically with the standard prefixes + Co-Authored-By footer.
+- **Progress heartbeat (crash-safe ledger).** Append one timestamped line to a `## Progress` section of the work doc at each step transition, so a killed child's state survives and the Executor (or a re-entry per the manual workflow's Entry state) can read where-in-the-workflow it is without parsing the stream. Create the section if absent. Log at: planner dispatched (step 5); plan accepted / implementation started (steps 6–8); each implementer phase landed, with the commit sha; each review/resolve pass (pass N — findings count, resolving/converged); quality gate result (step 11); Acceptance Verdict written. Format: `- <HH:MM> <event>` (e.g. `- 14:03 review pass 2: 1 blocking finding, resolving`). Transition points only — the ledger is greppable state, not narration.
+
+## Acceptance Verdict (close-out)
+
+In place of the manual close, append a final `## Acceptance Verdict` section to the work doc — the structured handback the caller reads:
+
+- `PASS` — all target criteria met, blocking findings cleared.
+- `PARTIAL` — criteria met except an enumerated residual list, each line with a reason.
+- `ESCALATE` — a specific blocking question or novel design decision the caller must resolve before the order can converge.
+
+List any criterion that requires a deploy, live runtime evidence, or empirical measurement under the verdict as `operator-gated` — staged for the operator, not counted as a blocking finding. Type-specific close-out rituals still apply (*bug*: the `resolution:` frontmatter + `## Resolution (<date>)` section). The work doc otherwise accumulates the same `<h2>` sections as the manual workflow, plus this verdict.

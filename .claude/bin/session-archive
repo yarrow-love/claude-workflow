@@ -1,0 +1,85 @@
+#!/usr/bin/env bun
+/**
+ * session-archive — copy Claude session transcripts into the durable in-repo store.
+ *
+ *   bun .claude/bin/session-archive <session-id|role@machine/session-id> [...more]
+ *   bun .claude/bin/session-archive --from-hook            # SessionEnd hook mode (JSON on stdin)
+ *
+ * Store: work/sessions/<machine>/<uuid>.jsonl.gz + sha256 MANIFEST (upsert; last write
+ * wins — transcripts only grow). Hook mode archives only if the ending session's id is
+ * stamped somewhere under work/ (archive-on-stamp: the stamped set IS the archive set).
+ * Grammar + rationale: work/README.md § The callback grammar.
+ */
+import { gzipSync } from "node:zlib";
+import { createHash } from "node:crypto";
+import { hostname } from "node:os";
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
+import { join, resolve } from "node:path";
+import { spawnSync } from "node:child_process";
+
+const machine = hostname().split(".")[0];
+const repoRoot = (() => {
+  const r = spawnSync("git", ["rev-parse", "--show-toplevel"], { encoding: "utf8" });
+  return r.status === 0 ? r.stdout.trim() : process.cwd();
+})();
+const slug = resolve(repoRoot).replace(/[^a-zA-Z0-9]/g, "-");
+const projectDir = join(process.env.HOME!, ".claude", "projects", slug);
+const storeRoot = join(repoRoot, "work", "sessions");
+const manifestPath = join(storeRoot, "MANIFEST");
+
+const UUID = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/;
+
+function archive(transcriptPath: string, uuid: string): string {
+  const gz = gzipSync(readFileSync(transcriptPath), { level: 9 });
+  const rel = `${machine}/${uuid}.jsonl.gz`;
+  mkdirSync(join(storeRoot, machine), { recursive: true });
+  writeFileSync(join(storeRoot, rel), gz);
+  const sha = createHash("sha256").update(gz).digest("hex");
+  const lines = existsSync(manifestPath)
+    ? readFileSync(manifestPath, "utf8").split("\n").filter(Boolean)
+    : [];
+  const kept = lines.filter((l) => l.split(/\s+/)[1] !== rel);
+  kept.push(`${sha}  ${rel}`);
+  writeFileSync(manifestPath, kept.sort((a, b) => a.localeCompare(b)).join("\n") + "\n");
+  return rel;
+}
+
+const args = process.argv.slice(2);
+
+if (args[0] === "--from-hook") {
+  // SessionEnd hook: {"session_id": ..., "transcript_path": ...} on stdin.
+  const input = JSON.parse(readFileSync(0, "utf8"));
+  const uuid: string = input.session_id;
+  const transcript: string = input.transcript_path;
+  if (!uuid || !transcript || !existsSync(transcript)) process.exit(0);
+  // Archive-on-stamp: only sessions referenced under work/ earn a durable copy.
+  const stamped =
+    spawnSync("git", ["grep", "-q", uuid, "--", "work"], { cwd: repoRoot }).status === 0;
+  if (!stamped) process.exit(0);
+  console.log(`session-archive: ${archive(transcript, uuid)}`);
+  process.exit(0);
+}
+
+if (args.length === 0) {
+  console.error("usage: session-archive <session-id|role@machine/uuid> [...] | --from-hook");
+  process.exit(1);
+}
+
+let failures = 0;
+for (const arg of args) {
+  const m = arg.match(UUID);
+  if (!m) {
+    console.error(`skip (no session uuid): ${arg}`);
+    failures++;
+    continue;
+  }
+  const uuid = m[0];
+  const src = join(projectDir, `${uuid}.jsonl`);
+  if (!existsSync(src)) {
+    console.error(`missing transcript: ${src}`);
+    failures++;
+    continue;
+  }
+  console.log(`archived: ${archive(src, uuid)}`);
+}
+process.exit(failures ? 1 : 0);

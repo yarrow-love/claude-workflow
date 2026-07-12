@@ -1,0 +1,10 @@
+{
+  "name": "claude-agentic-bin",
+  "private": true,
+  "description": "Executable tooling for the agentic workflow (portable with the .claude/ bootstrap; see .claude/BASELINE.md). Run directly (./consult) or `bun link` from this directory to put the commands on PATH.",
+  "type": "module",
+  "bin": {
+    "session-archive": "./session-archive",
+    "consult": "./consult"
+  }
+}

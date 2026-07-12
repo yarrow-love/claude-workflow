@@ -1,0 +1,13 @@
+# Machine-local Claude state (never canonical)
+.claude/settings.local.json
+.claude/worktrees/
+
+# Scratch / runtime
+tmp/
+node_modules/
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*~
+*.swp

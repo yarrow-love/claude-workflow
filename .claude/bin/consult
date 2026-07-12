@@ -1,0 +1,90 @@
+#!/usr/bin/env bun
+/**
+ * consult — resume-fork a recorded session and ask it a question, restoring the
+ * transcript from the durable archive if the local cache has lost it.
+ *
+ *   bun .claude/bin/consult <role@machine/session-id[#msg]> "<question>" [--model fable|opus] [--dry]
+ *
+ * The ladder: transcript present locally → resume; absent → restore from
+ * work/sessions/<machine>/<uuid>.jsonl.gz → resume; archive miss → degrade
+ * (documents + fresh dispatch). Cross-machine handles stop with a clear message
+ * (the cross-LAN intercom is deferred; see work/proposals/). A consult is
+ * advisory — interpretation, never new decisions (work/README.md § grammar).
+ */
+import { gunzipSync } from "node:zlib";
+import { hostname } from "node:os";
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
+import { join, resolve } from "node:path";
+import { spawnSync } from "node:child_process";
+
+const machineLocal = hostname().split(".")[0];
+const repoRoot = (() => {
+  const r = spawnSync("git", ["rev-parse", "--show-toplevel"], { encoding: "utf8" });
+  return r.status === 0 ? r.stdout.trim() : process.cwd();
+})();
+const slug = resolve(repoRoot).replace(/[^a-zA-Z0-9]/g, "-");
+const projectDir = join(process.env.HOME!, ".claude", "projects", slug);
+
+const args = process.argv.slice(2);
+const dry = args.includes("--dry");
+const modelIdx = args.indexOf("--model");
+const model = modelIdx >= 0 ? args[modelIdx + 1] : "fable";
+const positional = args.filter(
+  (a, i) => a !== "--dry" && a !== "--model" && (modelIdx === -1 || i !== modelIdx + 1)
+);
+const [handle, question] = positional;
+
+if (!handle || (!question && !dry)) {
+  console.error('usage: consult <role@machine/uuid[#msg]> "<question>" [--model fable] [--dry]');
+  process.exit(1);
+}
+
+const m = handle.match(
+  /^(?:(?<role>[\w-]+)@)?(?:(?<machine>[\w-]+)\/)?(?<uuid>[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})(?:#(?<msg>\S+))?$/
+);
+if (!m?.groups) {
+  console.error(`unparseable handle: ${handle} (expected role@machine/uuid[#msg])`);
+  process.exit(1);
+}
+const { machine = machineLocal, uuid, msg } = m.groups as Record<string, string>;
+
+if (machine !== machineLocal) {
+  console.error(
+    `handle is owned by '${machine}' (this is '${machineLocal}'). Cross-machine consults are deferred —\n` +
+      `either restore that machine's archive here (work/sessions/${machine}/${uuid}.jsonl.gz) or consult on the owning machine.`
+  );
+  process.exit(2);
+}
+
+const localPath = join(projectDir, `${uuid}.jsonl`);
+if (!existsSync(localPath)) {
+  const archived = join(repoRoot, "work", "sessions", machine, `${uuid}.jsonl.gz`);
+  if (existsSync(archived)) {
+    mkdirSync(projectDir, { recursive: true });
+    writeFileSync(localPath, gunzipSync(readFileSync(archived)));
+    console.error(`restored: ${archived} -> ${localPath}`);
+  } else {
+    console.error(
+      `no transcript for ${uuid} — not in the local cache nor in work/sessions/${machine}/.\n` +
+        `Degrade path: answer from the documents + a fresh dispatch (planner-callback policy).`
+    );
+    process.exit(3);
+  }
+}
+
+const prompt =
+  (msg ? `(Citing your message ${msg}.) ` : "") +
+  `Consultation via callback ${handle}. ${question ?? ""}` +
+  ` Answer from your session's intent; flag explicitly if this needs a human decision.`;
+const cmd = ["claude", "-p", "--resume", uuid, "--model", model, prompt];
+
+if (dry) {
+  console.log(`ready: transcript present at ${localPath}`);
+  console.log(`would run: ${cmd.map((c) => (c.includes(" ") ? JSON.stringify(c) : c)).join(" ")}`);
+  process.exit(0);
+}
+const run = spawnSync(cmd[0], cmd.slice(1), { stdio: "inherit" });
+if (run.status !== 0 && model === "fable") {
+  console.error("fable consult failed — retry with: --model opus");
+}
+process.exit(run.status ?? 1);
