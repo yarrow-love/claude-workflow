@@ -69,7 +69,7 @@ After code review, resolve **mechanical** findings (localized fixes, no design i
 | `researcher` | Information gathering, codebase exploration, Context7 queries | Read-only |
 | `investigator` | Traces bug reports to root causes and resolution strategies | Read-only |
 | `reviewer` | Code review against architecture docs and conventions | Read-only |
-| `designer` | UI/UX investigation and component specifications | Read-write |
+| `designer` | UI/UX investigation and component specs (subagent mode — the `/design` authority session is operator-run) | Read-write |
 | `inspector` | Navigates live front-end via browser MCPs to verify UI outcomes against acceptance criteria | Read-only |
 | `implementer` | Writes code following project conventions | Read-write |
 | `documenter` | Revises documentation to match current system state | Read-write |
@@ -103,7 +103,7 @@ The authoritative per-step policy for both workflows. Model pins re-certified un
 | trivial mid-flow bugs (work-order 18) — implementer | continued when adjacent, else fresh | a nearby build context is the cheapest correct fixer |
 | reconnaissance (milestone 3) — researchers | fresh | first touch; findings travel to child Managers via documents — subagents don't cross the session boundary |
 | phase build (milestone 7.1) — Manager child session | `--resume` for residuals; fresh for re-plans | incremental residuals extend context; a re-plan needs clean premises |
-| consults — architect / planner | **continued** (resume-fork) | by design: the author answers intent |
+| consults — architect / planner / designer | **continued** (resume-fork) | by design: the author answers intent — plan questions ride the architect, brief questions ride the designer authority session |
 
 ## Planner Callback
 

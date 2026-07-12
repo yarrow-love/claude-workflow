@@ -15,7 +15,7 @@ Operational facts for agent roles working **on this repo** (the canonical workfl
 
 ## Front-end surface (manager, inspector, designer, implementer)
 
-- **None.** This repo has no application UI; `interface` scope does not occur, the inspector is never dispatched, and the designer's remit is limited to documentation shape. (In a consuming project, this section carries: the serve recipe, target URLs, auth bootstrap, test posture.)
+- **None.** This repo has no application UI; `interface` scope does not occur, the inspector is never dispatched, and the designer's remit is limited to documentation shape. (In a consuming project, this section carries: the serve recipe, target URLs, auth bootstrap, test posture, and the **design container location** — default `src/design/` — plus the external design tool in use, per `designer.md`.)
 
 ## Runtime evidence (investigator)
 

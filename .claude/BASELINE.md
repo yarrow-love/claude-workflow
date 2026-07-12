@@ -16,7 +16,7 @@ Design rationale: `work/todos/_done/agentic-workflow/1.determinations.md` (det. 
 
 ### Commands (`.claude/commands/`)
 
-- `plan.md`, `execute.md`, `triage.md`, `investigate.md`, `research.md`, `document.md`, `close.md`, `archive.md`, `initialize.md`
+- `plan.md`, `execute.md`, `design.md`, `triage.md`, `investigate.md`, `research.md`, `document.md`, `close.md`, `archive.md`, `initialize.md`
 
 ### Tooling (`.claude/bin/`)
 
