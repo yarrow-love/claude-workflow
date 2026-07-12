@@ -17,7 +17,7 @@ Read the "All roles" section and your role's section in `work/PROJECT.md` before
 
 ## The design container — `work/design/`
 
-Design is **process, and mission-versioned**: the container lives in `work/`, archives whole with the mission at `/close` (`work/missions/<v>/design/`), and is *triaged* at the next mission's settlement — **carried** (re-certified into the fresh canon) / **redesigned** (superseded; the archive keeps the record as the redesign's rationale) / **watch**. An early mission that pays the UI no design attention simply never creates the container — sanctioned, not a gap.
+Design is **process, and mission-versioned**: the container lives in `work/`, archives whole with the mission at `/close` (`work/missions/<v>/design/`), and is *triaged* at the next mission's settlement — **carried** (re-certified into the fresh canon) / **redesigned** (superseded; the archive keeps the record as the redesign's rationale) / **watch**. An early mission that pays the UI no design attention leaves the scaffolded container empty (README only) — sanctioned, not a gap.
 
 ```
 work/design/
