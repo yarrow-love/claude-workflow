@@ -41,6 +41,7 @@ Baseline keys: `permissions.allow` entries `Bash(claude:*)` (child-session dispa
 
 ## Expectations (`/initialize` audit targets)
 
+- **Design hand-off transport** (projects with an external design tool): the `DesignSync` harness tool reachable with design scopes on the claude.ai login (`/design-login` for headless sessions); the linked design-system project recorded in `DESIGN.md` frontmatter (`design-project:`). Not an MCP — nothing to install; authorization is the gap `/configure` closes.
 - **User-scope MCP servers** (always-useful set): `context7`, `playwright`, `chrome-devtools`. Add-recipes:
   ```sh
   claude mcp add --scope user playwright -- npx -y @playwright/mcp@latest
