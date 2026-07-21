@@ -17,11 +17,12 @@ proceed to implementation.
  4. Format document; revise the initial filing section; add investigation/research findings section.
  5. Dispatch planner subagent to develop implementation plan from the findings — model per `difficulty` (see the manager model-tier policy: `high` → the fable pin stands; `low`/`medium` → dispatch with `model: "opus"`).
  6. Write the plan section to the todo file.
- 7. Update frontmatter `status` to `awaiting-approval`.
- 8. Exit. Do not proceed to implementation.
+ 7. Submit for blessing — the mandatory Architect gate, identical to the work-order workflow's step 7 (policy: the manager's Architect Blessing section): consult-fork the standing `architect@…` handle or dispatch a fresh architect, always flagship regardless of `difficulty`; on critique, refine via the continued planner and resubmit (two-round bound); append the stamped `## Blessing` section. An order leaves planning blessed — unresolved critique is recorded in the section for the consuming sign-off to weigh.
+ 8. Update frontmatter `status` to `awaiting-approval`.
+ 9. Exit. Do not proceed to implementation.
 
 **Omitted steps** (compared to the full work-order workflow): No user interview, no user consultation
-checkpoint — the plan is evaluated at sign-off by whoever consumes it (the operator, or an Executor at its Reconnaissance gate). `/execute` enters at implementation when it finds the approved plan (work-order Entry state).
+checkpoint — the Architect Blessing (step 7) is agent-side and still runs; the plan is then evaluated at sign-off by whoever consumes it (the operator, or an Executor at its Reconnaissance gate). `/execute` enters at implementation when it finds the approved, blessed plan (work-order Entry state).
 
 ## Format
 

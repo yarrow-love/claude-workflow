@@ -55,11 +55,20 @@ Two checkpoints, treated differently. The goal: the user signs off on design dec
 
 ### Pre-implementation sign-off (mandatory)
 
-After planning, before dispatching any implementer: present the plan brief together with the planner's **Decision points** block — one line per decision: the choice, the rejected alternative, the consequence — with your recommendation marked. Await explicit sign-off. This is the workflow's one mandatory pause. Plumbing details don't appear in the list; only choices the user would care about reversing.
+After planning **and blessing** (the Architect gate below — it always precedes this pause), before dispatching any implementer: present the plan brief together with the planner's **Decision points** block — one line per decision: the choice, the rejected alternative, the consequence — with your recommendation marked — and the Architect's Blessing verdict, including any unresolved critique. Await explicit sign-off on the order as documented. This is the workflow's one mandatory pause. Plumbing details don't appear in the list; only choices the user would care about reversing.
 
 ### Post-review (conditional)
 
 After code review, resolve **mechanical** findings (localized fixes, no design implications) directly — no pause — and record what was auto-resolved in the Code Review brief. Pause for the user **only** when a finding reopens a design decision: architecture, data model, security trade-off, or scope. The reviewer tags each finding mechanical or design to drive this gate; when in doubt, treat it as design.
+
+## Architect Blessing
+
+Every prepared work order is submitted to the Architect before execution — a mandatory agent-side gate between the written plan and the operator sign-off (work-order step 7; it equally concludes `/plan`'s plan-work-order). The Architect reads the order whole and returns a verdict: **`BLESSED`**, or numbered critique directives.
+
+- **Blesser resolution — standing handle first.** When the order's `sessions:` frontmatter carries a consultable planning handle (the last `architect@…` entry, machine-local), consult-fork it per Planner Callback — the upstream spec's author is the right judge of whether the order serves its intent; independence is not the point here, authority-of-intent is. When no handle exists or the fork fails, dispatch a fresh architect subagent briefed with the work order, the mission/milestone context it descends from, and the ask: *bless or critique*.
+- **Always flagship.** The blessing runs `fable` (fall back to `opus` if unavailable) regardless of the order's `difficulty` — it is one bounded read-and-critique, not a planning session; the planner downshift does not apply to it.
+- **Refinement loop, bounded.** On critique, refine via the **continued planner** (the author holds the rationale), revise the plan section, and resubmit. Two rounds maximum. Unresolved after the bound: in the manual workflow, carry both positions to the sign-off — the operator adjudicates; in automatic mode, stop with an `ESCALATE` verdict carrying the Architect's position — autonomous execution never proceeds over an unblessed order.
+- **Record it.** Append a stamped `## Blessing` section (`> architect@<machine>/<session-id> # blessing` — the consult fork's own session id when consulted, yours when the architect ran as your subagent): the verdict, each directive, and how it was resolved. The blessing is provenance, not authority — new design decisions surfaced by the critique still escalate to the operator.
 
 ## Available Agents
 
@@ -74,7 +83,7 @@ After code review, resolve **mechanical** findings (localized fixes, no design i
 | `implementer` | Writes code following project conventions | Read-write |
 | `documenter` | Revises documentation to match current system state | Read-write |
 
-Model tiers are deliberate — every specialist carries an explicit `model:` pin in its frontmatter, so the roster is independent of what model the manager itself runs on: **planner → fable** (deep architectural reasoning is the campaign's highest-leverage tokens), **implementer / designer → opus**, **researcher / investigator / reviewer / inspector / documenter / integrator → sonnet**. Don't edit the pins ad hoc; to escalate one unusually gnarly dispatch (e.g. a high-stakes review), pass the Agent tool's per-call `model` parameter instead — it overrides the frontmatter for that dispatch only. If a `fable` dispatch fails because the model is unavailable, re-dispatch that call with `model: "opus"`. The same knob works downward, driven by the work doc's frontmatter **`difficulty`** key (set at filing, by `/plan`, or by the milestone planner): `high` → the planner's fable pin stands; `low` / `medium` → dispatch the planner with `model: "opus"`; absent → judge it yourself (obvious plan, few files, no design forks → treat as `low`, and record your rating in the frontmatter). Reserve Fable's 2× spend for plans with genuine architectural content.
+Model tiers are deliberate — every specialist carries an explicit `model:` pin in its frontmatter, so the roster is independent of what model the manager itself runs on: **planner → fable** (deep architectural reasoning is the campaign's highest-leverage tokens), **implementer / designer → opus**, **researcher / investigator / reviewer / inspector / documenter / integrator → sonnet**. Don't edit the pins ad hoc; to escalate one unusually gnarly dispatch (e.g. a high-stakes review), pass the Agent tool's per-call `model` parameter instead — it overrides the frontmatter for that dispatch only. If a `fable` dispatch fails because the model is unavailable, re-dispatch that call with `model: "opus"`. The same knob works downward, driven by the work doc's frontmatter **`difficulty`** key (set at filing, by `/plan`, or by the milestone planner): `high` → the planner's fable pin stands; `low` / `medium` → dispatch the planner with `model: "opus"`; absent → judge it yourself (obvious plan, few files, no design forks → treat as `low`, and record your rating in the frontmatter). Reserve Fable's 2× spend for plans with genuine architectural content. The **Architect Blessing** (work-order step 7) is exempt from the downshift: always `fable` (fall back `opus`) — one bounded read-and-critique, not a planning session.
 
 ## Delegation Guidelines
 
@@ -94,13 +103,14 @@ The authoritative per-step policy for both workflows. Model pins re-certified un
 | --- | --- | --- |
 | investigate (work-order 2) — researcher / investigator | fresh | first touch; no prior context exists |
 | plan (work-order 5) — planner | fresh, then **continued** for questions | first contact is fresh; plan questions ride the author (Planner Callback) |
-| build (work-order 8) — implementer per phase | fresh | self-contained briefs by design; each becomes the continuation anchor for its phase downstream |
-| review (work-order 9) — reviewer | **fresh — required** | independence is the step's purpose; never continue from a build context |
-| resolve findings (work-order 10) — implementer | **continued** | extending the build context that produced the code |
-| gate failure (work-order 11) | judgment — see the step | obvious break → continued implementer directly; non-obvious → fresh investigator (diagnosis must not inherit the builder's assumptions), then continued implementer fixes |
-| inspect (work-order 13) — inspector | **fresh — required** | sees what a user sees |
-| doc wrap-up (work-order 15) — implementer as documenter | **continued** | transcribes held intent; documenter conventions bind |
-| trivial mid-flow bugs (work-order 18) — implementer | continued when adjacent, else fresh | a nearby build context is the cheapest correct fixer |
+| bless (work-order 7) — architect | **continued** (consult-fork the standing handle); fresh fable dispatch when none exists | the upstream spec's author judges service-to-intent — authority-of-intent, not independence, is the point (Architect Blessing) |
+| build (work-order 9) — implementer per phase | fresh | self-contained briefs by design; each becomes the continuation anchor for its phase downstream |
+| review (work-order 10) — reviewer | **fresh — required** | independence is the step's purpose; never continue from a build context |
+| resolve findings (work-order 11) — implementer | **continued** | extending the build context that produced the code |
+| gate failure (work-order 12) | judgment — see the step | obvious break → continued implementer directly; non-obvious → fresh investigator (diagnosis must not inherit the builder's assumptions), then continued implementer fixes |
+| inspect (work-order 14) — inspector | **fresh — required** | sees what a user sees |
+| doc wrap-up (work-order 16) — implementer as documenter | **continued** | transcribes held intent; documenter conventions bind |
+| trivial mid-flow bugs (work-order 19) — implementer | continued when adjacent, else fresh | a nearby build context is the cheapest correct fixer |
 | reconnaissance (milestone 3) — researchers | fresh | first touch; findings travel to child Managers via documents — subagents don't cross the session boundary |
 | phase build (milestone 7.1) — Manager child session | `--resume` for residuals; fresh for re-plans | incremental residuals extend context; a re-plan needs clean premises |
 | consults — architect / planner / designer | **continued** (resume-fork) | by design: the author answers intent — plan questions ride the architect, brief questions ride the designer authority session |
@@ -155,6 +165,7 @@ After implementation, review, and front-end inspection (if applicable) are compl
 - **Don't implement directly** — delegate to the implementer agent
 - **Don't review directly** — delegate to the reviewer agent
 - **Don't plan directly** — delegate to the planner agent
+- **Never execute an unblessed order** — the Architect Blessing precedes the sign-off; no implementer dispatches without a `## Blessing` section
 - **Always pause for pre-implementation sign-off** — never dispatch implementers before the user confirms the Decision points
 - **Don't commit without the quality gate** — run it before creating commits
 - **Commits have standing approval** — group logically and commit without asking; never `git add -A` or `git add .` (always enumerate paths)

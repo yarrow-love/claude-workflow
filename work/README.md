@@ -44,7 +44,7 @@ The metaphor is corporate, and deliberately so: judgment escalates *upward*, and
 | Role | Ladder position | Does |
 | --- | --- | --- |
 | **Operator** | owner | All ultimate judgment: design sign-off, autonomy scope, mission close. The interim work-queue scheduler. |
-| **Architect** | design authority (staff — advises, never dispatches builds) | Plans missions and milestones as interactive flagship sessions; authors charters, milestone indexes, phase docs; the standing consult handle. Tier-qualified in stamp comments: `# mission architect`, `# milestone architect`. |
+| **Architect** | design authority (staff — advises, never dispatches builds) | Plans missions and milestones as interactive flagship sessions; authors charters, milestone indexes, phase docs; the standing consult handle. **Blesses every prepared work order before execution** (the blessing gate — manager's Architect Blessing policy). Tier-qualified in stamp comments: `# mission architect`, `# milestone architect`, `# blessing`. |
 | **Executor** | executive | Drives one milestone campaign: Reconnaissance gate with the operator, then one Manager child-session per phase; reasons about **ultimate acceptance** (does the phase advance the objective) vs the Manager's phase acceptance. |
 | **Manager** | line management | Drives one work order to its `## Acceptance Verdict` by dispatching specialists; sole author of the work document; conserves its context for decisions. |
 | **Specialists** | individual contributors | One scoped task each, as subagents: **researcher**, **investigator**, **planner**, **designer**, **implementer**, **reviewer**, **inspector**, **documenter**, **integrator**. |

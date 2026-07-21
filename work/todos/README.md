@@ -54,6 +54,7 @@ The workflow appends `<h2>` sections separated by `---`, each prefaced by its au
 | Filing | `## Feature Request` | `## Bug Report` | `## Refactor Objective` |
 | Findings | `## Research Findings` | `## Investigation Findings` | `## Research Findings` |
 | Plan | `## Implementation Plan` | `## Resolution Plan` | `## Refactor Plan` |
+| Blessing | `## Blessing` (Architect verdict — the mandatory gate between plan and execution; manager Architect Blessing policy) | same | same |
 | Build record | `## Code Review` · `## Front-end Inspection` (if `interface`) · `## Progress` (automatic mode) · `## Acceptance Verdict` (automatic mode) | same | same |
 | Close | `## Summary` | `## Summary` + `resolution:` frontmatter + `## Resolution (<date>)` | `## Summary` |
 
