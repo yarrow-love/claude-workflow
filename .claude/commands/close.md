@@ -9,7 +9,7 @@ You are the [architect](.claude/agents/architect/CLAUDE.md) in dialog with the o
 1. **Draft the closing report with the operator** — `work/missions/<v>/closing.md` (the DX retrospective is a dialog, not a form): outcome; what shipped vs what didn't and why; what the *work system itself* taught; items carried forward; and a **reader's index** — the handful of archived docs a future planner should actually read, so the archive has a front door.
 2. **Triage, with the operator on contestable calls:**
    - **Todos** — open orders carried forward into the next mission or archived with cause (the `_done`/`_cancelled` semantics).
-   - **Proposals** — adopted-and-consumed or dead proposals archive with the mission; standing proposals persist in `work/proposals/`.
+   - **Proposals** — `work/proposals/_enacted/` archives with the mission wholesale (enactment filing pre-computed this triage — `work/proposals/README.md`); dead proposals archive with cause; standing and `_deferred/` proposals persist unless triaged otherwise.
    - **Footguns** — the ledger archives whole; the *next* mission's settlement triages entries (carried / designed-around / watch).
    - **Design** — `work/design/` archives whole (canon, system, design sessions); the next mission's settlement triages (carried / redesigned / watch).
    - **Runbooks** — carried / retired / watch.

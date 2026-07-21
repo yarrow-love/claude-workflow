@@ -2,7 +2,7 @@
 
 `work/` is the **process** container: everything about how work is planned, executed, recorded, and archived. `docs/` is the **knowledge** container: reference material, research, architecture. The split is load-bearing — agents grep the working tree, so what lives here is always relevant to the *active* mission, and what has served its purpose archives into `work/missions/<v>/` rather than polluting the active workspace.
 
-Determinations record: [`work/todos/_done/agentic-workflow/1.determinations.md`](todos/_done/agentic-workflow/1.determinations.md) (locked 26-07-11). Design corpus: [`work/proposals/26-07-05.agentic-workflow/`](proposals/26-07-05.agentic-workflow/).
+Determinations record: [`work/todos/_done/agentic-workflow/1.determinations.md`](todos/_done/agentic-workflow/1.determinations.md) (locked 26-07-11). Design corpus: [`work/proposals/_enacted/26-07-05.agentic-workflow/`](proposals/_enacted/26-07-05.agentic-workflow/) (standing remainder in [`proposals/26-07-05.agentic-workflow/`](proposals/26-07-05.agentic-workflow/)).
 
 ## Layout
 
@@ -10,7 +10,7 @@ Determinations record: [`work/todos/_done/agentic-workflow/1.determinations.md`]
 | --- | --- | --- |
 | `MISSION.md` | The active mission's charter (objective, scope, non-goals, success **and failure** criteria) | Written at mission open (`/plan` mission tier); archived at `/close` |
 | `todos/` | Active work orders (+ `bugs/`, `_done/`, `_cancelled/`, `BACKLOG.md`, phased series subdirectories) | Convention: [`todos/README.md`](todos/README.md) |
-| `proposals/` | Pre-decision design thinking (+ `_deferred/`, `_rejected/`) | Adopted-and-consumed or dead proposals archive with the closing mission; standing proposals persist |
+| `proposals/` | Pre-decision design thinking (+ `_deferred/`, `_rejected/`, `_enacted/`) | Adoption is a decision (`status:` updates, file stays put while enacting work pends); enactment is a completion (the closer of the enacting work files to `_enacted/` with `status: enacted` + a `sessions:` stamp — [`proposals/README.md`](proposals/README.md)). At `/close`, `_enacted/` archives wholesale with the mission; standing proposals persist |
 | `milestones/` | The active mission's phased roadmap (`<n>.<name>/` with `MILESTONE.md` + phase docs) | Archived whole at mission close |
 | `missions/` | Closed missions, archived whole and in-repo (`<v>/` with `MISSION.md`, `closing.md`, and the mission's todos/milestones/proposals/design/footguns/runbooks/docs/sessions) | Append-only institutional memory; `missions/README.md` is the ledger |
 | `design/` | The active mission's design authority: `DESIGN.md` (canon), `system/` (distilled assets), `sessions/<date>.<slug>/` (design sessions: `BRIEF.md` + outbound `current-state/` + returns) | Mission-versioned: README scaffolded, populated by the founding `/design` (an MVP mission may leave it empty); triaged at mission open (carried / redesigned / watch); archived at close |

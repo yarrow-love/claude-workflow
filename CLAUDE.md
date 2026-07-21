@@ -3,7 +3,7 @@
 This repository **is** the Claude agentic workflow — the canonical, project-generic bootstrap, dogfooding itself. Two things live here and must not blur:
 
 - **The product**: `.claude/` — the portable bootstrap (agents, commands, workflows, `bin/` tooling), manifested by `.claude/BASELINE.md`. Every file under `.claude/` must stay **project-generic**: no project facts, no machine-specific paths, no assumptions a fresh repo wouldn't satisfy. The seam for project specifics is `work/PROJECT.md` in the *consuming* repo.
-- **The instance**: `work/` — this repo's own live work system (the workflow governs its own development) plus the workflow's design history: the determinations record and founding series in `work/todos/_done/agentic-workflow/`, the design corpus in `work/proposals/26-07-05.agentic-workflow/`, the founding session archive in `work/sessions/`.
+- **The instance**: `work/` — this repo's own live work system (the workflow governs its own development) plus the workflow's design history: the determinations record and founding series in `work/todos/_done/agentic-workflow/`, the design corpus in `work/proposals/_enacted/26-07-05.agentic-workflow/` (standing remainder in `work/proposals/26-07-05.agentic-workflow/`), the founding session archive in `work/sessions/`.
 
 ## The work system
 
