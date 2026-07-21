@@ -1,0 +1,7 @@
+# codebase-memory-mcp index whitelist (gitignore syntax, layered over .gitignore).
+# The AST graph covers live source only: index src/ subdirectories, nothing else.
+/*
+!/src/
+
+# Retired sub-codebases (convention: src/README.md) stay out of the graph.
+/src/_archive/

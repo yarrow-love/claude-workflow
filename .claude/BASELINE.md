@@ -35,17 +35,23 @@ Baseline keys: `permissions.allow` entries `Bash(claude:*)` (child-session dispa
 ## Bootstrap procedure (new repo)
 
 1. Copy the manifest set into `<repo>/.claude/`.
-2. Scaffold the work system: `work/{README.md,todos/{README.md,bugs/,_done/,_cancelled/},proposals/{README.md,_deferred/,_rejected/,_enacted/},milestones/README.md,missions/,design/{README.md,system/README.md,sessions/README.md},footguns/README.md,notes/,runbooks/}` — copy the READMEs and stubs from this repo; they are project-generic (the design/footguns/milestones stubs are instructive mandates for directories that start empty).3. Author `work/PROJECT.md` (the supplement — per-project, use this repo's as the shape exemplar) and root `CLAUDE.md`.
+2. Scaffold the work system: `work/{README.md,todos/{README.md,bugs/,_done/,_cancelled/},proposals/{README.md,_deferred/,_rejected/,_enacted/},milestones/README.md,missions/,design/{README.md,system/README.md,sessions/README.md},footguns/README.md,notes/,runbooks/}` — copy the READMEs and stubs from this repo; they are project-generic (the design/footguns/milestones stubs are instructive mandates for directories that start empty). Also copy `src/README.md` (the source-layout convention: root reserved for `docs`/`work`/`src`; sub-codebases as `src/<subsystem>/`; retirement to `src/_archive/`) and the root `.cbmignore` (the index whitelist).
+3. Author `work/PROJECT.md` (the supplement — per-project, use this repo's as the shape exemplar) and root `CLAUDE.md`.
 4. Run `/initialize`; repair gaps (`/configure` once it exists).
 
 ## Expectations (`/initialize` audit targets)
 
 - **Design hand-off transport** (projects with an external design tool): the `DesignSync` harness tool reachable with design scopes on the claude.ai login (`/design-login` for headless sessions); the linked design-system project recorded in `DESIGN.md` frontmatter (`design-project:`). Not an MCP — nothing to install; authorization is the gap `/configure` closes.
-- **User-scope MCP servers** (always-useful set): `context7`, `playwright`, `chrome-devtools`. Add-recipes:
+- **User-scope MCP servers** (always-useful set): `context7`, `playwright`, `chrome-devtools`, `codebase-memory-mcp`. Add-recipes:
   ```sh
   claude mcp add --scope user playwright -- npx -y @playwright/mcp@latest
   claude mcp add --scope user chrome-devtools -- npx -y chrome-devtools-mcp@latest
+  # codebase-memory-mcp ships as a signed static binary; the official installer
+  # auto-configures Claude Code. Operator-run — verify the release signature first
+  # (https://github.com/DeusData/codebase-memory-mcp/releases):
+  curl -fsSL https://raw.githubusercontent.com/DeusData/codebase-memory-mcp/main/install.sh | bash
   ```
+- **Codebase graph index** (codebase-memory-mcp): the repo indexed — `codebase-memory-mcp cli index_repository '{"repo_path": "<repo>"}'` — with `auto_index` keeping it fresh (`codebase-memory-mcp config set auto_index true`). Index policy: **local, gitignored** — `.codebase-memory/` joins `.gitignore` (reindexing is cheap; no binary artifacts in git). **Index surface — live source only**: the committed root `.cbmignore` (gitignore syntax, layered over `.gitignore`) whitelists `src/` subdirectories and excludes everything else, including `src/_archive/` (retired sub-codebases — convention: `src/README.md`); one project at the repo root, never per-subsystem (cross-subsystem edges are the monorepo's value). Read-heavy roles (researcher, investigator, planner, reconnaissance) prefer graph queries over grep fan-outs when the MCP is present.
 - **Files**: `work/PROJECT.md` present and answering the supplement questions (quality gate, front-end surface, runtime evidence, library list, doc surface); root `CLAUDE.md` present; the `work/` scaffold complete.
 - **Settings**: every hook in `settings.json` points at an existing file; baseline permission entries present.
 - **Git hygiene**: secrets patterns and large-format assets gitignored; `tmp/` gitignored.

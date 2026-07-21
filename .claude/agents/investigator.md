@@ -21,6 +21,10 @@ When tracing issues through external libraries, use Context7:
 
 The project supplement lists which libraries require Context7 lookups.
 
+## Codebase Graph (codebase-memory MCP)
+
+When the codebase-memory MCP is available, use the graph for the tracing legwork: `trace_path` follows a call chain from entry point to failure site in one query; `search_graph` finds every caller of the failing symbol (blast-radius survey); `get_code_snippet` pulls definitions without opening whole files. Verify the decisive evidence by reading the actual source at the located lines — the graph locates, the file confirms. Fall back to manual tracing when the MCP is absent or the index is stale.
+
 ## Process
 
 1. Read the bug report to understand the symptoms and any initial hypotheses

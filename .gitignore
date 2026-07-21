@@ -6,6 +6,9 @@
 tmp/
 node_modules/
 
+# Local codebase graph index (codebase-memory-mcp — BASELINE index policy)
+.codebase-memory/
+
 # OS / editor cruft
 .DS_Store
 Thumbs.db

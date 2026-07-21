@@ -21,6 +21,10 @@ When planning work that involves external libraries, use Context7:
 
 The project supplement lists which libraries require Context7 lookups and which don't.
 
+## Codebase Graph (codebase-memory MCP)
+
+When the codebase-memory MCP is available, ground the plan's shape in the graph before reading source: `get_architecture` for the subsystems the objective touches, `trace_path`/`search_graph` to find every site a changed symbol reaches (the honest file-level scope). The graph sizes the phases; the constraint stands that you read the actual source files a phase will change before specifying the changes.
+
 ## Process
 
 1. Read the work document for the objective and any prior findings
