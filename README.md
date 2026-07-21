@@ -13,12 +13,12 @@ Full canon: [`work/README.md`](work/README.md). Portability manifest + bootstrap
 
 ## Bootstrap a new project
 
-1. Copy the manifest set (`.claude/BASELINE.md` § Manifest) into `<repo>/.claude/`.
-2. Scaffold `work/` — copy `work/README.md` (update its machine-registry row) and the directory READMEs (`todos/`, `milestones/`, `footguns/`, `sessions/`); create `todos/{bugs,_done,_cancelled}`, `proposals/{_deferred,_rejected}`, `missions/`, `notes/`, `runbooks/`.
-3. Author the project's `work/PROJECT.md` (the supplement — this repo's own is the shape exemplar) and a root `CLAUDE.md`.
-4. Run `/initialize`; repair gaps it names.
+The copy is **selective** — this repo is both the bootstrap's source of truth and a live instance of it, and only the product travels. Do **not** clone or template-copy the repo whole: that would carry the instance (this repo's own `work/` history — todos, proposals, missions, session archive — and a `README.md`/`CLAUDE.md` that describe *this* repo), and the new project would boot up with someone else's memories. The authoritative procedure and file set live in [`.claude/BASELINE.md`](.claude/BASELINE.md); this section is the orientation.
 
-Everything project-specific lives in `work/PROJECT.md` and the target repo's `CLAUDE.md` — nothing in `.claude/` ever carries project facts. That seam is what makes this copy clean.
+1. **Copy the manifest set** (`BASELINE.md` § Manifest) into `<repo>/.claude/` — agents, commands, workflows, `bin/` tooling, settings skeleton, and `BASELINE.md` itself.
+2. **Copy the scaffold** (`BASELINE.md` § Bootstrap procedure, step 2 — the exact set): the `work/` skeleton with its instructive READMEs and state directories, plus `src/README.md` (the source-layout convention: sub-codebases under `src/`, retirement to `src/_archive/`) and the root `.cbmignore` (the AST-index whitelist). One adaptation: in the copied `work/README.md`, replace the machine-registry row with the new project's machine(s).
+3. **Author the two keystone documents** that are never copied: the project's root `CLAUDE.md` (architecture source of truth) and `work/PROJECT.md` (the operational supplement — quality gate, front-end surface, runtime-evidence map, Context7 library list; this repo's own is the shape exemplar). Everything project-specific lives in these two files — nothing in `.claude/` ever carries project facts. That seam is what makes the copy clean.
+4. **Run `/initialize`** — a **read-only audit** against `BASELINE.md` § Expectations; it repairs nothing itself, but every gap it reports names its repair recipe (the user-scope MCP set including the codebase graph + repo index, hooks, git hygiene, transcript retention, toolchain). Run the repairs, re-run the audit. The MCP set is per-machine, not per-repo — a second project on the same machine finds it already satisfied.
 
 ## Developing the workflow
 
