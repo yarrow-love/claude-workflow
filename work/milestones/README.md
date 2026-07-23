@@ -1,6 +1,14 @@
 # Milestones
 
-The active mission's phased roadmap. Empty until the first mission is chartered (`/plan` at mission tier) and its milestones are laid — this README carries the conventions so `/plan <milestone>` and `/execute <milestone>` have a stable reference.
+The active mission's phased roadmap — mission `v1.subagent-boundary` (chartered 26-07-23, branch `26-07-23`; charter: [`work/MISSION.md`](../MISSION.md)).
+
+## Roadmap
+
+| # | Milestone | Gist | Depends on | Status |
+| --- | --- | --- | --- | --- |
+| 1 | [spike](1.spike/MILESTONE.md) | Five empirical probes of subagent dispatch on the installed CLI; verdicts gate M2 | — | pending |
+| 2 | [conversion](2.conversion/MILESTONE.md) | Subagent Manager boundary lands in canon; apparatus retires; env gate + archive sweep | 1 | pending |
+| 3 | [validation-and-fold](3.validation-and-fold/MILESTONE.md) | Real campaign under the new boundary; enactments; D4 doctrine rewrite + fold preparation | 2 | pending |
 
 ## Conventions
 
