@@ -76,7 +76,7 @@ const prompt =
   (msg ? `(Citing your message ${msg}.) ` : "") +
   `Consultation via callback ${handle}. ${question ?? ""}` +
   ` Answer from your session's intent; flag explicitly if this needs a human decision.`;
-const cmd = ["claude", "-p", "--resume", uuid, "--model", model, prompt];
+const cmd = ["claude", "-p", "--resume", uuid, "--fork-session", "--model", model, prompt];
 
 if (dry) {
   console.log(`ready: transcript present at ${localPath}`);

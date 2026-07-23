@@ -82,7 +82,7 @@ Retired: `/build`, `/resolve`, `/refactor`, `/implement` (→ `/execute`), `/acc
 
 - **role** — the role the session was acting in (ladder names above; tier-qualified by a trailing `# comment` where useful).
 - **machine** — the host owning the session transcript (registry below). Load-bearing: transcripts are machine-local; this is the routing key for any future cross-machine consult.
-- **session-id** — the resume handle. `claude -p --resume <session-id>` **forks** the session at full context (the original transcript is never mutated; parallel consults are safe).
+- **session-id** — the resume handle. `claude -p --resume <session-id> --fork-session` **forks** the session at full context. The flag is load-bearing: without `--fork-session`, resume **continues the transcript in place** and mutates it; with it, the original is never touched and parallel consults are safe. (Corrected 26-07-23 — see `todos/26-07-23.fork-session-consults.md`.)
 - **#message-id** *(optional)* — a **citation**, not a resume target: it locates the exact turn in the (archived) transcript, greppable via `zgrep <message-id> work/sessions/<machine>/<uuid>.jsonl.gz`. Include it when a specific statement is being cited; omit otherwise.
 
 Conventions:
