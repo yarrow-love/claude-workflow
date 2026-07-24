@@ -8,7 +8,7 @@ The active mission's phased roadmap — mission `v1.subagent-boundary` (chartere
 | --- | --- | --- | --- | --- |
 | 1 | [spike](1.spike/MILESTONE.md) | Five empirical probes of subagent dispatch on the pinned CLI (≥v2.1.217, env-gated regime); verdicts gate M2 | — | done (26-07-24) |
 | 2 | [conversion](2.conversion/MILESTONE.md) | Subagent Manager boundary lands in canon; apparatus retires; depth-cap key + archive sweep | 1 | done (26-07-24) |
-| 3 | [validation-and-fold](3.validation-and-fold/MILESTONE.md) | Real campaign under the new boundary; enactments; D4 doctrine rewrite + fold preparation | 2 | pending |
+| 3 | [validation-and-fold](3.validation-and-fold/MILESTONE.md) | Criterion-3 completion + enactments; D4 doctrine rewrite + `.claude/ADR.md`; fold staged + rehearsed for the operator's `/close` | 2 | pending |
 
 ## Conventions
 
