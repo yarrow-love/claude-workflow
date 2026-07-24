@@ -2,11 +2,12 @@
 sessions:
   - architect@play/76ba13c6-e6f5-4933-9e6c-7ef3fbdd6b7d # mission architect (stub)
   - architect@play/6a0035c9-cd57-4573-8e3a-b22dc4cba6c2 # milestone architect
+  - executor@play/2bd6ea6d-d5b5-43cb-bfcc-743b1494caa2 # campaign executor
 ---
 
 # M3 — validation and fold: prove the boundary, purify the template
 
-> Status: pending — hardened 26-07-24 (`/plan`, three phases, `/execute`-ready). Re-scoped with the operator: M2's campaign already ran under the new boundary (early dogfood, operator-chosen at its gate) and recorded the downward nudge in anger; M3 completes the criterion-3 evidence, adds the `.claude/ADR.md` deliverable, and stages the fold — the `/close` ceremony and the fold execution remain the operator's, after M3 closes.
+> Status: in progress — hardened 26-07-24 (`/plan`, three phases, `/execute`-ready); campaign opened 26-07-24 (`26-07-24.execute-validation-and-fold.md`). Re-scoped with the operator: M2's campaign already ran under the new boundary (early dogfood, operator-chosen at its gate) and recorded the downward nudge in anger; M3 completes the criterion-3 evidence, adds the `.claude/ADR.md` deliverable, and stages the fold — the `/close` ceremony and the fold execution remain the operator's, after M3 closes.
 
 ## Objective
 
@@ -21,7 +22,7 @@ Complete the mission's evidence and land its durable record: criterion 3 closes 
 
 ## Out of scope
 
-- **Running `/close` and executing the fold** — operator-invoked ceremony, after M3 closes; M3 stages and rehearses, never performs (charter: "the close itself remains the operator's `/close` ceremony").
+- **Running `/close` and executing the fold** — operator-invoked ceremony, after M3 closes; M3 stages and rehearses, never performs (charter: "the close itself remains the operator's `/close` ceremony"). *(Re-scoped 26-07-24 — see the note below; the exclusion holds **through M3's own close**, then the ceremony runs immediately.)*
 - Amending `.claude/commands/close.md` with fold/purification steps — genericity violation; a consuming repo's `work/missions/` is institutional memory and never purifies (operator-confirmed 26-07-24).
 - The configure-command feature work (`todos/26-07-11.configure-command.md`) — not drafted into validation; its disposition is a prepared `/close` triage recommendation (archive open-carried; re-seed on a future mission branch).
 - The lan-intercom order and proposal — Orchestra's territory; halted state carries into the archive untouched.
@@ -36,6 +37,23 @@ Complete the mission's evidence and land its durable record: criterion 3 closes 
 | 3 | [fold-preparation](3.fold-preparation.md) | Purification manifest; fold recipe rehearsed in a disposable worktree; close runbook + prepared triage dispositions; the Executor-held item exercising the upward pause-and-ask | pending |
 
 The campaign runs under the converted boundary (subagent Managers per current canon) with the operator watching the panels — this campaign is itself the remaining validation instrument.
+
+## Re-scope note (26-07-24 — the fold executes; shape (b))
+
+Appended at the campaign's Reconnaissance gate; the Scope, Phases, and Acceptance above are **unchanged** and remain the milestone's bar.
+
+The operator authorized executing the fold, not merely staging it. Verbatim: *"I would like to authorize the fold itself -- consult the Architect agents for blessing. I just want the process to be totally completed, so that I can integrate the latest `main` into other projects, which are awaiting this upgrade (ie, ~/dev/orchestra)."* This utterance is the **invocation record** — the tier-ladder protection that the system never initiates its own mission close is satisfied by it, not bypassed.
+
+Both architect handles were consulted and blessed the expansion in **shape (b)**: M3's three phases and their acceptance stand exactly as written and M3 closes *criteria-closed*; only then does the ceremony run — **M3 close → operator judgment + closing report + tag → fold per the rehearsed recipe → verification → push** — with the Executor as its mechanical arm. Shape (a), a fourth phase carrying the fold, was rejected: a phase whose acceptance is "the mission is closed" makes a milestone's criterion depend on the container that must outlive it, and the fold ends the branch's live work system, so M3's bookkeeping must strictly precede it.
+
+Two protections are **not** transferable and remain the operator's:
+
+- **The closing judgment.** `accomplished | failed | superseded` is rendered by the operator as an explicit utterance, recorded verbatim — never inferred from "proceed" or from silence. The Executor drafts the report; the operator amends and renders. Rationale: this campaign is criterion 3's measuring instrument, and an instrument cannot certify its own reading; the archive must not teach future missions that campaigns may certify themselves.
+- **The criterion-3 attestation.** Operator-authored, landed *before* the ceremony opens. If it does not arrive, criterion 3 is incomplete and the closing report weighs that honestly — "accomplished, with the stated evidence gap" is a legitimate operator verdict; a backfilled attestation is not.
+
+Any **history-rewriting operation on `main`** (as distinct from merge-plus-purification-commit, or a squash commit) would require its own fresh operator authorization.
+
+Recorded for the record: the downstream driver is real but softer than stated — Orchestra is already bootstrapped and what it awaits is the updated `.claude/` manifest, which adoption-by-re-copy can take from this mission branch today. The purified `main` makes that re-copy canonical and diff-friendly; it does not gate it. Consequently a red rehearsal may delay the fold at no cost to Orchestra.
 
 ## Acceptance
 
