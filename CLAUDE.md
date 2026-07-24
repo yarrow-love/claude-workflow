@@ -24,3 +24,4 @@ Conventions, tier ladder, role ladder, command family, callback grammar: **[`wor
 | Subsystem | Ledger file |
 | --- | --- |
 | `.claude/bin/` scripts | [`work/footguns/bin-scripts.md`](work/footguns/bin-scripts.md) |
+| `.claude/bin/consult` (session forks) | [`work/footguns/consult.md`](work/footguns/consult.md) |
