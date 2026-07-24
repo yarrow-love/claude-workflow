@@ -31,6 +31,8 @@ The proposal's spawn plan, at mission scale: the empirical spike; the canon conv
 
 **D2 — Depth is configured state, never assumed.** The capability has flipped twice in a year. `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH=2` becomes a baseline settings key with an `/initialize` audit; the spike (M1) is the only admissible evidence of behavior, and it gates M2.
 
+> **M1 finding (26-07-24) — premise falsified; D2 re-scope pending at M2.** The spike found the opposite of this determination's premise on CLI v2.1.218: nesting is **default-on and deep**, and `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` acts as a **restrictive cap**, not an enabler. The capability the conversion needs — nested depth-2 dispatch — *works* (M2 proceeds), but there is nothing to "enable," so the baseline-key rationale flips to a *cap against default-deep-nesting*, and the `/initialize` behavioral audit inverts (from "is nesting on?" to at most "is the cap set as intended?"). M2's `/plan` re-scopes D2 from the spike's reconciliation table (`todos/_done/26-07-23.probe-battery.md`); the *interactive* plain-session default remains uncertified (only `-p` subprocess + interactive var=2 were) and M2 confirms it. The determination text above is preserved as chartered; this note is the empirical correction. Operator-dispositioned 26-07-24 (close M1 accepted; re-scope at M2).
+
 **D3 — The archive's role rises.** Manager leaves the durable tier (stamps anchor to the Executor session); `session-archive` grows the `subagents/agent-*.jsonl` sweep so the archived unit is the whole tree — deliberately shaped for Orchestra's asynchronous peer-observability use of `work/sessions/`.
 
 **D4 — Template purification at close (operator-confirmed 26-07-23).** At mission close, `main` becomes the **pure project-generic template**: product only (`.claude/` manifest, scaffold, canon READMEs, `src/README.md`, `.cbmignore`). All instance content — mission archive, todos history, founding corpus, session archives — leaves `main` and is carried by the mission branch (per `/close`: "the branch's final state carries the archive"). The dual product+instance doctrine in root `CLAUDE.md`/`README.md` is rewritten accordingly (M3 scope). Consequence, accepted: development thereafter happens on mission branches; a clone of `main` is a ready bootstrap — the wholesale-copy trap dies at the root.
@@ -61,6 +63,6 @@ The proposal's spawn plan, at mission scale: the empirical spike; the canon conv
 
 | # | Milestone | Gist | Depends on | Status |
 | --- | --- | --- | --- | --- |
-| 1 | [spike](milestones/1.spike/MILESTONE.md) | The five empirical probes; verdicts gate everything downstream | — | pending |
+| 1 | [spike](milestones/1.spike/MILESTONE.md) | The five empirical probes; verdicts gate everything downstream | — | done (26-07-24) |
 | 2 | [conversion](milestones/2.conversion/MILESTONE.md) | Canon rewrite, env gate, archive sweep, apparatus retirement, reconciliation notes | 1 | pending |
 | 3 | [validation-and-fold](milestones/3.validation-and-fold/MILESTONE.md) | Real campaign under the new boundary; enactment filings; D4 doctrine rewrite + fold-back preparation | 2 | pending |

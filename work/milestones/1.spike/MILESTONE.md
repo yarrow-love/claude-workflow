@@ -7,7 +7,7 @@ sessions:
 
 # M1 — spike: empirical verification of subagent dispatch
 
-> Status: in progress — reconnaissance done + probe order seeded & staged 26-07-23 (`/execute`); awaiting the operator's clean window to run Step 0 (CLI upgrade) + the five probes. Campaign log: [`work/todos/26-07-23.execute-m1-spike.md`](../../todos/26-07-23.execute-m1-spike.md).
+> Status: **done (26-07-24)** — all five probes ran on pinned CLI v2.1.218; every premise CONFIRMED except premise 1 (depth-enabling model **diverged** — nesting default-on/deep, the spawn-depth var is a cap not an enabler; the nested-dispatch capability M2 needs is present, D2 re-scoped at M2). Probes 1 & 4 pass — no load-bearing fail. Verdicts + reconciliation: [work order](../../todos/_done/26-07-23.probe-battery.md); campaign: [`26-07-23.execute-m1-spike.md`](../../todos/_done/26-07-23.execute-m1-spike.md).
 
 ## Objective
 
@@ -33,7 +33,7 @@ Planning finding (26-07-23): the installed CLI is v2.1.197 — inside the v2.1.1
 
 | # | Phase | Gist | Status |
 | --- | --- | --- | --- |
-| 1 | [probe-battery](1.probe-battery.md) | Environment pin, then the five probes through one interactive probe-parent session; verdict write-up | staged (awaiting operator run) |
+| 1 | [probe-battery](1.probe-battery.md) | Environment pin, then the five probes through one interactive probe-parent session; verdict write-up | done (26-07-24) |
 
 ## Acceptance
 

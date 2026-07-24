@@ -1,6 +1,6 @@
 # Runbook — subagent-dispatch probe battery (M1 spike)
 
-> The hand-execution procedure for M1's five probes. Pick this up in a fresh session on the upgraded CLI. **Verdicts land in the work order** [`work/todos/26-07-23.probe-battery.md`](../todos/26-07-23.probe-battery.md) (§ Verdicts + the reconciliation table) — that's the campaign record; this runbook is how you produce it. Campaign log: [`26-07-23.execute-m1-spike.md`](../todos/26-07-23.execute-m1-spike.md). Est. time: ~30–45 min for the full five; ~15 min for the load-bearing pair.
+> The hand-execution procedure for M1's five probes. Pick this up in a fresh session on the upgraded CLI. **Verdicts land in the work order** [`work/todos/_done/26-07-23.probe-battery.md`](../todos/_done/26-07-23.probe-battery.md) (§ Verdicts + the reconciliation table) — that's the campaign record; this runbook is how you produce it. Campaign log: [`26-07-23.execute-m1-spike.md`](../todos/_done/26-07-23.execute-m1-spike.md). Est. time: ~30–45 min for the full five; ~15 min for the load-bearing pair.
 
 ---
 
