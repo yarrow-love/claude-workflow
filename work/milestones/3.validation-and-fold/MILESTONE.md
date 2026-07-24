@@ -7,7 +7,7 @@ sessions:
 
 # M3 — validation and fold: prove the boundary, purify the template
 
-> Status: in progress — hardened 26-07-24 (`/plan`, three phases, `/execute`-ready); campaign opened 26-07-24 (`26-07-24.execute-validation-and-fold.md`). Re-scoped with the operator: M2's campaign already ran under the new boundary (early dogfood, operator-chosen at its gate) and recorded the downward nudge in anger; M3 completes the criterion-3 evidence, adds the `.claude/ADR.md` deliverable, and stages the fold — the `/close` ceremony and the fold execution remain the operator's, after M3 closes.
+> Status: **done (26-07-24)** — all three phases PASS; criterion 3 complete in all three legs; the ceremony staged with zero mechanical work remaining (campaign log [`26-07-24.execute-validation-and-fold.md`](../../todos/_done/26-07-24.execute-validation-and-fold.md)). Hardened 26-07-24 (`/plan`, three phases, `/execute`-ready); executed 26-07-24 as a subagent-Manager campaign. Re-scoped with the operator: M2's campaign already ran under the new boundary (early dogfood, operator-chosen at its gate) and recorded the downward nudge in anger; M3 completes the criterion-3 evidence, adds the `.claude/ADR.md` deliverable, and stages the fold — the `/close` ceremony and the fold execution remain the operator's, after M3 closes.
 
 ## Objective
 
@@ -34,7 +34,7 @@ Complete the mission's evidence and land its durable record: criterion 3 closes 
 | --- | --- | --- | --- |
 | 1 | [validation-and-enactment](1.validation-and-enactment.md) | Criterion-3 ledger opened (nudge citation + panel attestation); proposal to `_enacted/` with reconciliation note; MISSION bookkeeping; archive spot-check | **done (26-07-24)** |
 | 2 | [doctrine-and-adr](2.doctrine-and-adr.md) | Root `CLAUDE.md`/`README.md` D4 rewrite; `.claude/ADR.md` authored + manifested; BASELINE scaffold-enumeration reconciliation | **done (26-07-24)** |
-| 3 | [fold-preparation](3.fold-preparation.md) | Purification manifest; fold recipe rehearsed in a disposable worktree; close runbook + prepared triage dispositions; the Executor-held item exercising the upward pause-and-ask | pending |
+| 3 | [fold-preparation](3.fold-preparation.md) | Purification manifest; fold recipe rehearsed in a disposable worktree; close runbook + prepared triage dispositions; the Executor-held item exercising the upward pause-and-ask | **done (26-07-24)** |
 
 The campaign runs under the converted boundary (subagent Managers per current canon) with the operator watching the panels — this campaign is itself the remaining validation instrument.
 

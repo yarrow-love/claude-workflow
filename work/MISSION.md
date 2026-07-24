@@ -65,4 +65,4 @@ The proposal's spawn plan, at mission scale: the empirical spike; the canon conv
 | --- | --- | --- | --- | --- |
 | 1 | [spike](milestones/1.spike/MILESTONE.md) | The five empirical probes; verdicts gate everything downstream | — | done (26-07-24) |
 | 2 | [conversion](milestones/2.conversion/MILESTONE.md) | Canon rewrite, env gate, archive sweep, apparatus retirement, reconciliation notes | 1 | done (26-07-24) |
-| 3 | [validation-and-fold](milestones/3.validation-and-fold/MILESTONE.md) | Real campaign under the new boundary; enactment filings; D4 doctrine rewrite + fold-back preparation | 2 | in progress |
+| 3 | [validation-and-fold](milestones/3.validation-and-fold/MILESTONE.md) | Real campaign under the new boundary; enactment filings; D4 doctrine rewrite + fold-back preparation | 2 | done (26-07-24) |
