@@ -26,7 +26,7 @@ Workflow tooling lives *inside* the bootstrap — it travels with the copy, and 
 
 ### Settings skeleton (`.claude/settings.json`)
 
-Baseline keys: `permissions.allow` entries `Bash(claude:*)` (child-session dispatch + consults), `Bash(ast-grep:*)`, `Bash(sg:*)`; the `SessionEnd` archive-on-stamp hook (`bun run "$CLAUDE_PROJECT_DIR/.claude/bin/session-archive" --from-hook`); the `Stop` follow-through backstop hook (`bun run "$CLAUDE_PROJECT_DIR/.claude/bin/commit-guard"` — blocks a stop that stranded close-out artifacts, soft-reminds on other dirty workflow paths; loop-guarded so a paused session is nudged once, not re-nagged). **Project decisions, not baseline**: `defaultMode` (this repo runs `bypassPermissions` — an operator trust choice, re-decide per repo).
+Baseline keys: `permissions.allow` entries `Bash(claude:*)` (child-session dispatch + consults), `Bash(ast-grep:*)`, `Bash(sg:*)`; the `SessionEnd` archive-on-stamp hook (`bun run "$CLAUDE_PROJECT_DIR/.claude/bin/session-archive" --from-hook`); the `Stop` follow-through backstop hook (`bun run "$CLAUDE_PROJECT_DIR/.claude/bin/commit-guard"` — blocks a stop that stranded close-out artifacts; loop-guarded so a paused session is nudged once, not re-nagged). **Project decisions, not baseline**: `defaultMode` (this repo runs `bypassPermissions` — an operator trust choice, re-decide per repo).
 
 ### This file
 

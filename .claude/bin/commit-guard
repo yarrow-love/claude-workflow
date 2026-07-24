@@ -6,14 +6,15 @@
  *   bun .claude/bin/commit-guard          # no piped stdin (a TTY) → prints usage, exits 1
  *
  * Reads Stop-hook JSON ({session_id, transcript_path, stop_hook_active, ...}) and
- * inspects `git status --porcelain`. Two tiers: BLOCK on close-out evidence (a
- * stranded filing/archive) — paths under work/todos/_done|_cancelled/, a dirty
- * markdown doc at any depth under work/todos/ whose frontmatter reads `status: done`, or an added
- * work/sessions/ transcript — forcing one turn to commit-or-state-why; a soft
- * CONTEXT reminder for other dirty work/, .claude/, docs/ paths. Loop-guarded (the
- * stop_hook_active field + a session+fingerprint marker under tmp/) so a paused
- * session is nudged at most once per offending set, never re-nagged. Any internal
- * error exits 0 silently — a buggy backstop must never break a session.
+ * inspects `git status --porcelain`. A pure close-out BLOCK backstop: it BLOCKS a
+ * stop only on close-out evidence (a stranded filing/archive) — paths under
+ * work/todos/_done|_cancelled/, a dirty markdown doc at any depth under work/todos/
+ * whose frontmatter reads `status: done`, or an added work/sessions/ transcript —
+ * forcing one turn to commit-or-state-why; every other case is completely silent.
+ * Loop-guarded (the stop_hook_active field + a session+fingerprint marker under
+ * tmp/) so it blocks at most once per offending set — an in-chain or already-nagged
+ * repeat stops silently, and a new offending set re-arms. Any internal error exits 0
+ * silently — a buggy backstop must never break a session.
  * Rationale: work/README.md § The follow-through rule.
  */
 import { createHash } from "node:crypto";
@@ -72,7 +73,6 @@ try {
   };
 
   const block: string[] = [];
-  const context: string[] = [];
 
   for (const { path } of entries) {
     // Class 1 — close-out filings: additions/renames into the done/cancelled bins.
@@ -95,24 +95,16 @@ try {
       block.push(path);
       continue;
     }
-    // Context tier — any other dirt under the workflow surfaces.
-    if (/^(work|\.claude|docs)\//.test(path)) {
-      context.push(path);
-    }
   }
 
   const blockPaths = [...new Set(block)].sort();
-  const contextPaths = [...new Set(context)].sort();
 
-  if (blockPaths.length === 0) {
-    if (contextPaths.length === 0) process.exit(0);
-    emitContext(contextPaths);
-    process.exit(0);
-  }
+  // No close-out evidence — silent (a stop that stranded nothing worth interrupting).
+  if (blockPaths.length === 0) process.exit(0);
 
-  // Loop guard. In-chain: stop_hook_active downgrades to a context nudge. Across
-  // turns: a tmp/ marker keyed by session + a fingerprint of the offending set —
-  // seen this exact set before → downgrade; a new set may block again.
+  // Loop guard. In-chain: stop_hook_active means this stop already follows a block,
+  // so stop silently. Across turns: a tmp/ marker keyed by session + a fingerprint of
+  // the offending set — seen this exact set before → stop silently; a new set re-arms.
   const fingerprint = createHash("sha256")
     .update(blockPaths.join("\n"))
     .digest("hex")
@@ -121,10 +113,7 @@ try {
   const markerPath = join(markerDir, `${sessionId}.${fingerprint}`);
   const alreadyNagged = existsSync(markerPath);
 
-  if (stopHookActive || alreadyNagged) {
-    emitContext([...blockPaths, ...contextPaths]);
-    process.exit(0);
-  }
+  if (stopHookActive || alreadyNagged) process.exit(0);
 
   try {
     mkdirSync(markerDir, { recursive: true });
@@ -144,16 +133,4 @@ try {
   // Any internal failure (unparseable stdin, git error, fs error) is a silent
   // no-op — the backstop never breaks a session.
   process.exit(0);
-}
-
-function emitContext(paths: string[]): void {
-  const additionalContext =
-    `Uncommitted workflow artifacts: ${paths.join(", ")}. ` +
-    `Commit them when they reach a committable state, or note why they wait ` +
-    `(work/README.md § The follow-through rule).`;
-  process.stdout.write(
-    JSON.stringify({
-      hookSpecificOutput: { hookEventName: "Stop", additionalContext },
-    }) + "\n"
-  );
 }
