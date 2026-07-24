@@ -1,4 +1,4 @@
-Audit the environment against the baseline expectations — **read-only**: every failure names its fix; this command performs nothing (`/configure`, the repair counterpart, is a deferred filing: `work/todos/26-07-11.configure-command.md`). Run after bootstrapping a repo, after importing/updating `.claude/`, or whenever agent behavior suggests a configuration gap.
+Audit the environment against the baseline expectations — **read-only**: every failure names its fix; this command performs nothing (`/configure`, the repair counterpart, is a deferred filing). Run after bootstrapping a repo, after importing/updating `.claude/`, or whenever agent behavior suggests a configuration gap.
 
 ## Checks
 
