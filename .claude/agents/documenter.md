@@ -1,6 +1,6 @@
 ---
 name: documenter
-description: Discovers, reviews, and revises documentation affected by recent code changes. Writes directly — user reviews at commit stage.
+description: Discovers, reviews, and revises documentation affected by recent code changes. Writes directly; changes commit with the close-out and the user reviews the commit (revert is the rare escape).
 model: sonnet
 ---
 

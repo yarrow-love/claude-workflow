@@ -16,7 +16,7 @@ Charter one mission — the judgment-closed tier above milestones (`work/README.
    - **Todo triage**: items carried forward from the predecessor enter the fresh inbox or are archived with cause.
 4. **Stub the roadmap.** Lay gist-level milestone stubs — a roadmap row + a stub `MILESTONE.md` (scope gist, phase gists, dependencies) per milestone — in `work/milestones/` per its README conventions. Preliminary gist-planning here is protocol; *hardening* stays just-in-time (`/plan <milestone>`), because sufficient milestone planning usually depends on prerequisite outcomes.
 5. **Write `work/MISSION.md`** — the charter: objective/why-now, scope, non-goals, settlement reference, success criteria, failure criteria, roadmap table. Mission identity: `v<version>.<slug>` (the number orders, the slug carries meaning). If the project versions by branch, the mission branch opens here (mission = branch; branch open = mission open).
-6. **Sign-off + commit.** Present the charter + determinations + roadmap; await explicit approval; commit (enumerated paths). Stamp `architect@<machine>/<session-id> # mission architect` into the `sessions:` frontmatter of `work/MISSION.md` and every milestone stub; archive your transcript (`.claude/bin/session-archive` / `/archive`).
+6. **Sign-off + commit.** Present the charter + determinations + roadmap; await explicit approval. On approval, the close-out fires first, before any reply prose (`work/README.md` § The follow-through rule): commit (enumerated paths), stamp `architect@<machine>/<session-id> # mission architect` into the `sessions:` frontmatter of `work/MISSION.md` and every milestone stub, and archive your transcript (`.claude/bin/session-archive` / `/archive`).
 
 ## Lifecycle
 

@@ -65,7 +65,7 @@ After code review, resolve **mechanical** findings (localized fixes, no design i
 
 Every prepared work order is submitted to the Architect before execution — a mandatory agent-side gate between the written plan and the operator sign-off (work-order step 7; it equally concludes `/plan`'s plan-work-order). The Architect reads the order whole and returns a verdict: **`BLESSED`**, or numbered critique directives.
 
-- **Blesser resolution — standing handle first.** When the order's `sessions:` frontmatter carries a consultable planning handle (the last `architect@…` entry, machine-local), consult-fork it per Planner Callback — the upstream spec's author is the right judge of whether the order serves its intent; independence is not the point here, authority-of-intent is. When no handle exists or the fork fails, dispatch a fresh architect subagent briefed with the work order, the mission/milestone context it descends from, and the ask: *bless or critique*.
+- **Blesser resolution — standing handle first.** When the order's `sessions:` frontmatter carries a consultable planning handle (the last `architect@…` entry, machine-local), consult it via `bun .claude/bin/consult "<handle>" "<question>"` per Planner Callback (the script owns the restore ladder + the read-only fork boundary) — the upstream spec's author is the right judge of whether the order serves its intent; independence is not the point here, authority-of-intent is. The blessing is a read-and-critique, which the read-only fork supports fully (it Reads the order and returns a verdict, losing only the ability to act). When no handle exists or the consult fails, dispatch a fresh architect subagent briefed with the work order, the mission/milestone context it descends from, and the ask: *bless or critique*.
 - **Always flagship.** The blessing runs `fable` (fall back to `opus` if unavailable) regardless of the order's `difficulty` — it is one bounded read-and-critique, not a planning session; the planner downshift does not apply to it.
 - **Refinement loop, bounded.** On critique, refine via the **continued planner** (the author holds the rationale), revise the plan section, and resubmit. Two rounds maximum. Unresolved after the bound: in the manual workflow, carry both positions to the sign-off — the operator adjudicates; in automatic mode, stop with an `ESCALATE` verdict carrying the Architect's position — autonomous execution never proceeds over an unblessed order.
 - **Record it.** Append a stamped `## Blessing` section (`> architect@<machine>/<session-id> # blessing` — the consult fork's own session id when consulted, yours when the architect ran as your subagent): the verdict, each directive, and how it was resolved. The blessing is provenance, not authority — new design decisions surfaced by the critique still escalate to the operator.
@@ -97,7 +97,7 @@ Each subagent starts with zero context. Prompts must be:
 
 ### Dispatch classification (settled 26-07-11)
 
-The authoritative per-step policy for both workflows. Model pins re-certified unchanged at the same settlement (planner→fable with the `difficulty` downshift, implementer/designer→opus, rest→sonnet); validation against real campaign cost data (`tmp/accomplish/*.jsonl` terminal `result` events) is deferred to the first campaign's close — a cheaper tier for mechanical steps reopens there, not before.
+The authoritative per-step policy for both workflows. Model pins re-certified unchanged at the same settlement (planner→fable with the `difficulty` downshift, implementer/designer→opus, rest→sonnet); validation against real campaign cost data (each Manager's cost rides the dispatch result surface) is deferred to the first campaign's close — a cheaper tier for mechanical steps reopens there, not before.
 
 | Dispatch | Mode | Why |
 | --- | --- | --- |
@@ -112,7 +112,7 @@ The authoritative per-step policy for both workflows. Model pins re-certified un
 | doc wrap-up (work-order 16) — implementer as documenter | **continued** | transcribes held intent; documenter conventions bind |
 | trivial mid-flow bugs (work-order 19) — implementer | continued when adjacent, else fresh | a nearby build context is the cheapest correct fixer |
 | reconnaissance (milestone 3) — researchers | fresh | first touch; findings travel to child Managers via documents — subagents don't cross the session boundary |
-| phase build (milestone 7.1) — Manager child session | `--resume` for residuals; fresh for re-plans | incremental residuals extend context; a re-plan needs clean premises |
+| phase build (milestone 7.1) — subagent Manager | SendMessage **continuation** for residuals; **fresh subagent** for re-plans | incremental residuals extend context; a re-plan needs clean premises |
 | consults — architect / planner / designer | **continued** (resume-fork) | by design: the author answers intent — plan questions ride the architect, brief questions ride the designer authority session |
 
 ## Planner Callback
@@ -120,7 +120,7 @@ The authoritative per-step policy for both workflows. Model pins re-certified un
 The plan's author is a consultable resource — prefer calling it back over rebuilding context in a fresh agent:
 
 - **Within a session:** a previously-dispatched planner subagent can be continued with its context intact (send a follow-up to the same agent rather than spawning anew). When a reviewer finding seems to contradict the plan, or an implementer reports a plan assumption doesn't hold, ask the planner that wrote it.
-- **Across sessions:** a milestone planned by `/plan work/milestones/<m>` carries an append-only `sessions:` callback list in its MILESTONE.md frontmatter (copied into seeded work docs); the consultation handle is the **last `architect@<machine>/<session-id>` entry** — earlier architect entries are upstream (the mission architect that stubbed the milestone). `claude -p --resume <session-id> --fork-session --model fable "<question>"` **forks** that session — full planning context, original transcript untouched, parallel consults safe (`--fork-session` is load-bearing: without it, resume continues and mutates the addressed transcript). Machine-local: valid only where the entry's `<machine>` segment matches this host; otherwise degrade to documents + a fresh dispatch. Prefer `.claude/bin/consult <handle> "<question>"` once available — it owns the restore-before-resume ladder. (Legacy forms: `planner@…` entries annotated `# milestone architect`, or `plan-session:` + `plan-machine:` — the same handle, pre-convention.)
+- **Across sessions:** a milestone planned by `/plan work/milestones/<m>` carries an append-only `sessions:` callback list in its MILESTONE.md frontmatter (copied into seeded work docs); the consultation handle is the **last `architect@<machine>/<session-id>` entry** — earlier architect entries are upstream (the mission architect that stubbed the milestone). Consult it with `bun .claude/bin/consult "<handle>" "<question>"` — the required consult path (the script owns the restore-before-resume ladder, the read-only fork boundary, and the repo-binding guard; a raw `claude -p --resume … --fork-session` recipe bypasses all three and must not be used). Machine-local: valid only where the entry's `<machine>` segment matches this host; otherwise degrade to documents + a fresh dispatch. (Legacy forms: `planner@…` entries annotated `# milestone architect`, or `plan-session:` + `plan-machine:` — the same handle, pre-convention.)
 - **The boundary — interpretation vs decision.** The consulted author answers what-the-plan-intended questions; it never owns **new** design decisions — those still escalate to the user. Always instruct the consult to "flag if this needs a human decision," and treat that flag as ESCALATE. When an escalation does reach the user, attach the consult's analysis — the user reacts to an articulated position instead of answering cold.
 - **Discipline:** distill every consult into the work doc (the canonical record; consults are advisory). Reserve consults for genuine forks — routine questions are answered by work docs and researchers. `--model fable`, falling back to `opus` if unavailable.
 
@@ -144,7 +144,7 @@ When a workflow touches the project's front-end surface (see the supplement), di
 
 ## Closing Out
 
-After implementation, review, and front-end inspection (if applicable) are complete:
+After implementation, review, and front-end inspection (if applicable) are complete, the close-out runs immediately on completion/sign-off, before any reply prose (`work/README.md` § The follow-through rule):
 
 1. Run the project quality gate
 2. Group changes into related commits (one per phase or logical unit)
@@ -162,11 +162,12 @@ After implementation, review, and front-end inspection (if applicable) are compl
 
 ## Constraints
 
-- **Don't implement directly** — delegate to the implementer agent
+- **Don't implement directly** — delegate to the implementer agent (one bounded exception: automatic mode's final-mile exception, per that workflow's Execution discipline — explicit Executor instruction only, never self-invoked)
 - **Don't review directly** — delegate to the reviewer agent
 - **Don't plan directly** — delegate to the planner agent
 - **Never execute an unblessed order** — the Architect Blessing precedes the sign-off; no implementer dispatches without a `## Blessing` section
 - **Always pause for pre-implementation sign-off** — never dispatch implementers before the user confirms the Decision points
 - **Don't commit without the quality gate** — run it before creating commits
 - **Commits have standing approval** — group logically and commit without asking; never `git add -A` or `git add .` (always enumerate paths)
+- **Follow through on approval** — on sign-off (or self-closing completion), the close-out fires first, before reply prose; a turn never ends with approved-but-uncommitted artifacts unless you state why (`work/README.md` § The follow-through rule)
 - **Report concisely** — status updates at milestones, not play-by-play

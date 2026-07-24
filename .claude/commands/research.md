@@ -12,7 +12,7 @@ Research the following question and write a report to `docs/research/`:
 
 4. **Analyze** — synthesize findings. Compare approaches, note trade-offs, identify what applies to this project's stack and constraints. Flag anything uncertain or conflicting across sources.
 
-5. **Write report** — save to `docs/research/<slug>.md` using the format below. The slug should be a short kebab-case name derived from the topic (e.g., `vector-quantization.md`).
+5. **Write report** — save to `docs/research/<slug>.md` using the format below. The slug should be a short kebab-case name derived from the topic (e.g., `vector-quantization.md`). Then commit the report (enumerated path, `Add:` prefix) as the close-out, before any reply prose (`work/README.md` § The follow-through rule) — a finished report is not left uncommitted.
 
 ## Report Format
 

@@ -45,7 +45,7 @@ The metaphor is corporate, and deliberately so: judgment escalates *upward*, and
 | --- | --- | --- |
 | **Operator** | owner | All ultimate judgment: design sign-off, autonomy scope, mission close. The interim work-queue scheduler. |
 | **Architect** | design authority (staff — advises, never dispatches builds) | Plans missions and milestones as interactive flagship sessions; authors charters, milestone indexes, phase docs; the standing consult handle. **Blesses every prepared work order before execution** (the blessing gate — manager's Architect Blessing policy). Tier-qualified in stamp comments: `# mission architect`, `# milestone architect`, `# blessing`. |
-| **Executor** | executive | Drives one milestone campaign: Reconnaissance gate with the operator, then one Manager child-session per phase; reasons about **ultimate acceptance** (does the phase advance the objective) vs the Manager's phase acceptance. |
+| **Executor** | executive | Drives one milestone campaign: Reconnaissance gate with the operator, then one Manager subagent per phase; reasons about **ultimate acceptance** (does the phase advance the objective) vs the Manager's phase acceptance. |
 | **Manager** | line management | Drives one work order to its `## Acceptance Verdict` by dispatching specialists; sole author of the work document; conserves its context for decisions. |
 | **Specialists** | individual contributors | One scoped task each, as subagents: **researcher**, **investigator**, **planner**, **designer**, **implementer**, **reviewer**, **inspector**, **documenter**, **integrator**. |
 
@@ -87,9 +87,11 @@ Retired: `/build`, `/resolve`, `/refactor`, `/implement` (→ `/execute`), `/acc
 
 Conventions:
 
-- **`sessions:` frontmatter — durable tiers only** (architect / executor / manager: the sessions someone can actually `--resume`). Append-only, each entry the grammar above plus an optional `# role comment`. Append, never rewrite, reorder, or delete. Any agent that touches a work order at any stage records itself — durable sessions here, everything else via the section stamps below.
+- **`sessions:` frontmatter — durable tiers only** (architect / executor: sessions someone can actually `--resume`; a Manager entry follows the **nearest-resumable-session principle** — a subagent Manager anchors to its hosting Executor session, `manager@<machine>/<executor-session-id>`, reachable by resuming that Executor and continuing the agent by id, while a headless-fallback Manager is its own resumable session and stamps its own id). Append-only, each entry the grammar above plus an optional `# role comment`. Append, never rewrite, reorder, or delete. Any agent that touches a work order at any stage records itself — durable sessions here, everything else via the section stamps below.
 - **Per-section stamps** — every `<h2>` section appended to a work document is prefaced by a blockquote stamp: `> <role>@<machine>/<session-id>`. **The role names the act; the session-id names who can answer for it**: a specialist's report carries the specialist's role over the hosting (resumable) session's id — e.g. `> reviewer@play/<manager-session-id>` (the reviewer subagent is reachable back through that session). A session acting outside a dispatched role stamps the capacity it was serving when it wrote. A section revised by a *different* session appends a second stamp line. The `sessions:` list is derivable from the body stamps (dedupe by session-id, which collapses to the durable tiers) — the stamps are the source of truth.
 - **A callback is provenance plus a consult handle, never authority.** Resuming an author answers "what did you intend / why was X rejected"; new design decisions still escalate to the Operator.
+- **A consult is read-only by construction.** The fork can read the transcript and answer, never act — no writes, shell, git, subagents, web, MCP, or hooks. Enforced by `.claude/bin/consult` (the required consult path); a raw `claude -p --resume … --fork-session` recipe carries no boundary and is a documented bypass.
+- **A consult is repo-bound.** A handle resolves only where the transcript's recorded `cwd` matches the consulting repo; a transcript belonging to another repo is refused (the fork would act in the wrong working tree). Foreign repos degrade to documents + a fresh dispatch — the handle itself stays `role@machine/session-id`, the repo binding is a property the tooling enforces, not a segment of the grammar.
 - **Durability** — stamping creates a promise of consultability; `work/sessions/` (archive-on-stamp + `/archive`) is what makes the promise true. Consult via `.claude/bin/consult <handle> "<question>"`, which owns the restore-before-resume ladder.
 
 ### Machine registry
@@ -99,6 +101,16 @@ Conventions:
 | `play` | Linux (CachyOS) / zsh | `/home/yarrow/dev/claude-workflow` | Single machine today; add a row per machine at bootstrap |
 
 (The registry gains rows — and a remote-consult recipe — when the cross-LAN intercom is adopted; see `proposals/26-07-05.agentic-workflow/26-07-03.cross-lan-agent-calls.md`.)
+
+## The follow-through rule
+
+**Stated here once; referenced everywhere else.**
+
+On receiving sign-off — or completing self-closing work — the session's **first actions** are the mechanical close-out: commit (enumerated paths), transcript archive, status/roadmap updates, **before any reply prose**. Approval (or completion) is the *trigger* for the close-out, not the ending after it.
+
+- A turn never ends with approved-but-uncommitted artifacts.
+- The **only** legitimate way a turn ends with uncommitted approved work is an **explicitly stated reason** — canonically "uncommitted pending your sign-off" while the pause awaits it. State the reason; make the state visible, never ambient.
+- **No standing per-workflow commit exceptions.** Every close-out commits on the same terms; a doc that fails review is reverted or revised afterward (rare), not gated pre-commit.
 
 ## Historical rename mapping
 

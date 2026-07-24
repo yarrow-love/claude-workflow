@@ -1,13 +1,12 @@
 # claude-workflow
 
-This repository **is** the Claude agentic workflow — the canonical, project-generic bootstrap, dogfooding itself. Two things live here and must not blur:
+This repository **is** the Claude agentic workflow — the canonical, project-generic bootstrap, dogfooding itself. `main` carries the **template only**: the `.claude/` product (agents, commands, workflows, `bin/` tooling) manifested by `.claude/BASELINE.md`, the `work/` and `src/` scaffold with its instructive READMEs, the canon READMEs, and `.cbmignore`. Every file under `.claude/` must stay **project-generic**: no project facts, no machine-specific paths, no assumptions a fresh repo wouldn't satisfy. The seam for project specifics is `work/PROJECT.md` in the *consuming* repo.
 
-- **The product**: `.claude/` — the portable bootstrap (agents, commands, workflows, `bin/` tooling), manifested by `.claude/BASELINE.md`. Every file under `.claude/` must stay **project-generic**: no project facts, no machine-specific paths, no assumptions a fresh repo wouldn't satisfy. The seam for project specifics is `work/PROJECT.md` in the *consuming* repo.
-- **The instance**: `work/` — this repo's own live work system (the workflow governs its own development) plus the workflow's design history: the determinations record and founding series in `work/todos/_done/agentic-workflow/`, the design corpus in `work/proposals/_enacted/26-07-05.agentic-workflow/` (standing remainder in `work/proposals/26-07-05.agentic-workflow/`), the founding session archive in `work/sessions/`.
+The workflow's own development never runs on `main` — it runs on **mission branches**. A mission branches from `main`, works under the workflow (its charter, work orders, proposals, and archives filling the scaffold), and at close is tagged `<v>-closed` carrying its whole mission archive; only the product folds back. Design history is therefore reachable through [`.claude/ADR.md`](.claude/ADR.md) and the mission tags, never through in-tree instance files.
 
 ## The work system
 
-Conventions, tier ladder, role ladder, command family, callback grammar: **[`work/README.md`](work/README.md)**. Work orders: [`work/todos/README.md`](work/todos/README.md). This repo's operational facts: **[`work/PROJECT.md`](work/PROJECT.md)**.
+Conventions, tier ladder, role ladder, command family, callback grammar: **[`work/README.md`](work/README.md)**. Work orders: [`work/todos/README.md`](work/todos/README.md). Operational facts agents read — quality gate, surfaces, per-role notes — live in **`work/PROJECT.md`**, authored at branch open (bootstrap step 3) and absent from a bare template tree.
 
 ## Conventions
 
@@ -17,10 +16,6 @@ Conventions, tier ladder, role ladder, command family, callback grammar: **[`wor
 - **No packaging leaks to root** — the one sanctioned `package.json` lives at `.claude/bin/`.
 - **Commits**: imperative `Add:` / `Fix:` / `Update:` / `Organize:` / `Document:` prefixes; enumerate paths (never `git add -A` / `git add .`); Co-Authored-By footer per harness convention.
 
-## Footgun index
+## Standing hazards
 
-[`work/footguns/`](work/footguns/README.md) — none yet.
-
-| Subsystem | Ledger file |
-| --- | --- |
-| — | (none yet) |
+The product's durable hazards — the ones that outlive any single mission — are [`.claude/ADR.md`](.claude/ADR.md) § Standing hazards. Read them before touching the subsystems they name. A mission's own hazard ledger lives in the scaffold's ledger directory and archives with its branch ([`work/README.md`](work/README.md) § Layout).

@@ -10,6 +10,18 @@
  * (documents + fresh dispatch). Cross-machine handles stop with a clear message
  * (the cross-LAN intercom is deferred; see work/proposals/). A consult is
  * advisory — interpretation, never new decisions (work/README.md § grammar).
+ *
+ * The fork runs under a read-only capability boundary (see cmd, below): it can
+ * read and answer, never act. And it is repo-bound — a handle resolves only
+ * where the transcript's recorded cwd matches the consulting repo.
+ *
+ * exit codes:
+ *   0  ran (or --dry)
+ *   1  usage / unparseable handle
+ *   2  cross-machine handle (deferred)
+ *   3  transcript unusable — absent (cache + archive both miss), or present but
+ *      the fork produced no answer (failed to resume). Both take the degrade path.
+ *   4  repo mismatch — transcript belongs to another repo (refuse; degrade)
  */
 import { gunzipSync } from "node:zlib";
 import { hostname } from "node:os";
@@ -35,7 +47,10 @@ const positional = args.filter(
 const [handle, question] = positional;
 
 if (!handle || (!question && !dry)) {
-  console.error('usage: consult <role@machine/uuid[#msg]> "<question>" [--model fable] [--dry]');
+  console.error(
+    'usage: consult <role@machine/uuid[#msg]> "<question>" [--model fable] [--dry]\n' +
+      "  the fork is read-only (reads + answers, never acts) and repo-bound to this repo"
+  );
   process.exit(1);
 }
 
@@ -56,12 +71,51 @@ if (machine !== machineLocal) {
   process.exit(2);
 }
 
+// The transcript's recorded cwd is the first line carrying a `cwd` field — NOT
+// the first parseable line: transcripts lead with cwd-less mode/summary entries.
+const transcriptCwd = (buf: Buffer): string | null => {
+  for (const line of buf.toString("utf8").split("\n")) {
+    if (!line) continue;
+    try {
+      const o = JSON.parse(line);
+      if (typeof o.cwd === "string") return o.cwd;
+    } catch {
+      /* skip unparseable line */
+    }
+  }
+  return null;
+};
+
+// Repo-binding guard: a handle resolves only where the transcript originated.
+// Refuse a foreign transcript before it can act in this tree — and, for the
+// archive path, before it materializes (so it never pollutes the local cache).
+const bindOrRefuse = (cwd: string | null) => {
+  if (cwd === null) {
+    console.error(`warning: no cwd field in transcript ${uuid} — cannot verify repo binding; proceeding.`);
+    return;
+  }
+  const origin = resolve(cwd);
+  const here = resolve(repoRoot);
+  if (origin !== here && !origin.startsWith(here + "/")) {
+    console.error(
+      `refuse: ${uuid} belongs to ${origin}, but this repo is ${here}.\n` +
+        `A consult forks in place, so it may only resume a transcript from its owning repo.\n` +
+        `Degrade path: consult from the owning repo, or answer from documents + a fresh dispatch.`
+    );
+    process.exit(4);
+  }
+};
+
 const localPath = join(projectDir, `${uuid}.jsonl`);
-if (!existsSync(localPath)) {
+if (existsSync(localPath)) {
+  bindOrRefuse(transcriptCwd(readFileSync(localPath)));
+} else {
   const archived = join(repoRoot, "work", "sessions", machine, `${uuid}.jsonl.gz`);
   if (existsSync(archived)) {
+    const buf = gunzipSync(readFileSync(archived));
+    bindOrRefuse(transcriptCwd(buf)); // parse before materializing
     mkdirSync(projectDir, { recursive: true });
-    writeFileSync(localPath, gunzipSync(readFileSync(archived)));
+    writeFileSync(localPath, buf);
     console.error(`restored: ${archived} -> ${localPath}`);
   } else {
     console.error(
@@ -76,15 +130,114 @@ const prompt =
   (msg ? `(Citing your message ${msg}.) ` : "") +
   `Consultation via callback ${handle}. ${question ?? ""}` +
   ` Answer from your session's intent; flag explicitly if this needs a human decision.`;
-const cmd = ["claude", "-p", "--resume", uuid, "--fork-session", "--model", model, prompt];
+
+// Read-only fork boundary — five independent layers, each covering a hole the
+// others leave. `deny` is load-bearing, not belt: this repo's settings.json
+// allows Bash(claude:*), and only a deny rule defeats a project allow, so a
+// mode/allowlist-only fork could still spawn an unconstrained child claude.
+// disableAllHooks because hooks run OUTSIDE the permission layers — else this
+// repo's Stop→commit-guard and SessionEnd→session-archive fire inside a
+// "read-only" fork. --permission-mode goes last: --allowedTools/--disallowedTools/
+// --mcp-config are variadic and would otherwise swallow the trailing prompt.
+//
+// DENY is a strict superset of "anything that can mutate, message, schedule,
+// escape, or publish". For the built-in harness/deferred tool class
+// (EnterWorktree, TaskCreate, …) the boundary is NAME-DENY-ONLY: the allowlist
+// ("Read,Grep,Glob") does NOT default-deny that class, so each such tool must be
+// named here explicitly. Audited against `claude 2.1.197` (26-07-23 crux probe:
+// deny of EnterWorktree makes it ABSENT from the fork's ToolSearch registry —
+// enforcement is by name-filtering, strictly stronger than a runtime prompt).
+// ⚠ ON A HARNESS UPGRADE: re-enumerate the deferred/built-in tool registry and
+// reconcile DENY — a new mutating/escaping tool that isn't named here is NOT
+// caught by the allowlist and silently re-opens the boundary.
+// The deferred names aren't in the static tool registry at settings-parse time,
+// so the harness may emit an intermittent "matches no known tool" warning to
+// stderr — cosmetic; the deny still filters them from the deferred registry.
+const DENY = [
+  // classic mutation / shell / web
+  "Edit", "Write", "NotebookEdit", "Bash", "WebFetch", "WebSearch",
+  // subagent launchers + orchestration (route-around via a delegated child that
+  // could carry its own tool grants). Skill is kept: it only injects read-only
+  // instructions, and any tool a skill invokes is still gated by this deny.
+  "Task", "Agent", "Workflow",
+  // worktree / branch escape — real git mutation
+  "EnterWorktree", "ExitWorktree",
+  // background-task fleet
+  "TaskCreate", "TaskStop", "TaskUpdate", "TaskGet", "TaskList", "TaskOutput",
+  // messaging / scheduling / outward signalling (whole Cron family, incl. the read)
+  "SendMessage", "RemoteTrigger", "PushNotification", "ScheduleWakeup",
+  "CronCreate", "CronDelete", "CronList", "DesignSync", "Monitor",
+  // plan-mode transitions
+  "EnterPlanMode", "ExitPlanMode",
+  // publishing (outward-facing web)
+  "Artifact",
+  // read-only MCP resource tools — moot under --strict-mcp-config, denied anyway
+  "ReadMcpResourceTool", "ListMcpResourcesTool",
+];
+const settings = JSON.stringify({
+  permissions: { defaultMode: "dontAsk", deny: DENY },
+  disableAllHooks: true,
+});
+const cmd = [
+  "claude",
+  "-p",
+  "--resume",
+  uuid,
+  "--fork-session",
+  "--model",
+  model,
+  "--settings",
+  settings,
+  "--strict-mcp-config",
+  "--mcp-config",
+  '{"mcpServers":{}}',
+  "--allowedTools",
+  "Read,Grep,Glob",
+  "--disallowedTools",
+  DENY.join(","),
+  "--permission-mode",
+  "dontAsk",
+  prompt,
+];
 
 if (dry) {
   console.log(`ready: transcript present at ${localPath}`);
   console.log(`would run: ${cmd.map((c) => (c.includes(" ") ? JSON.stringify(c) : c)).join(" ")}`);
   process.exit(0);
 }
-const run = spawnSync(cmd[0], cmd.slice(1), { stdio: "inherit" });
-if (run.status !== 0 && model === "fable") {
-  console.error("fable consult failed — retry with: --model opus");
+// stdin from /dev/null so the fork never blocks waiting for piped input; stdout
+// captured (then echoed) so a failed *start* is caught — `claude -p` can exit 0
+// with no answer when the fork can't resume ("No conversation found"), which
+// would otherwise report a silently-failed consult as success and skip the
+// caller's degrade path (e.g. Blessing's fresh-architect fallback).
+// Capture stdout (then echo) instead of live-streaming — required so the
+// empty-output→exit-3 detection below can see the fork produced no answer. The
+// 64 MB cap is a deliberate ceiling: a fork whose stdout exceeds it ENOBUFS-
+// errors (run.status non-zero) → the failure path → degrade, not a silent truncation.
+const run = spawnSync(cmd[0], cmd.slice(1), {
+  cwd: repoRoot,
+  stdio: ["ignore", "pipe", "inherit"],
+  encoding: "utf8",
+  maxBuffer: 64 * 1024 * 1024,
+});
+const answer = run.stdout ?? "";
+if (answer) process.stdout.write(answer);
+
+// A successful consult always emits an answer on stdout. Empty stdout means the
+// fork could not resume ("No conversation found", printed to the inherited
+// stderr) — `claude -p` reports this as exit 0 or 1; either way it's the
+// transcript-degrade case, so map it to exit 3 (not 1, which is usage) so
+// callers hit the documented fallback (e.g. Blessing's fresh-architect path).
+const failedToStart = answer.trim() === "";
+if (run.status !== 0 || failedToStart) {
+  if (model === "fable") console.error("fable consult failed — retry with: --model opus");
+  if (failedToStart) {
+    console.error(
+      `consult produced no answer for ${uuid} (the fork could not resume) —\n` +
+        `Degrade path: answer from the documents + a fresh dispatch (planner-callback policy).`
+    );
+    process.exit(3);
+  }
+  process.exit(run.status ?? 1);
 }
-process.exit(run.status ?? 1);
+process.exit(0);
