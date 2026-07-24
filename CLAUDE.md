@@ -19,8 +19,8 @@ Conventions, tier ladder, role ladder, command family, callback grammar: **[`wor
 
 ## Footgun index
 
-[`work/footguns/`](work/footguns/README.md) — none yet.
+[`work/footguns/`](work/footguns/README.md).
 
 | Subsystem | Ledger file |
 | --- | --- |
-| — | (none yet) |
+| `.claude/bin/` scripts | [`work/footguns/bin-scripts.md`](work/footguns/bin-scripts.md) |
