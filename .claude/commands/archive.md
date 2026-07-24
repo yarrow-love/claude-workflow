@@ -1,4 +1,4 @@
-Sweep and backfill the durable session archive (`work/sessions/`) — the checkpoint for a mission that is inactive but not closed, and the preparation step before migrating work to another machine. Design: `work/README.md` § The callback grammar (Durability); `work/proposals/_enacted/26-07-05.agentic-workflow/26-07-06.durable-resumability.md`.
+Sweep and backfill the durable session archive (`work/sessions/`) — the checkpoint for a mission that is inactive but not closed, and the preparation step before migrating work to another machine. Design: `work/README.md` § The callback grammar (Durability).
 
 ## Process
 

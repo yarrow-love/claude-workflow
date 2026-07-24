@@ -2,7 +2,7 @@
 
 **Canonical home**: `git@github.com:yarrow-love/claude-workflow.git` (`~/dev/claude-workflow`). Bootstrap development happens there; consuming repos adopt by re-copying the manifest set. Every file listed here belongs to the **project-generic, portable** agentic bootstrap: copy exactly this set to a new repo (plus the scaffold, below) and the system works there unmodified. Anything in `.claude/` **not** listed is project-specific by definition. `/initialize` audits the environment against the *Expectations* section.
 
-Design rationale: `work/todos/_done/agentic-workflow/1.determinations.md` (det. 4). Project-specific facts never live in `.claude/` — they live in `work/PROJECT.md` (the supplement) and root `CLAUDE.md` (architecture).
+Design rationale: the project's design record under `work/`. Project-specific facts never live in `.claude/` — they live in `work/PROJECT.md` (the supplement) and root `CLAUDE.md` (architecture).
 
 ## Manifest
 
@@ -35,7 +35,7 @@ Baseline keys: `permissions.allow` entries `Bash(claude:*)` (child-session dispa
 ## Bootstrap procedure (new repo)
 
 1. Copy the manifest set into `<repo>/.claude/`.
-2. Scaffold the work system: `work/{README.md,todos/{README.md,bugs/,_done/,_cancelled/},proposals/{README.md,_deferred/,_rejected/,_enacted/},milestones/README.md,missions/,design/{README.md,system/README.md,sessions/README.md},footguns/README.md,notes/,runbooks/}` — copy the READMEs and stubs from this repo; they are project-generic (the design/footguns/milestones stubs are instructive mandates for directories that start empty). Also copy `src/README.md` (the source-layout convention: root reserved for `docs`/`work`/`src`; sub-codebases as `src/<subsystem>/`; retirement to `src/_archive/`) and the root `.cbmignore` (the index whitelist). One adaptation: the copied `work/README.md`'s machine registry starts over — replace the row(s) with the new project's machine(s).
+2. Scaffold the work system: `work/{README.md,todos/{README.md,bugs/,_done/,_cancelled/},proposals/{README.md,_deferred/,_rejected/,_enacted/},milestones/README.md,missions/,design/{README.md,system/README.md,sessions/README.md},footguns/README.md,notes/,runbooks/}` — copy the READMEs and stubs from this repo; they are project-generic (the design/footguns/milestones stubs are instructive mandates for directories that start empty). Also copy `src/README.md` (the source-layout convention: root reserved for `docs`/`work`/`src`; sub-codebases as `src/<subsystem>/`; retirement to `src/_archive/`, a convention path created on first retirement — reference gates must sanction its absence) and the root `.cbmignore` (the index whitelist). One adaptation: the copied `work/README.md`'s machine registry starts over — replace the row(s) with the new project's machine(s).
 3. Author `work/PROJECT.md` (the supplement — per-project, use this repo's as the shape exemplar) and root `CLAUDE.md`.
 4. Run `/initialize`; repair gaps (`/configure` once it exists).
 
@@ -55,4 +55,4 @@ Baseline keys: `permissions.allow` entries `Bash(claude:*)` (child-session dispa
 - **Files**: `work/PROJECT.md` present and answering the supplement questions (quality gate, front-end surface, runtime evidence, library list, doc surface); root `CLAUDE.md` present; the `work/` scaffold complete.
 - **Settings**: every hook in `settings.json` points at an existing file; baseline permission entries present.
 - **Git hygiene**: secrets patterns and large-format assets gitignored; `tmp/` gitignored.
-- **Retention**: CLI transcript `cleanupPeriodDays` raised (see `agentic-workflow/5`) so the local cache outlives a campaign.
+- **Retention**: CLI transcript `cleanupPeriodDays` raised so the local cache outlives a campaign.
