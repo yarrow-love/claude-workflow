@@ -1,8 +1,8 @@
 # The generic bootstrap — baseline manifest
 
-**Canonical home**: `git@github.com:yarrow-love/claude-workflow.git` (`~/dev/claude-workflow`). Bootstrap development happens there; consuming repos adopt by re-copying the manifest set. Every file listed here belongs to the **project-generic, portable** agentic bootstrap: copy exactly this set to a new repo (plus the scaffold, below) and the system works there unmodified. Anything in `.claude/` **not** listed is project-specific by definition. `/initialize` audits the environment against the *Expectations* section.
+**Canonical home**: `git@github.com:yarrow-love/claude-workflow.git`. Bootstrap development happens there; consuming repos adopt by re-copying the manifest set. Every file listed here belongs to the **project-generic, portable** agentic bootstrap: copy exactly this set to a new repo (plus the scaffold, below) and the system works there unmodified. Anything in `.claude/` **not** listed is project-specific by definition. `/initialize` audits the environment against the *Expectations* section.
 
-Design rationale: the project's design record under `work/`. Project-specific facts never live in `.claude/` — they live in `work/PROJECT.md` (the supplement) and root `CLAUDE.md` (architecture).
+Design rationale: [`.claude/ADR.md`](ADR.md) — the decision register; the full working history lives on tagged mission branches, reachable through the register's provenance pointers. Project-specific facts never live in `.claude/` — they live in `work/PROJECT.md` (the supplement) and root `CLAUDE.md` (architecture).
 
 ## Manifest
 
@@ -28,15 +28,26 @@ Workflow tooling lives *inside* the bootstrap — it travels with the copy, and 
 
 Baseline keys: `permissions.allow` entries `Bash(claude:*)` (child-session dispatch + consults), `Bash(ast-grep:*)`, `Bash(sg:*)`; the `SessionEnd` archive-on-stamp hook (`bun run "$CLAUDE_PROJECT_DIR/.claude/bin/session-archive" --from-hook`); the `Stop` follow-through backstop hook (`bun run "$CLAUDE_PROJECT_DIR/.claude/bin/commit-guard"` — blocks a stop that stranded close-out artifacts; loop-guarded so a paused session is nudged once, not re-nagged); the `env.CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` dispatch-depth cap, pinned to `"2"` (it **caps, does not enable** — on the pinned CLI subagent nesting is default-ON and deep; the var *restricts*, and at the cap a subagent is simply not granted the Agent/Task tool, structurally and without error; `"2"` encodes the dispatch ladder exactly — root session → Manager → specialists — and pins that against platform default flips, the blast-radius principle applied to dispatch). **Project decisions, not baseline**: `defaultMode` (this repo runs `bypassPermissions` — an operator trust choice, re-decide per repo).
 
-### This file
+### Root of `.claude/`
 
-- `BASELINE.md`
+- `BASELINE.md` — this manifest.
+- `ADR.md` — the decision register: founding determinations, per-mission decisions, standing hazards. Append one block per mission; it travels with the copy and carries the same manifest rule as any other bootstrap file (adding, moving or removing it updates this file in the same commit).
 
 ## Bootstrap procedure (new repo)
 
 1. Copy the manifest set into `<repo>/.claude/`.
-2. Scaffold the work system: `work/{README.md,todos/{README.md,bugs/,_done/,_cancelled/},proposals/{README.md,_deferred/,_rejected/,_enacted/},milestones/README.md,missions/,design/{README.md,system/README.md,sessions/README.md},footguns/README.md,notes/,runbooks/}` — copy the READMEs and stubs from this repo; they are project-generic (the design/footguns/milestones stubs are instructive mandates for directories that start empty). Also copy `src/README.md` (the source-layout convention: root reserved for `docs`/`work`/`src`; sub-codebases as `src/<subsystem>/`; retirement to `src/_archive/`, a convention path created on first retirement — reference gates must sanction its absence) and the root `.cbmignore` (the index whitelist). One adaptation: the copied `work/README.md`'s machine registry starts over — replace the row(s) with the new project's machine(s).
-3. Author `work/PROJECT.md` (the supplement — per-project, use this repo's as the shape exemplar) and root `CLAUDE.md`.
+2. Scaffold the work system: `work/{README.md,todos/{README.md,bugs/,_done/,_cancelled/},proposals/{README.md,_deferred/,_rejected/,_enacted/},milestones/README.md,missions/README.md,design/{README.md,system/README.md,sessions/README.md},footguns/README.md,notes/README.md,runbooks/README.md,sessions/README.md}` — copy the READMEs and stubs from the template; they are project-generic (the design/footguns/milestones stubs are instructive mandates for directories that start empty). Also copy:
+   - `src/README.md` — the source-layout convention: root reserved for `docs`/`work`/`src`; sub-codebases as `src/<subsystem>/`; retirement to `src/_archive/`, a convention path created on first retirement.
+   - `docs/{README.md,research/README.md}` — the documentation surface; `/research` writes its reports into `docs/research/`, so the scaffold must exist before the first run.
+   - `.archive/README.md` — the repo-local cold-storage convention (material that leaves the working tree but not the repo).
+   - the root `.cbmignore` — the index whitelist.
+
+   One adaptation: the copied `work/README.md`'s machine registry starts over — replace the row(s) with the new project's machine(s).
+
+   **The governing invariant**: this enumeration and the template's purification keep-column are *identical sets*, less the `.claude/` manifest (step 1) and the root keystone documents the template carries but a consuming repo re-authors — `CLAUDE.md`, `README.md`, `.gitignore` (step 3). Those three are enumerated here as the exception precisely so the equation stays exact and auditable: step 2 ∪ step 1 ∪ {`CLAUDE.md`, `README.md`, `.gitignore`} = the keep column, exactly. A file that survives purification and is not covered above is a manifest gap.
+
+   **Paths that post-date the scaffold** — created by convention as work begins, so absence is *not* a gap and reference gates must sanction it: `work/PROJECT.md` (authored at step 3), `work/sessions/MANIFEST` (created by the first archive sweep), `src/_archive/` (created on first retirement).
+3. Author the two keystone documents the copy never carries: `work/PROJECT.md` (the supplement — per-project; the template repository's own is the shape exemplar) and root `CLAUDE.md` (architecture source of truth). A root `README.md` and `.gitignore` are likewise the consuming repo's own.
 4. Run `/initialize`; repair gaps (`/configure` once it exists).
 
 ## Expectations (`/initialize` audit targets)
