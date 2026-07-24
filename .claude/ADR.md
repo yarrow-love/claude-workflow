@@ -52,6 +52,10 @@ Tag: `v1.subagent-boundary-closed`. Converted the Executor→Manager boundary fr
 
 Scripts open with a JSDoc header; any literal `*/` inside it — a glob written in prose, for instance — closes the comment early, and bun then refuses to parse the file. Describe patterns in header prose ("a markdown doc at any depth under `work/todos/`") and keep literal globs in code, where they belong. Verify with `bun run <script>` after editing a header.
 
+### Dispatching an agent onto a file transfers that file until the agent reports
+
+Parallel dispatch is safe between specialists because their file sets are disjoint; it breaks at the dispatcher's own hand. A manager that edits a file directly — typically under a late final-mile instruction — while an agent it dispatched is still live on that same file puts two writers on one file, and the final-mile exception does **not** implicitly revoke the continuation. The collision is visible only by luck: a stale `old_string` makes the agent's `Edit` fail and re-read. A whole-file write, or an anchor that still matches, loses the other side's edit silently and leaves no trace in either transcript — the lucky failure mode is the loud one, the real one is quiet. **Rule**: before touching a file you have dispatched onto, either wait for that agent's report or cancel the continuation explicitly.
+
 ---
 
 ## Template repository only
