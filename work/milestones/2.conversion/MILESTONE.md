@@ -7,7 +7,7 @@ sessions:
 
 # M2 — conversion: the subagent Manager boundary lands in canon
 
-> Status: pending — hardened 26-07-24 (`/plan`, three phases, `/execute`-ready). Gate satisfied: M1 probes 1 & 4 pass as capabilities ([verdicts](../../todos/_done/26-07-23.probe-battery.md)); premise-1 divergence carried in as the D2 re-scope below.
+> Status: **done (26-07-24)** — all three phases PASS; milestone-level acceptance verified (campaign log [`26-07-24.execute-conversion.md`](../../todos/_done/26-07-24.execute-conversion.md)). Hardened + executed 26-07-24 as a subagent-Manager campaign (early dogfood of the new boundary). Gate satisfied: M1 probes 1 & 4 pass as capabilities ([verdicts](../../todos/_done/26-07-23.probe-battery.md)); premise-1 divergence carried in as the D2 re-scope below. One operator-gated item (interactive no-var default check) staged non-blocking; `.gitignore` hygiene residual surfaced — both in the campaign Operator Handoff.
 
 ## Objective
 
@@ -34,7 +34,7 @@ Enact the proposal's design across live canon: the Executor dispatches Managers 
 | --- | --- | --- | --- |
 | 1 | [mechanics](1.mechanics.md) | Depth-cap env key + BASELINE + `/initialize` audit; `session-archive` subagent sweep with self-test; operator-gated interactive-default check | done (26-07-24) |
 | 2 | [canon-rewrite](2.canon-rewrite.md) | The six-file doctrinal conversion; pause-and-ask; apparatus retirement; premature-exit bug folded and closed | done (26-07-24) |
-| 3 | [coherence-sweep](3.coherence-sweep.md) | Residue grep sweep; work-queue-tier reconciliation note; quality gate end-to-end | pending |
+| 3 | [coherence-sweep](3.coherence-sweep.md) | Residue grep sweep; work-queue-tier reconciliation note; quality gate end-to-end | done (26-07-24) |
 
 M2's own campaign runs as the **last headless campaign** — canon governs until it is rewritten; M3 validates the new boundary in anger.
 
