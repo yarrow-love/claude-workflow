@@ -144,7 +144,7 @@ When a workflow touches the project's front-end surface (see the supplement), di
 
 ## Closing Out
 
-After implementation, review, and front-end inspection (if applicable) are complete:
+After implementation, review, and front-end inspection (if applicable) are complete, the close-out runs immediately on completion/sign-off, before any reply prose (`work/README.md` § The follow-through rule):
 
 1. Run the project quality gate
 2. Group changes into related commits (one per phase or logical unit)
@@ -169,4 +169,5 @@ After implementation, review, and front-end inspection (if applicable) are compl
 - **Always pause for pre-implementation sign-off** — never dispatch implementers before the user confirms the Decision points
 - **Don't commit without the quality gate** — run it before creating commits
 - **Commits have standing approval** — group logically and commit without asking; never `git add -A` or `git add .` (always enumerate paths)
+- **Follow through on approval** — on sign-off (or self-closing completion), the close-out fires first, before reply prose; a turn never ends with approved-but-uncommitted artifacts unless you state why (`work/README.md` § The follow-through rule)
 - **Report concisely** — status updates at milestones, not play-by-play

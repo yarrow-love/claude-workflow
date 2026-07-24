@@ -77,6 +77,8 @@ The Executor authors one **campaign log** in `work/todos/` (`<date>.execute-<obj
 
 ## Closing Out
 
+At each close, the campaign-log/milestone-doc commit fires first, before any reply prose (`work/README.md` § The follow-through rule).
+
 - **Per phase** — on ultimate-acceptance PASS: record in the campaign ledger; update the milestone phase doc (status + addendum, per the `work/milestones/README.md` conventions); advance.
 - **At objective close** — update the milestone `MILESTONE.md` + roadmap row (status), reconcile the footgun ledger (`work/footguns/` + the CLAUDE.md index), write the campaign Summary, surface the consolidated **Operator Handoff** (staged deploy / measurement recipes for operator-gated acceptance), and move the campaign log to `work/todos/_done/`.
 
@@ -88,3 +90,4 @@ The Executor authors one **campaign log** in `work/todos/` (`<date>.execute-<obj
 - **Operator-gate infra / deploy** unless explicitly authorized at the gate.
 - **Conserve context** — the campaign log is durable state; work one phase at a time and resume from it.
 - **Commits** ride through the Manager (which runs the quality gate + logical grouping). The Executor commits only its own campaign-log / milestone-doc updates, with standing approval; never `git add -A` / `git add .`.
+- **Follow through at each close** — on phase or objective close, the campaign-log/milestone-doc close-out commits first, before reply prose; a turn never ends with approved-but-uncommitted artifacts unless you state why (`work/README.md` § The follow-through rule).

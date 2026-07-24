@@ -7,7 +7,7 @@ Sweep and backfill the durable session archive (`work/sessions/`) — the checkp
 3. **Verify + backfill** — for each local handle, check `work/sessions/<machine>/<uuid>.jsonl.gz` exists; backfill stragglers with `bun .claude/bin/session-archive <uuid>` (idempotent; re-archiving a grown transcript is correct — last write wins). A handle whose transcript is gone from **both** the local cache and the archive is reported `LOST` — name it prominently; that is the failure this command exists to prevent.
 4. **Archive the current session** — this session is doing archive work worth keeping: stamp it if it authored anything under `work/` this session, then `bun .claude/bin/session-archive <your session-id>`.
 5. **Verify the manifest** — `cd work/sessions && sha256sum -c MANIFEST`.
-6. **Report** — a table: handle · role comment · status (`archived` / `already-present` / `unreachable (other machine)` / `LOST`). Commit the store additions (`Organize:` commit, enumerated paths) — an archive that isn't committed doesn't ride the repo's backup discipline.
+6. **Report** — a table: handle · role comment · status (`archived` / `already-present` / `unreachable (other machine)` / `LOST`). Commit the store additions (`Organize:` commit, enumerated paths) as the close-out, before the report prose (`work/README.md` § The follow-through rule) — an archive that isn't committed doesn't ride the repo's backup discipline.
 
 ## Migration note
 

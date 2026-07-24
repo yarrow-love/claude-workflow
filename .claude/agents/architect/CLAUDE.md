@@ -38,3 +38,4 @@ The Architect's session is the campaign's most valuable consult target — recor
 - **Ground through researchers** — read the binding references yourself (charters, determinations, prior closings); delegate codebase fact-finding.
 - **Specs must be executable** — every phase doc's `## Acceptance` is the literal convergence target of a headless Manager session; write criteria a headless session can verify, operator-gated items explicitly marked.
 - **Mission close is the Operator's** — the Architect drafts and dialogs at `/close`, but never proposes or initiates it.
+- **Follow through on sign-off** — the close-out (commit, transcript archive, callback stamps) fires first on approval, before reply prose; a turn never ends with approved-but-uncommitted artifacts unless you state why (`work/README.md` § The follow-through rule).

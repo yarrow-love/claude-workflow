@@ -100,6 +100,16 @@ Conventions:
 
 (The registry gains rows — and a remote-consult recipe — when the cross-LAN intercom is adopted; see `proposals/26-07-05.agentic-workflow/26-07-03.cross-lan-agent-calls.md`.)
 
+## The follow-through rule
+
+**Stated here once; referenced everywhere else.**
+
+On receiving sign-off — or completing self-closing work — the session's **first actions** are the mechanical close-out: commit (enumerated paths), transcript archive, status/roadmap updates, **before any reply prose**. Approval (or completion) is the *trigger* for the close-out, not the ending after it.
+
+- A turn never ends with approved-but-uncommitted artifacts.
+- The **only** legitimate way a turn ends with uncommitted approved work is an **explicitly stated reason** — canonically "uncommitted pending your sign-off" while the pause awaits it. State the reason; make the state visible, never ambient.
+- **No standing per-workflow commit exceptions.** Every close-out commits on the same terms; a doc that fails review is reverted or revised afterward (rare), not gated pre-commit.
+
 ## Historical rename mapping
 
 Imported documents (notably `work/proposals/`) and old callback stamps retain the previous vocabulary — **they are never rewritten**; read them through this mapping:

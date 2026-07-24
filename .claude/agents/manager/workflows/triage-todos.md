@@ -14,7 +14,7 @@ Backlog grooming, not execution. This workflow catches the standing `work/todos/
  7. Checkpoint only the contestable closures. When a `dead` / `superseded` verdict is a genuine judgment call, or closing would discard scope the user may still want, list those items with their verdict and one-line rationale and await confirmation before moving them. This is the workflow's conditional pause — mirror the post-review consultation policy: handle the obvious silently, surface only what the user would care to reverse.
  8. Rewrite `work/todos/BACKLOG.md` as the manager: the prioritized ledger of everything still active after this pass, ordered by priority then dependency, plus the "Closed this pass" record. Set `Last triaged: <date>`.
  9. Present the close-out brief: the ranked backlog, what was closed this pass, and a recommended near-term sequence — which items to `/execute` next as one-offs, and which to fold into which upcoming milestone phase. Recommendation only; triage does not dispatch the work.
- 10. Commit as a single `Organize:` group — the normalized todo frontmatter, the files moved to `_done/`, and `BACKLOG.md` together. Standing commit approval applies; enumerate paths, never `git add -A` / `git add .`. Use the Co-Authored-By footer.
+ 10. Commit as a single `Organize:` group — the normalized todo frontmatter, the files moved to `_done/`, and `BACKLOG.md` together — the close-out fires on completion, before any reply prose (`work/README.md` § The follow-through rule). Standing commit approval applies; enumerate paths, never `git add -A` / `git add .`. Use the Co-Authored-By footer.
 
 ## Format
 

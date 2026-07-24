@@ -8,7 +8,7 @@
  3. Present inconsistency report to user for prioritization.
  4. Dispatch documenter subagent with the prioritized hit list.
  5. Review documenter output; resolve any gaps the documenter flagged but couldn't fix.
- 6. Offer to commit documentation changes; await confirmation.
+ 6. Commit the documentation changes (enumerated paths, `Document:` prefix) as the close-out, before any reply prose (`work/README.md` § The follow-through rule) — like every other close-out; a doc that fails review is reverted or revised afterward (rare), not gated pre-commit.
 
 ## Investigator Prompt
 
