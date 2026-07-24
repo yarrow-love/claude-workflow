@@ -33,7 +33,7 @@ Complete the mission's evidence and land its durable record: criterion 3 closes 
 | # | Phase | Gist | Status |
 | --- | --- | --- | --- |
 | 1 | [validation-and-enactment](1.validation-and-enactment.md) | Criterion-3 ledger opened (nudge citation + panel attestation); proposal to `_enacted/` with reconciliation note; MISSION bookkeeping; archive spot-check | **done (26-07-24)** |
-| 2 | [doctrine-and-adr](2.doctrine-and-adr.md) | Root `CLAUDE.md`/`README.md` D4 rewrite; `.claude/ADR.md` authored + manifested; BASELINE scaffold-enumeration reconciliation | pending |
+| 2 | [doctrine-and-adr](2.doctrine-and-adr.md) | Root `CLAUDE.md`/`README.md` D4 rewrite; `.claude/ADR.md` authored + manifested; BASELINE scaffold-enumeration reconciliation | **done (26-07-24)** |
 | 3 | [fold-preparation](3.fold-preparation.md) | Purification manifest; fold recipe rehearsed in a disposable worktree; close runbook + prepared triage dispositions; the Executor-held item exercising the upward pause-and-ask | pending |
 
 The campaign runs under the converted boundary (subagent Managers per current canon) with the operator watching the panels — this campaign is itself the remaining validation instrument.
