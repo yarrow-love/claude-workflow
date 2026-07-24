@@ -20,13 +20,13 @@ Design rationale: `work/todos/_done/agentic-workflow/1.determinations.md` (det. 
 
 ### Tooling (`.claude/bin/`)
 
-- `.claude/bin/session-archive`, `.claude/bin/consult`, `.claude/bin/package.json`
+- `.claude/bin/session-archive`, `.claude/bin/consult`, `.claude/bin/commit-guard`, `.claude/bin/package.json`
 
 Workflow tooling lives *inside* the bootstrap — it travels with the copy, and its packaging file stays in its directory (nothing leaks to the repo root). The `package.json` `bin` map is the executable interface: run the scripts directly (`.claude/bin/consult …`) or `bun link` from `.claude/bin/` to put `consult` and `session-archive` on PATH.
 
 ### Settings skeleton (`.claude/settings.json`)
 
-Baseline keys: `permissions.allow` entries `Bash(claude:*)` (child-session dispatch + consults), `Bash(ast-grep:*)`, `Bash(sg:*)`; the `SessionEnd` archive-on-stamp hook (`bun run "$CLAUDE_PROJECT_DIR/.claude/bin/session-archive" --from-hook`). **Project decisions, not baseline**: `defaultMode` (this repo runs `bypassPermissions` — an operator trust choice, re-decide per repo).
+Baseline keys: `permissions.allow` entries `Bash(claude:*)` (child-session dispatch + consults), `Bash(ast-grep:*)`, `Bash(sg:*)`; the `SessionEnd` archive-on-stamp hook (`bun run "$CLAUDE_PROJECT_DIR/.claude/bin/session-archive" --from-hook`); the `Stop` follow-through backstop hook (`bun run "$CLAUDE_PROJECT_DIR/.claude/bin/commit-guard"` — blocks a stop that stranded close-out artifacts, soft-reminds on other dirty workflow paths; loop-guarded so a paused session is nudged once, not re-nagged). **Project decisions, not baseline**: `defaultMode` (this repo runs `bypassPermissions` — an operator trust choice, re-decide per repo).
 
 ### This file
 

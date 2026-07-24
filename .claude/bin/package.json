@@ -5,6 +5,7 @@
   "type": "module",
   "bin": {
     "session-archive": "./session-archive",
-    "consult": "./consult"
+    "consult": "./consult",
+    "commit-guard": "./commit-guard"
   }
 }

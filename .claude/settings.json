@@ -13,6 +13,16 @@
           }
         ]
       }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun run \"$CLAUDE_PROJECT_DIR/.claude/bin/commit-guard\""
+          }
+        ]
+      }
     ]
   }
 }

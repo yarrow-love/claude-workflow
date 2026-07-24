@@ -1,0 +1,159 @@
+#!/usr/bin/env bun
+/**
+ * commit-guard — Stop hook: the follow-through backstop for approved-but-uncommitted work.
+ *
+ *   bun .claude/bin/commit-guard          # Stop hook mode (JSON on stdin)
+ *   bun .claude/bin/commit-guard          # no piped stdin (a TTY) → prints usage, exits 1
+ *
+ * Reads Stop-hook JSON ({session_id, transcript_path, stop_hook_active, ...}) and
+ * inspects `git status --porcelain`. Two tiers: BLOCK on close-out evidence (a
+ * stranded filing/archive) — paths under work/todos/_done|_cancelled/, a dirty
+ * markdown doc at any depth under work/todos/ whose frontmatter reads `status: done`, or an added
+ * work/sessions/ transcript — forcing one turn to commit-or-state-why; a soft
+ * CONTEXT reminder for other dirty work/, .claude/, docs/ paths. Loop-guarded (the
+ * stop_hook_active field + a session+fingerprint marker under tmp/) so a paused
+ * session is nudged at most once per offending set, never re-nagged. Any internal
+ * error exits 0 silently — a buggy backstop must never break a session.
+ * Rationale: work/README.md § The follow-through rule.
+ */
+import { createHash } from "node:crypto";
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
+import { join } from "node:path";
+import { spawnSync } from "node:child_process";
+
+// TTY guard: with no piped stdin (interactive / `bun run` resolve probe) print
+// usage and exit 1 — matches the no-args-usage convention, and keeps /initialize
+// check 3 from hanging on a stdin read.
+if (process.stdin.isTTY) {
+  console.error("usage: commit-guard   (Stop hook — reads hook JSON on stdin)");
+  process.exit(1);
+}
+
+try {
+  const input = JSON.parse(readFileSync(0, "utf8"));
+  const sessionId: string = input?.session_id ?? "unknown";
+  const stopHookActive: boolean = input?.stop_hook_active === true;
+
+  const repoRoot = (() => {
+    const r = spawnSync("git", ["rev-parse", "--show-toplevel"], { encoding: "utf8" });
+    return r.status === 0 ? r.stdout.trim() : process.cwd();
+  })();
+
+  const status = spawnSync("git", ["status", "--porcelain"], {
+    cwd: repoRoot,
+    encoding: "utf8",
+  });
+  if (status.status !== 0) process.exit(0);
+
+  // Porcelain v1: "XY <path>" or, for renames/copies, "XY <old> -> <new>".
+  // A rename's effective path is the destination.
+  const entries = status.stdout
+    .split("\n")
+    .filter(Boolean)
+    .map((line) => {
+      const xy = line.slice(0, 2);
+      let path = line.slice(3);
+      const arrow = path.indexOf(" -> ");
+      if (arrow >= 0) path = path.slice(arrow + 4);
+      // Porcelain quotes paths with unusual characters; strip surrounding quotes.
+      if (path.startsWith('"') && path.endsWith('"')) path = path.slice(1, -1);
+      return { xy, path };
+    });
+
+  const headMatchesDone = (rel: string): boolean => {
+    const abs = join(repoRoot, rel);
+    if (!existsSync(abs)) return false;
+    try {
+      const head = readFileSync(abs, "utf8").slice(0, 512);
+      return /^status:[ \t]*done[ \t]*$/m.test(head);
+    } catch {
+      return false;
+    }
+  };
+
+  const block: string[] = [];
+  const context: string[] = [];
+
+  for (const { path } of entries) {
+    // Class 1 — close-out filings: additions/renames into the done/cancelled bins.
+    if (/^work\/todos\/(_done|_cancelled)\//.test(path)) {
+      block.push(path);
+      continue;
+    }
+    // Class 2 — a dirty tracked work doc flipped to status: done (any depth under
+    // work/todos/ except the class-1 bins, which are handled above).
+    if (
+      /^work\/todos\/.*\.md$/.test(path) &&
+      !/^work\/todos\/(_done|_cancelled)\//.test(path) &&
+      headMatchesDone(path)
+    ) {
+      block.push(path);
+      continue;
+    }
+    // Class 3 — a stranded transcript archive.
+    if (/^work\/sessions\//.test(path)) {
+      block.push(path);
+      continue;
+    }
+    // Context tier — any other dirt under the workflow surfaces.
+    if (/^(work|\.claude|docs)\//.test(path)) {
+      context.push(path);
+    }
+  }
+
+  const blockPaths = [...new Set(block)].sort();
+  const contextPaths = [...new Set(context)].sort();
+
+  if (blockPaths.length === 0) {
+    if (contextPaths.length === 0) process.exit(0);
+    emitContext(contextPaths);
+    process.exit(0);
+  }
+
+  // Loop guard. In-chain: stop_hook_active downgrades to a context nudge. Across
+  // turns: a tmp/ marker keyed by session + a fingerprint of the offending set —
+  // seen this exact set before → downgrade; a new set may block again.
+  const fingerprint = createHash("sha256")
+    .update(blockPaths.join("\n"))
+    .digest("hex")
+    .slice(0, 16);
+  const markerDir = join(repoRoot, "tmp", "commit-guard");
+  const markerPath = join(markerDir, `${sessionId}.${fingerprint}`);
+  const alreadyNagged = existsSync(markerPath);
+
+  if (stopHookActive || alreadyNagged) {
+    emitContext([...blockPaths, ...contextPaths]);
+    process.exit(0);
+  }
+
+  try {
+    mkdirSync(markerDir, { recursive: true });
+    writeFileSync(markerPath, `${new Date().toISOString()}\n`);
+  } catch {
+    // Marker write failed — proceed to block anyway (stop_hook_active still caps
+    // the in-chain loop; the harness hard-caps consecutive blocks).
+  }
+
+  const reason =
+    `Uncommitted close-out artifacts: ${blockPaths.join(", ")}. ` +
+    `Commit them now (enumerate the paths, per work/README.md § The follow-through rule) ` +
+    `or state to the operator why these remain uncommitted — awaiting sign-off is a valid, stated reason.`;
+  process.stdout.write(JSON.stringify({ decision: "block", reason }) + "\n");
+  process.exit(0);
+} catch {
+  // Any internal failure (unparseable stdin, git error, fs error) is a silent
+  // no-op — the backstop never breaks a session.
+  process.exit(0);
+}
+
+function emitContext(paths: string[]): void {
+  const additionalContext =
+    `Uncommitted workflow artifacts: ${paths.join(", ")}. ` +
+    `Commit them when they reach a committable state, or note why they wait ` +
+    `(work/README.md § The follow-through rule).`;
+  process.stdout.write(
+    JSON.stringify({
+      hookSpecificOutput: { hookEventName: "Stop", additionalContext },
+    }) + "\n"
+  );
+}
