@@ -6,15 +6,17 @@
  *   bun .claude/bin/session-archive --from-hook            # SessionEnd hook mode (JSON on stdin)
  *
  * Store: work/sessions/<machine>/<uuid>.jsonl.gz + sha256 MANIFEST (upsert; last write
- * wins — transcripts only grow). Hook mode archives only if the ending session's id is
+ * wins — transcripts only grow). After the main transcript, also sweeps the session's
+ * subagent transcripts (flat under the session dir, all depths co-located) into a
+ * subagents/ subdir of the store. Hook mode archives only if the ending session's id is
  * stamped somewhere under work/ (archive-on-stamp: the stamped set IS the archive set).
  * Grammar + rationale: work/README.md § The callback grammar.
  */
 import { gzipSync } from "node:zlib";
 import { createHash } from "node:crypto";
 import { hostname } from "node:os";
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync } from "node:fs";
+import { join, resolve, dirname } from "node:path";
 import { spawnSync } from "node:child_process";
 
 const machine = hostname().split(".")[0];
@@ -29,10 +31,9 @@ const manifestPath = join(storeRoot, "MANIFEST");
 
 const UUID = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/;
 
-function archive(transcriptPath: string, uuid: string): string {
-  const gz = gzipSync(readFileSync(transcriptPath), { level: 9 });
-  const rel = `${machine}/${uuid}.jsonl.gz`;
-  mkdirSync(join(storeRoot, machine), { recursive: true });
+function archive(srcPath: string, rel: string): string {
+  const gz = gzipSync(readFileSync(srcPath), { level: 9 });
+  mkdirSync(dirname(join(storeRoot, rel)), { recursive: true });
   writeFileSync(join(storeRoot, rel), gz);
   const sha = createHash("sha256").update(gz).digest("hex");
   const lines = existsSync(manifestPath)
@@ -42,6 +43,19 @@ function archive(transcriptPath: string, uuid: string): string {
   kept.push(`${sha}  ${rel}`);
   writeFileSync(manifestPath, kept.sort((a, b) => a.localeCompare(b)).join("\n") + "\n");
   return rel;
+}
+
+// Additive: archive every subagent transcript this session produced. Both depth-1 and
+// depth-2 transcripts co-locate flat in the one subagents/ dir keyed by the root session,
+// so a single non-recursive read covers all depths. The sibling tool-results/ dir is
+// excluded structurally by reading only subagents/. Absent dir = no-op (never a failure).
+function sweepSubagents(uuid: string): void {
+  const subagentsDir = join(projectDir, uuid, "subagents");
+  if (!existsSync(subagentsDir)) return;
+  for (const name of readdirSync(subagentsDir)) {
+    if (!/^agent-.*\.(jsonl|meta\.json)$/.test(name)) continue;
+    archive(join(subagentsDir, name), `${machine}/${uuid}/subagents/${name}.gz`);
+  }
 }
 
 const args = process.argv.slice(2);
@@ -56,7 +70,8 @@ if (args[0] === "--from-hook") {
   const stamped =
     spawnSync("git", ["grep", "-q", uuid, "--", "work"], { cwd: repoRoot }).status === 0;
   if (!stamped) process.exit(0);
-  console.log(`session-archive: ${archive(transcript, uuid)}`);
+  console.log(`session-archive: ${archive(transcript, `${machine}/${uuid}.jsonl.gz`)}`);
+  sweepSubagents(uuid);
   process.exit(0);
 }
 
@@ -80,6 +95,7 @@ for (const arg of args) {
     failures++;
     continue;
   }
-  console.log(`archived: ${archive(src, uuid)}`);
+  console.log(`archived: ${archive(src, `${machine}/${uuid}.jsonl.gz`)}`);
+  sweepSubagents(uuid);
 }
 process.exit(failures ? 1 : 0);
