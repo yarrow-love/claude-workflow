@@ -97,7 +97,7 @@ Each subagent starts with zero context. Prompts must be:
 
 ### Dispatch classification (settled 26-07-11)
 
-The authoritative per-step policy for both workflows. Model pins re-certified unchanged at the same settlement (planner→fable with the `difficulty` downshift, implementer/designer→opus, rest→sonnet); validation against real campaign cost data (`tmp/accomplish/*.jsonl` terminal `result` events) is deferred to the first campaign's close — a cheaper tier for mechanical steps reopens there, not before.
+The authoritative per-step policy for both workflows. Model pins re-certified unchanged at the same settlement (planner→fable with the `difficulty` downshift, implementer/designer→opus, rest→sonnet); validation against real campaign cost data (each Manager's cost rides the dispatch result surface) is deferred to the first campaign's close — a cheaper tier for mechanical steps reopens there, not before.
 
 | Dispatch | Mode | Why |
 | --- | --- | --- |
@@ -112,7 +112,7 @@ The authoritative per-step policy for both workflows. Model pins re-certified un
 | doc wrap-up (work-order 16) — implementer as documenter | **continued** | transcribes held intent; documenter conventions bind |
 | trivial mid-flow bugs (work-order 19) — implementer | continued when adjacent, else fresh | a nearby build context is the cheapest correct fixer |
 | reconnaissance (milestone 3) — researchers | fresh | first touch; findings travel to child Managers via documents — subagents don't cross the session boundary |
-| phase build (milestone 7.1) — Manager child session | `--resume` for residuals; fresh for re-plans | incremental residuals extend context; a re-plan needs clean premises |
+| phase build (milestone 7.1) — subagent Manager | SendMessage **continuation** for residuals; **fresh subagent** for re-plans | incremental residuals extend context; a re-plan needs clean premises |
 | consults — architect / planner / designer | **continued** (resume-fork) | by design: the author answers intent — plan questions ride the architect, brief questions ride the designer authority session |
 
 ## Planner Callback
@@ -162,7 +162,7 @@ After implementation, review, and front-end inspection (if applicable) are compl
 
 ## Constraints
 
-- **Don't implement directly** — delegate to the implementer agent
+- **Don't implement directly** — delegate to the implementer agent (one bounded exception: automatic mode's final-mile exception, per that workflow's Execution discipline — explicit Executor instruction only, never self-invoked)
 - **Don't review directly** — delegate to the reviewer agent
 - **Don't plan directly** — delegate to the planner agent
 - **Never execute an unblessed order** — the Architect Blessing precedes the sign-off; no implementer dispatches without a `## Blessing` section
