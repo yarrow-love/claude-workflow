@@ -13,5 +13,3 @@ A runbook describes *how a thing is operated*, which is mission-versioned in pra
 
 | Runbook | Purpose |
 | --- | --- |
-| [`probe-battery.md`](probe-battery.md) | M1 spike — the five subagent-dispatch probes, hand-run by the operator on the upgraded CLI |
-| [`fold-and-close.md`](fold-and-close.md) | Mission close + template fold — the `/close` ceremony, the rehearsed merge/purify recipe, and the post-fold gate; operator-run |

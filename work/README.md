@@ -2,8 +2,6 @@
 
 `work/` is the **process** container: everything about how work is planned, executed, recorded, and archived. `docs/` is the **knowledge** container: reference material, research, architecture. The split is load-bearing — agents grep the working tree, so what lives here is always relevant to the *active* mission, and what has served its purpose archives into `work/missions/<v>/` rather than polluting the active workspace.
 
-Determinations record: [`work/todos/_done/agentic-workflow/1.determinations.md`](todos/_done/agentic-workflow/1.determinations.md) (locked 26-07-11). Design corpus: [`work/proposals/_enacted/26-07-05.agentic-workflow/`](proposals/_enacted/26-07-05.agentic-workflow/) (standing remainder in [`proposals/26-07-05.agentic-workflow/`](proposals/26-07-05.agentic-workflow/)).
-
 ## Layout
 
 | Path | Holds | Lifecycle |
@@ -51,8 +49,6 @@ The metaphor is corporate, and deliberately so: judgment escalates *upward*, and
 
 The **Planner** and the **Architect** are the same competency at different tiers: the Planner authors the implementation-plan section of one work order, as a dispatched subagent pinned to the flagship model; the Architect authors the specs those work orders descend from, interactively, with the operator in the dialog. The **Designer** carries the same split for design: authority mode (`/design`, operator-run, judgment-closed — authors the design canon and session briefs) vs subagent mode (scoped in-build investigation). The **Integrator** merges worktree branches back to trunk (renamed from "resolver" to break the collision with bug *resolution*).
 
-Deferred: a **work-queue tier** above the Executor (triage → dispatch across the standing queue) — seeded at `proposals/_deferred/26-07-11.work-queue-tier.md`; the Operator plays this role today.
-
 ## The command family
 
 Commands are **verbs**; agents are **nouns**. Two core verbs are polymorphic on the argument's tier — the directory structure identifies the context, so the operator never chooses between specialized command names:
@@ -98,9 +94,7 @@ Conventions:
 
 | Machine | OS / shell | Repo path | Notes |
 | --- | --- | --- | --- |
-| `play` | Linux (CachyOS) / zsh | `/home/yarrow/dev/claude-workflow` | Single machine today; add a row per machine at bootstrap |
-
-(The registry gains rows — and a remote-consult recipe — when the cross-LAN intercom is adopted; see `proposals/26-07-05.agentic-workflow/26-07-03.cross-lan-agent-calls.md`.)
+| `<machine>` | `<os>` / `<shell>` | `<repo-path>` | Single machine today; add a row per machine at bootstrap |
 
 ## The follow-through rule
 

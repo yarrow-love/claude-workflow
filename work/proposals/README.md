@@ -13,5 +13,3 @@ Pre-decision design thinking. The root is the **standing set** — proposals sti
 Series subdirectories (`<date>.<series>/`) are preserved inside state directories — enacted members of a series move to `_enacted/<series>/`, keeping same-directory cross-links intact; links that cross the boundary are repaired at move time.
 
 At mission close, `_enacted/` archives wholesale with the mission (`work/missions/<v>/proposals/`) — enactment filed the close-time triage in advance; standing and `_deferred/` proposals persist unless the close triages them otherwise.
-
-The `26-07-05.agentic-workflow/` series is this workflow's own founding design record: enacted members at [`_enacted/26-07-05.agentic-workflow/`](_enacted/26-07-05.agentic-workflow/), the standing remainder in [`26-07-05.agentic-workflow/`](26-07-05.agentic-workflow/).
