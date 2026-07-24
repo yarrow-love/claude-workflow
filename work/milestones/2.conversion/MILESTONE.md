@@ -2,6 +2,7 @@
 sessions:
   - architect@play/76ba13c6-e6f5-4933-9e6c-7ef3fbdd6b7d # mission architect (stub)
   - architect@play/6a0035c9-cd57-4573-8e3a-b22dc4cba6c2 # milestone architect
+  - executor@play/2f2dc1c5-64e6-4673-8e24-4309de22fb19 # M2 campaign executor
 ---
 
 # M2 — conversion: the subagent Manager boundary lands in canon
