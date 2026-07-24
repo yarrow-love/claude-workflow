@@ -2,11 +2,12 @@
 sessions:
   - architect@play/76ba13c6-e6f5-4933-9e6c-7ef3fbdd6b7d # mission architect (stub)
   - architect@play/1db4a079-772c-4127-be8d-85fd6d1d43a5 # milestone architect
+  - executor@play/a52d1822-b990-4172-8516-2c4002aed454 # M1 spike campaign
 ---
 
 # M1 — spike: empirical verification of subagent dispatch
 
-> Status: pending — planned 26-07-23; `/execute`-ready.
+> Status: in progress — reconnaissance done + probe order seeded & staged 26-07-23 (`/execute`); awaiting the operator's clean window to run Step 0 (CLI upgrade) + the five probes. Campaign log: [`work/todos/26-07-23.execute-m1-spike.md`](../../todos/26-07-23.execute-m1-spike.md).
 
 ## Objective
 
@@ -32,7 +33,7 @@ Planning finding (26-07-23): the installed CLI is v2.1.197 — inside the v2.1.1
 
 | # | Phase | Gist | Status |
 | --- | --- | --- | --- |
-| 1 | [probe-battery](1.probe-battery.md) | Environment pin, then the five probes through one interactive probe-parent session; verdict write-up | pending |
+| 1 | [probe-battery](1.probe-battery.md) | Environment pin, then the five probes through one interactive probe-parent session; verdict write-up | staged (awaiting operator run) |
 
 ## Acceptance
 
