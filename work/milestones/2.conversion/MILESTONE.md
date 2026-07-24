@@ -33,7 +33,7 @@ Enact the proposal's design across live canon: the Executor dispatches Managers 
 | # | Phase | Gist | Status |
 | --- | --- | --- | --- |
 | 1 | [mechanics](1.mechanics.md) | Depth-cap env key + BASELINE + `/initialize` audit; `session-archive` subagent sweep with self-test; operator-gated interactive-default check | done (26-07-24) |
-| 2 | [canon-rewrite](2.canon-rewrite.md) | The six-file doctrinal conversion; pause-and-ask; apparatus retirement; premature-exit bug folded and closed | pending |
+| 2 | [canon-rewrite](2.canon-rewrite.md) | The six-file doctrinal conversion; pause-and-ask; apparatus retirement; premature-exit bug folded and closed | done (26-07-24) |
 | 3 | [coherence-sweep](3.coherence-sweep.md) | Residue grep sweep; work-queue-tier reconciliation note; quality gate end-to-end | pending |
 
 M2's own campaign runs as the **last headless campaign** — canon governs until it is rewritten; M3 validates the new boundary in anger.
