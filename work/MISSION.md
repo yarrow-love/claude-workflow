@@ -8,7 +8,7 @@ sessions:
 
 # Mission v1 — the subagent Manager boundary
 
-> Chartered 26-07-23 by operator commission. Design authority: the adopted proposal [`work/proposals/26-07-23.subagent-manager-boundary.md`](proposals/26-07-23.subagent-manager-boundary.md) — its determinations bind this mission; the charter adds the mission-scale frame and the fold-back protocol. First mission this repo has chartered; the mission rides branch `26-07-23` (mission = branch).
+> Chartered 26-07-23 by operator commission. Design authority: the adopted proposal [`work/proposals/_enacted/26-07-23.subagent-manager-boundary.md`](proposals/_enacted/26-07-23.subagent-manager-boundary.md) — its determinations bind this mission; the charter adds the mission-scale frame and the fold-back protocol. First mission this repo has chartered; the mission rides branch `26-07-23` (mission = branch).
 
 ## Objective / why now
 
@@ -64,5 +64,5 @@ The proposal's spawn plan, at mission scale: the empirical spike; the canon conv
 | # | Milestone | Gist | Depends on | Status |
 | --- | --- | --- | --- | --- |
 | 1 | [spike](milestones/1.spike/MILESTONE.md) | The five empirical probes; verdicts gate everything downstream | — | done (26-07-24) |
-| 2 | [conversion](milestones/2.conversion/MILESTONE.md) | Canon rewrite, env gate, archive sweep, apparatus retirement, reconciliation notes | 1 | pending |
-| 3 | [validation-and-fold](milestones/3.validation-and-fold/MILESTONE.md) | Real campaign under the new boundary; enactment filings; D4 doctrine rewrite + fold-back preparation | 2 | pending |
+| 2 | [conversion](milestones/2.conversion/MILESTONE.md) | Canon rewrite, env gate, archive sweep, apparatus retirement, reconciliation notes | 1 | done (26-07-24) |
+| 3 | [validation-and-fold](milestones/3.validation-and-fold/MILESTONE.md) | Real campaign under the new boundary; enactment filings; D4 doctrine rewrite + fold-back preparation | 2 | in progress |

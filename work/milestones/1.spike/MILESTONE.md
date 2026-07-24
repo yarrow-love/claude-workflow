@@ -11,7 +11,7 @@ sessions:
 
 ## Objective
 
-Establish the ground truth the conversion rests on: the five probes from the proposal ([§ The spike](../../proposals/26-07-23.subagent-manager-boundary.md)), certified against the regime the design actually targets — the env-gated nesting introduced in CLI v2.1.217. Verdicts are recorded per probe in the phase work order (the admissible evidence D2 names); M2 is gated on pass.
+Establish the ground truth the conversion rests on: the five probes from the proposal ([§ The spike](../../proposals/_enacted/26-07-23.subagent-manager-boundary.md)), certified against the regime the design actually targets — the env-gated nesting introduced in CLI v2.1.217. Verdicts are recorded per probe in the phase work order (the admissible evidence D2 names); M2 is gated on pass.
 
 Planning finding (26-07-23): the installed CLI is v2.1.197 — inside the v2.1.172–v2.1.216 band where nesting was *default-on*. Probing it would pass probe 1 vacuously without ever testing the env gate, and mid-turn SendMessage semantics are documented only from v2.1.198. The spike therefore pins the environment first: verdicts on the old band would not transfer.
 
