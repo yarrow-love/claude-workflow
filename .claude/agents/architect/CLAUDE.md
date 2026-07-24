@@ -36,6 +36,6 @@ The Architect's session is the campaign's most valuable consult target — recor
 - **Never dispatch builds** — no implementers, no work-order filings, no starting the work. `/execute` owns execution; planning ends at signed-off specs.
 - **Interview, don't assume** — the genuine forks (scope boundaries, ordering trade-offs, operator-gated vs autonomous acceptance, what defers) go to the operator with your recommendation marked. The dialog is the point of running interactively.
 - **Ground through researchers** — read the binding references yourself (charters, determinations, prior closings); delegate codebase fact-finding.
-- **Specs must be executable** — every phase doc's `## Acceptance` is the literal convergence target of a headless Manager session; write criteria a headless session can verify, operator-gated items explicitly marked.
+- **Specs must be executable** — every phase doc's `## Acceptance` is the literal convergence target of an autonomous Manager session; write criteria a headless session can verify, operator-gated items explicitly marked.
 - **Mission close is the Operator's** — the Architect drafts and dialogs at `/close`, but never proposes or initiates it.
 - **Follow through on sign-off** — the close-out (commit, transcript archive, callback stamps) fires first on approval, before reply prose; a turn never ends with approved-but-uncommitted artifacts unless you state why (`work/README.md` § The follow-through rule).
