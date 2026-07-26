@@ -8,7 +8,7 @@ sessions:
 
 # Mission v2 — repo hygiene: the Janitor competency and the declared-structure floor
 
-> Chartered 26-07-25 by operator commission, on full endorsement of the adopted proposal [`work/proposals/26-07-25.repo-hygiene.md`](proposals/26-07-25.repo-hygiene.md) — its design and fork resolutions bind this mission; the charter adds the mission-scale frame. Second mission this repo has chartered (predecessor: `v1.subagent-boundary`, closed accomplished 26-07-24, archive on branch `26-07-23`); the mission rides branch `26-07-25` (mission = branch). Operator amendment at commission: **single-milestone mission**.
+> Chartered 26-07-25 by operator commission, on full endorsement of the adopted proposal [`work/proposals/_enacted/26-07-25.repo-hygiene.md`](proposals/_enacted/26-07-25.repo-hygiene.md) — its design and fork resolutions bind this mission; the charter adds the mission-scale frame. Second mission this repo has chartered (predecessor: `v1.subagent-boundary`, closed accomplished 26-07-24, archive on branch `26-07-23`); the mission rides branch `26-07-25` (mission = branch). Operator amendment at commission: **single-milestone mission**.
 
 ## Objective / why now
 
@@ -21,7 +21,7 @@ The proposal's design, at mission scale: the declared-structure floor into canon
 ## Non-goals
 
 - Any change to consuming projects themselves — Orchestra's note is evidence; Orchestra fixes Orchestra (the one-way valve stands in both directions).
-- The dispatch architecture, consult mechanics, session archive — untouched (v1's product).
+- The dispatch architecture, consult mechanics, session archive — untouched (v1's product). *Scoped override: A4 — the return-path defect only.*
 - A new executive tier or scheduler — the Janitor is staff, not command (D3).
 - Whole-canon reference gating *per-commit* — the generalized gate runs at `/clean`-time only (fork 5 resolution).
 - v1's carried design questions (verdict-absence collection, footgun-index convention, `/configure`) — except where the dogfood pass naturally dispositions the two declared-vs-actual bugs (see Settlement — triage).
@@ -44,7 +44,7 @@ The proposal's design, at mission scale: the declared-structure floor into canon
 
 - **Footguns**: v1's ledger (`consult.md`, `bin-scripts.md`) — **carried as watch**, out of this mission's subsystems; the consult deny-list reconciliation stays pinned to harness upgrades, untouched here.
 - **Todos**: `26-07-11.configure-command` — stays archive-carried; not re-seeded (non-goal). `26-07-22.lan-intercom` — stays halted/archived (Orchestra valve). The two declared-vs-actual bugs — **re-seeded as dogfood subjects** (D6), dispositioned by the validation pass, not re-opened as standalone orders.
-- **Proposals**: `26-07-25.repo-hygiene` (adopted) enacts via this mission — files to `_enacted/` in the validation phase. v1's `_deferred/` set persists untouched.
+- **Proposals**: `26-07-25.repo-hygiene` (enacted 26-07-25) enacts via this mission — filed to `_enacted/` in the validation phase. v1's `_deferred/` set persists untouched.
 - **Design canon / runbooks**: empty scaffold on this branch; v1's `fold-and-close.md` runbook inherited by archive reference (D5).
 
 ## Amendments
@@ -59,6 +59,8 @@ The proposal's design, at mission scale: the declared-structure floor into canon
 
 The gap the episode exposed is real and is being fixed: the amendment **claimed** an approval without naming the approving session, leaving a mid-campaign observer no way to verify it. That is a declared-vs-actual gap in this charter's own grammar — the same class of defect this mission exists to kill, found in the mission's own instrument. The remedy rides `work/proposals/26-07-25.return-path.md`: **charter amendments carry the approving session's callback handle**, with A1–A3 receiving retroactive stamps and A4 born stamped.
 
+**A4 — M2 return-path chartered; the dispatch-architecture non-goal takes a scoped override (26-07-25, operator-approved in the mission-architect dialog — `architect@play/76ba13c6-e6f5-4933-9e6c-7ef3fbdd6b7d` — on full endorsement of [`work/proposals/26-07-25.return-path.md`](proposals/26-07-25.return-path.md)).** The M1 campaign's investigated filing (`work/todos/bugs/26-07-25.bug.orchestration-return-path.md`: the orchestration tree is a tree for control flow but a star for return flow; eight instances, three Manager sessions; A3 secures one leak path of a list nothing suggests is closed) warrants a model-level remedy *inside this mission* — fold-once economics: closing v2 first would fold known-suspect A3 doctrine into the template any consumer could bootstrap from, then churn the same lines again under a v3. Resolved: **milestone 2 `return-path`** (`milestones/2.return-path/`), `depends-on` M1, **spike-gated** — phase 1 probes the topology on the pinned CLI (the only admissible evidence; v1 D2's standing lesson), phase 2 settles doctrine from verdicts, with one outcome reserved to the operator: if the probes show depth-1 orchestration unsound *per se*, that tier-ladder finding escalates rather than being settled by any agent. The Non-goals bullet "dispatch architecture … untouched (v1's product)" reads as overridden **for the return-path defect only**. Success criterion 6 added; roadmap extended. Interim campaign practice for M1 phase 4 (practice, not canon): synchronous-only dispatch; continuations transcript-read, never awaited; the nudge as standing recovery. **Provenance rule, effective now:** every amendment names its approving session inline. Retroactive stamps: A1, A2 — approved in the milestone-planning operator dialog, `architect@play/5d30e2de-8145-4fbd-b80c-c48bd99dff9c`; A3 — approved in the mission-architect operator dialog, `architect@play/76ba13c6-e6f5-4933-9e6c-7ef3fbdd6b7d`, before commit `f435cc9` (see the provenance note above).
+
 ## Success criteria
 
 1. The floor is canon: PROJECT.md § Structure defaults in BASELINE's bootstrap guidance, doctrine in `work/README.md`, and the genericity test holds — zero project-shaped facts entered `.claude/`.
@@ -66,6 +68,7 @@ The gap the episode exposed is real and is being fixed: the amendment **claimed*
 3. The dogfood `/clean` ran against this tree with all three rungs exercised and recorded: ≥1 mechanical auto-fix committed, each rung-2/rung-3 finding either produced (filed order / escalated fork) or explicitly recorded as none-found — and both D6 seeded divergences detected and dispositioned.
 4. Enactment filed: the proposal moved to `_enacted/` with stamp; reconciliation notes appended where the build diverged.
 5. Fold-back prepared per D5: keep-column derived from specification, rehearsed; the close itself remains the operator's `/close` ceremony.
+6. (A4) The return-path probe verdicts are recorded on the pinned CLI, reproducible from written recipes, reconciled against the filing's confidence ledger; doctrine settled *from the verdicts* — the constrained dispatch idiom and continuation rule in canon, A3 reconciled, the ADR entry — or the reserved tier-ladder finding explicitly escalated to the operator; the return-path proposal enacted and the seeding bug dispositioned.
 
 ## Failure criteria
 
@@ -78,3 +81,4 @@ The gap the episode exposed is real and is being fixed: the amendment **claimed*
 | # | Milestone | Gist | Depends on | Status |
 | --- | --- | --- | --- | --- |
 | 1 | [janitor](milestones/1.janitor/MILESTONE.md) | The whole arc as phases: floor into canon → competency + gate wiring → dogfood-validate, enact, fold prep | — | pending |
+| 2 | [return-path](milestones/2.return-path/MILESTONE.md) | A4: probe the orchestration return-path topology on the pinned CLI → settle doctrine from verdicts (constrained idiom, continuation rule, A3 reconciliation) or escalate the reserved tier-ladder finding | 1 | pending (planned 26-07-25) |
