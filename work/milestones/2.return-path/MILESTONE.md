@@ -2,6 +2,7 @@
 sessions:
   - architect@play/76ba13c6-e6f5-4933-9e6c-7ef3fbdd6b7d # mission architect
   - architect@play/76ba13c6-e6f5-4933-9e6c-7ef3fbdd6b7d # milestone architect (same session — M2 planned in the mission-architect dialog, charter A4)
+  - executor@play/2cb889b5-b570-4b6d-b435-c315de40e68d # campaign executor (26-07-26)
 ---
 
 # M2 — return-path: probe the orchestration topology, then fix the model
