@@ -1,6 +1,12 @@
 # Milestones
 
-The active mission's phased roadmap. Empty until the first mission is chartered (`/plan` at mission tier) and its milestones are laid — this README carries the conventions so `/plan <milestone>` and `/execute <milestone>` have a stable reference.
+The active mission's phased roadmap — mission `v2.repo-hygiene` (chartered 26-07-25, branch `26-07-25`; charter: [`work/MISSION.md`](../MISSION.md)).
+
+## Roadmap
+
+| # | Milestone | Gist | Depends on | Status |
+| --- | --- | --- | --- | --- |
+| 1 | [janitor](1.janitor/MILESTONE.md) | Declared-structure floor into canon → Janitor competency + `/clean` + gate wiring → dogfood-validate, enact, fold prep | — | pending |
 
 ## Conventions
 
