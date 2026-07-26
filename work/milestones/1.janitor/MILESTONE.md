@@ -52,7 +52,7 @@ Settled in operator dialog 26-07-25, with the reference-gate fork routed to the 
 | --- | --- | --- | --- | --- |
 | 1 | [floor](1.floor.md) | The declared-structure doctrine into `work/README.md`; § Structure schema + template defaults into BASELINE's bootstrap step 3; this repo's own declaration as exemplar | high | done (26-07-25) — landed seven pinned subsections, not five; see Addendum |
 | 2 | [competency](2.competency.md) | `.claude/agents/janitor.md` + `.claude/commands/clean.md`; role-ladder and command-family rows; BASELINE manifest | high | done (26-07-25) — nine pinned headings; two contractual; see Addendum |
-| 3 | [wiring](3.wiring.md) | Blessing hygiene lens · where-artifacts-land in all three planning shapes · advisory order-close · blocking milestone-close with ESCALATE halt · ADR · child-collection rule (A3) | medium | pending |
+| 3 | [wiring](3.wiring.md) | Blessing hygiene lens · where-artifacts-land in all three planning shapes · advisory order-close · blocking milestone-close with ESCALATE halt · ADR · child-collection rule (A3) | medium | done (26-07-25) — nine sites; zero nudges; see Addendum |
 | 4 | [prove](4.prove.md) | The pass in anger: five axes, three rungs, both seeded divergences; `.claude/bin/reference-gate` via blessed remedy order; proposal → `_enacted/`; fold rehearsal | high | pending |
 
 ## Acceptance
