@@ -1,0 +1,329 @@
+#!/usr/bin/env bun
+/**
+ * reference-gate — the whole-canon reference-integrity axis, executable.
+ *
+ *   bun .claude/bin/reference-gate check
+ *
+ * Every project-shaped fact is read from work/PROJECT.md § Structure — the scope
+ * roots, the exclusions, the sanctioned absences, the planning-artifact roots —
+ * so the engine itself carries none. That section's schema (heading strings,
+ * first-code-span-is-the-path bullet grammar) is pinned in .claude/BASELINE.md
+ * bootstrap step 3; a repo with no declaration exits 3 rather than passing
+ * silently, because a generic engine that finds nothing to read must say so.
+ *
+ * The scan set is tracked markdown under the declared scope roots, less the
+ * declared exclusions — tracked-only by construction, which is what keeps
+ * gitignored scratch out with no special case. Within a file, candidates come
+ * from YAML frontmatter values unconditionally (a real break can sit in a list
+ * literal), and from body prose only where the canon marks a path as a path:
+ * inline code spans and markdown link targets. Every candidate is left-boundary
+ * anchored, so a declared root appearing inside a longer foreign path — a
+ * home-relative or absolute path in a shell recipe — is not a tree reference.
+ *
+ * Tag-qualified paths are provenance data, not tree references: the gate checks
+ * the tree, tags carry history (work/PROJECT.md § All roles). Both the full
+ * `git show <ref>:<path>` form and the elided `<ref>:<path>` form are consumed
+ * whole and resolved against the ref they name — a ref not yet cut warns and
+ * never fails, because forward-citing a close tag is correct. A `<path>:<line>`
+ * citation drops the line number; a candidate carrying an angle-bracket
+ * placeholder segment is a template, not an assertion, and is exempt.
+ *
+ * Three accepted false negatives, stated so the trade stays visible: a broken
+ * path written in bare prose — no code span, no link — is missed, the price of
+ * killing the extension-less-prose and slash-separated-word-list classes at
+ * once; a deliberately illustrative path inside a code span in a
+ * planning-artifact root warns rather than fails, because those containers'
+ * references are temporal by declaration; and a bare word pressed straight
+ * against a colon and a declared root, with no space anywhere between them,
+ * wears the elided-provenance shape without being one, so it is classified as
+ * provenance rather than as a tree reference and a break written that way
+ * softens from a failure to a warning. This corpus carries no instance of it.
+ *
+ * Doctrine: work/README.md § The declared-structure floor.
+ *
+ * exit codes:
+ *   0  clean — no failures (warnings are reported and never affect status)
+ *   1  usage / no mode given
+ *   2  failures present
+ *   3  declaration missing or malformed — work/PROJECT.md absent, § Structure
+ *      absent, or a required subsection heading missing or empty
+ */
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+import { spawnSync } from "node:child_process";
+
+const repoRoot = (() => {
+  const r = spawnSync("git", ["rev-parse", "--show-toplevel"], { encoding: "utf8" });
+  return r.status === 0 ? r.stdout.trim() : process.cwd();
+})();
+
+const args = process.argv.slice(2);
+const mode = args[0];
+
+if (mode !== "check") {
+  console.error(
+    "usage: reference-gate check\n" +
+      "  checks every path the canon references against the tree, and every\n" +
+      "  tag-qualified pointer against its ref; reads work/PROJECT.md § Structure"
+  );
+  process.exit(1);
+}
+
+// The declaration seam and its pinned heading strings — the only workflow-generic
+// literals in this file. Everything project-shaped comes from the declaration.
+const DECLARATION = "work/PROJECT.md";
+const SECTION = "## Structure";
+const SCOPE_ROOTS = "### Reference-gate scope roots";
+const EXCLUSIONS = "### Reference-gate exclusions";
+const SANCTIONED = "### Sanctioned absences";
+const PLANNING = "### Planning-artifact roots";
+
+const declPath = join(repoRoot, DECLARATION);
+if (!existsSync(declPath)) {
+  console.error(
+    `no declaration: ${DECLARATION} is absent — this repo declares no structure, so the\n` +
+      `reference-integrity axis has nothing to read. Author it per .claude/BASELINE.md bootstrap step 3.`
+  );
+  process.exit(3);
+}
+
+const declLines = readFileSync(declPath, "utf8").split("\n");
+const sectionStart = declLines.findIndex((l) => l.trim() === SECTION);
+if (sectionStart < 0) {
+  console.error(`malformed declaration: ${DECLARATION} has no '${SECTION}' section.`);
+  process.exit(3);
+}
+let sectionEnd = declLines.length;
+for (let i = sectionStart + 1; i < declLines.length; i++) {
+  if (/^##\s/.test(declLines[i])) {
+    sectionEnd = i;
+    break;
+  }
+}
+const section = declLines.slice(sectionStart, sectionEnd);
+
+// Bullet grammar: the first inline code span on a `- ` bullet is the path; a
+// trailing glob is permitted, and prose after the span is commentary.
+const bulletsUnder = (heading: string): string[] | null => {
+  const at = section.findIndex((l) => l.trim() === heading);
+  if (at < 0) return null;
+  const out: string[] = [];
+  for (let i = at + 1; i < section.length; i++) {
+    if (/^#{1,6}\s/.test(section[i])) break;
+    const m = section[i].match(/^\s*-\s+`([^`]+)`/);
+    if (m) out.push(m[1]);
+  }
+  return out;
+};
+
+const scopeBullets = bulletsUnder(SCOPE_ROOTS);
+const exclusionBullets = bulletsUnder(EXCLUSIONS);
+const sanctionedBullets = bulletsUnder(SANCTIONED);
+const planningBullets = bulletsUnder(PLANNING);
+
+const missing = [
+  [SCOPE_ROOTS, scopeBullets],
+  [EXCLUSIONS, exclusionBullets],
+  [SANCTIONED, sanctionedBullets],
+  [PLANNING, planningBullets],
+]
+  .filter(([, b]) => b === null)
+  .map(([h]) => h as string);
+if (missing.length) {
+  console.error(
+    `malformed declaration: ${DECLARATION} § Structure is missing ${missing.length} required ` +
+      `subsection${missing.length > 1 ? "s" : ""}:\n` +
+      missing.map((h) => `  ${h}`).join("\n") +
+      `\nThe heading strings are a parser contract — see .claude/BASELINE.md bootstrap step 3.`
+  );
+  process.exit(3);
+}
+
+const withSlash = (p: string) => (p.endsWith("/") ? p : p + "/");
+// `./` declares the repo root itself: root-level tracked markdown joins the scan
+// set. It is not an extraction prefix — the directory bullets are.
+const scanRootFiles = scopeBullets!.some((b) => b === "./" || b === ".");
+const prefixes = scopeBullets!.filter((b) => b !== "./" && b !== ".").map(withSlash);
+if (prefixes.length === 0) {
+  console.error(
+    `malformed declaration: ${SCOPE_ROOTS} declares no directory prefix, so no written path\n` +
+      `could ever count as a tree reference.`
+  );
+  process.exit(3);
+}
+const exclusions = exclusionBullets!.map(withSlash);
+const planningRoots = planningBullets!;
+const sanctions = sanctionedBullets!;
+
+const tracked = spawnSync("git", ["ls-files", "-z"], { cwd: repoRoot, encoding: "utf8" });
+if (tracked.status !== 0) {
+  console.error("git ls-files failed — reference-gate runs inside a git working tree.");
+  process.exit(3);
+}
+const files = tracked.stdout
+  .split("\0")
+  .filter((f) => f.endsWith(".md"))
+  .filter((f) => (scanRootFiles && !f.includes("/")) || prefixes.some((p) => f.startsWith(p)))
+  .filter((f) => !exclusions.some((p) => f.startsWith(p)));
+
+// The path character class of the original grep recipe, angle brackets included
+// so a placeholder segment is captured whole and then exempted rather than
+// truncated into a path that happens to resolve.
+const PATHCH = "A-Za-z0-9._/<>-";
+// `~` joins the class only as a left boundary: it is what makes a home-relative
+// path (`~` then a declared root) foreign rather than a reference to this tree.
+const BOUNDARY = new RegExp(`[~${PATHCH}]`);
+const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const alt = prefixes.map(escape).join("|");
+// Alternation order is the classification priority: a full provenance expression,
+// then an elided one, then a live-tree path with an optional line citation.
+const CANDIDATE = new RegExp(
+  `git\\s+show\\s+([^\\s:]+):((?:${alt})[${PATHCH}]*)` +
+    `|([A-Za-z0-9][A-Za-z0-9._-]*):((?:${alt})[${PATHCH}]*)` +
+    `|((?:${alt})[${PATHCH}]*)(?::\\d+)?`,
+  "g"
+);
+
+const isTemplate = (s: string) => s.includes("<") || s.includes(">");
+const tidy = (p: string) => p.replace(/[.,;]+$/, "");
+
+const sanctioned = (p: string) =>
+  sanctions.some((s) => {
+    if (s.endsWith("*")) return p.startsWith(s.slice(0, -1));
+    if (s.endsWith("/")) return p === s || p === s.slice(0, -1) || p.startsWith(s);
+    return p === s;
+  });
+
+const isPlanningArtifact = (f: string) =>
+  planningRoots.some((p) => (p.endsWith("/") ? f.startsWith(p) : f === p));
+
+const refCache = new Map<string, boolean>();
+const refExists = (ref: string) => {
+  if (!refCache.has(ref)) {
+    const r = spawnSync("git", ["rev-parse", "--verify", "--quiet", ref], {
+      cwd: repoRoot,
+      stdio: "ignore",
+    });
+    refCache.set(ref, r.status === 0);
+  }
+  return refCache.get(ref)!;
+};
+const pathAtRef = (ref: string, p: string) =>
+  spawnSync("git", ["cat-file", "-e", `${ref}:${p}`], { cwd: repoRoot, stdio: "ignore" }).status ===
+  0;
+
+type Finding = { file: string; line: number; token: string; level: string; reason: string };
+const findings: Finding[] = [];
+let checked = 0;
+
+const gradeTree = (file: string, line: number, raw: string) => {
+  const p = tidy(raw);
+  if (!p || isTemplate(p)) return;
+  checked++;
+  if (existsSync(join(repoRoot, p))) return;
+  if (sanctioned(p)) return;
+  if (isPlanningArtifact(file))
+    findings.push({
+      file,
+      line,
+      token: p,
+      level: "WARN",
+      reason: "not in the working tree — planning artifact, references are temporal",
+    });
+  else findings.push({ file, line, token: p, level: "FAIL", reason: "not in the working tree" });
+};
+
+const gradeProvenance = (file: string, line: number, ref: string, raw: string) => {
+  const p = tidy(raw);
+  if (!p || isTemplate(p) || isTemplate(ref)) return;
+  checked++;
+  const token = `${ref}:${p}`;
+  if (!refExists(ref)) {
+    findings.push({ file, line, token, level: "WARN", reason: "ref not cut yet — forward cite" });
+    return;
+  }
+  if (pathAtRef(ref, p)) return;
+  findings.push({
+    file,
+    line,
+    token,
+    level: isPlanningArtifact(file) ? "WARN" : "FAIL",
+    reason: `path does not exist in ${ref}`,
+  });
+};
+
+const scanText = (text: string, file: string, line: number, seen: Set<string>) => {
+  CANDIDATE.lastIndex = 0;
+  let m: RegExpExecArray | null;
+  while ((m = CANDIDATE.exec(text)) !== null) {
+    if (m.index > 0 && BOUNDARY.test(text[m.index - 1])) continue;
+    const key = `${line}\x00${m[0]}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    if (m[1] !== undefined) gradeProvenance(file, line, m[1], m[2]);
+    else if (m[3] !== undefined) gradeProvenance(file, line, m[3], m[4]);
+    else gradeTree(file, line, m[5]);
+  }
+};
+
+const SPAN = /(`+)(.*?)\1/g;
+const LINK = /\]\(([^()\s]+)\)/g;
+
+for (const file of files) {
+  const abs = join(repoRoot, file);
+  if (!existsSync(abs)) continue;
+  const lines = readFileSync(abs, "utf8").split("\n");
+  const seen = new Set<string>();
+
+  // YAML frontmatter values are their own unconditionally-checked class: a real
+  // break can sit in a `depends-on:` list literal, where no code span marks it.
+  let body = 0;
+  if (lines[0]?.trim() === "---") {
+    for (let i = 1; i < lines.length; i++) {
+      if (lines[i].trim() === "---") {
+        body = i + 1;
+        break;
+      }
+      scanText(lines[i], file, i + 1, seen);
+    }
+  }
+
+  let fenced = false;
+  for (let i = body; i < lines.length; i++) {
+    const line = lines[i];
+    if (/^\s*(```|~~~)/.test(line)) {
+      fenced = !fenced;
+      continue;
+    }
+    if (fenced) continue;
+
+    SPAN.lastIndex = 0;
+    let s: RegExpExecArray | null;
+    while ((s = SPAN.exec(line)) !== null) scanText(s[2], file, i + 1, seen);
+
+    LINK.lastIndex = 0;
+    let l: RegExpExecArray | null;
+    while ((l = LINK.exec(line)) !== null) {
+      const target = l[1].split("#")[0];
+      // A4-8 seam: the canon mixes file-relative and repo-root-anchored link
+      // styles, and no single resolver satisfies both. The style question is an
+      // open operator fork, so a target carrying no declared prefix is skipped
+      // rather than guessed at. Do not normalize; add the check once the fork
+      // is answered.
+      if (!prefixes.some((p) => target.startsWith(p))) continue;
+      const key = `${i + 1}\x00${target}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      gradeTree(file, i + 1, target);
+    }
+  }
+}
+
+for (const f of findings) console.log(`${f.level} ${f.file}:${f.line} ${f.token} — ${f.reason}`);
+
+const fails = findings.filter((f) => f.level === "FAIL").length;
+const warns = findings.length - fails;
+console.log(
+  `${files.length} files scanned, ${checked} references checked, ${fails} failures, ${warns} warnings`
+);
+process.exit(fails ? 2 : 0);

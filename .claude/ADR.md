@@ -4,7 +4,7 @@ A register of the decisions that shape this workflow: what was decided, why, and
 
 ## Founding determinations (locked 26-07-11; amended 26-07-12)
 
-Provenance for the block: `git show v1.subagent-boundary-closed:work/todos/_done/agentic-workflow/1.determinations.md`
+Provenance for the block: `git show v1.subagent-boundary-closed:work/missions/v1.subagent-boundary/todos/_done/agentic-workflow/1.determinations.md`
 
 | # | Determination |
 | --- | --- |
@@ -21,17 +21,17 @@ Provenance for the block: `git show v1.subagent-boundary-closed:work/todos/_done
 
 Tag: `v1.subagent-boundary-closed`. Converted the Executor→Manager boundary from headless `claude -p` child sessions to native subagent dispatch.
 
-**D1 — The adopted proposal binds.** The subagent-manager-boundary proposal is the mission's spec: env-gated depth-2 dispatch, the pause-and-ask protocol, the durability amendment, the permission story, headless-as-documented-fallback. Where a milestone doc and the proposal disagree, the proposal wins until the charter explicitly revises it. Provenance: `git show v1.subagent-boundary-closed:work/MISSION.md`.
+**D1 — The adopted proposal binds.** The subagent-manager-boundary proposal is the mission's spec: env-gated depth-2 dispatch, the pause-and-ask protocol, the durability amendment, the permission story, headless-as-documented-fallback. Where a milestone doc and the proposal disagree, the proposal wins until the charter explicitly revises it. Provenance: `git show v1.subagent-boundary-closed:work/missions/v1.subagent-boundary/MISSION.md`.
 
-**D2 — Depth is configured state; the spawn-depth var is a pin + cap.** Chartered as "enable nesting via env var"; the premise inverted on CLI v2.1.218 — nesting is default-ON and deep, and `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH=2` *restricts* to the dispatch ladder (root → Manager → specialists). The capability flipped twice in a year: audit the cap's value, never assume the behavior. Provenance: `git show v1.subagent-boundary-closed:work/MISSION.md`.
+**D2 — Depth is configured state; the spawn-depth var is a pin + cap.** Chartered as "enable nesting via env var"; the premise inverted on CLI v2.1.218 — nesting is default-ON and deep, and `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH=2` *restricts* to the dispatch ladder (root → Manager → specialists). The capability flipped twice in a year: audit the cap's value, never assume the behavior. Provenance: `git show v1.subagent-boundary-closed:work/missions/v1.subagent-boundary/MISSION.md`.
 
-**D3 — Whole-tree archives; the Manager leaves the durable tier.** Manager stamps anchor to the hosting Executor session — the nearest-resumable-session principle applied one tier up, no new grammar — and `session-archive` sweeps the parent's `subagents/agent-*.jsonl` alongside its transcript. The archived unit is the whole agent tree, not its root, which is what an asynchronous peer reader needs. Provenance: `git show v1.subagent-boundary-closed:work/MISSION.md`.
+**D3 — Whole-tree archives; the Manager leaves the durable tier.** Manager stamps anchor to the hosting Executor session — the nearest-resumable-session principle applied one tier up, no new grammar — and `session-archive` sweeps the parent's `subagents/agent-*.jsonl` alongside its transcript. The archived unit is the whole agent tree, not its root, which is what an asynchronous peer reader needs. Provenance: `git show v1.subagent-boundary-closed:work/missions/v1.subagent-boundary/MISSION.md`.
 
-**D4 — Template purification: `main` carries product only.** The canonical repository's `main` is the pure project-generic template — the `.claude/` manifest, the scaffold, the canon READMEs. Instance content (mission archives, todo history, the design corpus) rides mission branches, each tagged at close, and design history is reachable through this register plus the tags rather than through in-tree files. Consequence, accepted: a clone of `main` is a ready bootstrap, and the wholesale-copy trap dies at the root. Provenance: `git show v1.subagent-boundary-closed:work/MISSION.md`.
+**D4 — Template purification: `main` carries product only.** The canonical repository's `main` is the pure project-generic template — the `.claude/` manifest, the scaffold, the canon READMEs. Instance content (mission archives, todo history, the design corpus) rides mission branches, each tagged at close, and design history is reachable through this register plus the tags rather than through in-tree files. Consequence, accepted: a clone of `main` is a ready bootstrap, and the wholesale-copy trap dies at the root. Provenance: `git show v1.subagent-boundary-closed:work/missions/v1.subagent-boundary/MISSION.md`.
 
-**D5 — Consult integrity is a precondition, not a feature.** A consult forks its target with `--fork-session` so reading a session never mutates the shared tree; the fix landed before the mission opened, so the mission ran on sound archive semantics. Provenance: `git show v1.subagent-boundary-closed:work/MISSION.md`.
+**D5 — Consult integrity is a precondition, not a feature.** A consult forks its target with `--fork-session` so reading a session never mutates the shared tree; the fix landed before the mission opened, so the mission ran on sound archive semantics. Provenance: `git show v1.subagent-boundary-closed:work/missions/v1.subagent-boundary/MISSION.md`.
 
-**Operational rules.** Provenance: `git show v1.subagent-boundary-closed:work/proposals/_enacted/26-07-23.subagent-manager-boundary.md` (verdict-absence detection: `git show v1.subagent-boundary-closed:work/milestones/2.conversion/2.canon-rewrite.md`).
+**Operational rules.** Provenance: `git show v1.subagent-boundary-closed:work/missions/v1.subagent-boundary/proposals/_enacted/26-07-23.subagent-manager-boundary.md` (verdict-absence detection: `git show v1.subagent-boundary-closed:work/missions/v1.subagent-boundary/milestones/2.conversion/2.canon-rewrite.md`).
 
 - **Pause-and-ask.** A subagent meeting an interpretation question ends its turn with the question, context held, and resumes in place on the answer; the terminal `ESCALATE` verdict is reserved for genuinely terminal states — budget exhaustion, an unblessed order past the refinement bound, operator-gated stops.
 - **Verdict-absence detection.** On a Manager's clean return, check the work doc for `## Acceptance Verdict`: absence means early stop, distinct from re-plan — nudge it to continue, sharing the outer pass budget rather than adding a counter.
