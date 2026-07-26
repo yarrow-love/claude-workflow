@@ -7,7 +7,9 @@ sessions:
 
 # M2 — return-path: probe the orchestration topology, then fix the model
 
-> Status: pending — planned 26-07-25 in the mission-architect dialog (charter A4; design authority: the adopted proposal [`work/proposals/26-07-25.return-path.md`](../../proposals/26-07-25.return-path.md) and the seeding filing [`work/todos/bugs/26-07-25.bug.orchestration-return-path.md`](../../todos/bugs/26-07-25.bug.orchestration-return-path.md)). `depends-on` M1; phase 2 is a verdict-gated stub by design.
+> Status: **in progress — phase 1 run PARTIAL, premise inverted; awaiting a milestone-tier re-plan** (26-07-26). P1-a falsified H′ on CLI 2.1.220: a depth-2 child's asynchronous result was delivered to its depth-1 dispatcher after that dispatcher's turn ended, not to the root — the inverse of the topology this milestone was chartered to fix, and a version flip against M1's 2.1.218 evidence. The battery stopped at 1 of 10 probes per its early-exit rule; four confidence-ledger rows are untested and `run_in_background: false` proved unreliably honored. Phase 2 cannot be hardened from these verdicts, and this is **not** the R4 escalation (the evidence points away from depth-1 orchestration being unsound). Record: [`work/todos/26-07-26.probes.md`](../../todos/26-07-26.probes.md); campaign: [`work/todos/26-07-26.execute-m2-return-path.md`](../../todos/26-07-26.execute-m2-return-path.md).
+>
+> Planned 26-07-25 in the mission-architect dialog (charter A4; design authority: the adopted proposal [`work/proposals/26-07-25.return-path.md`](../../proposals/26-07-25.return-path.md) and the seeding filing [`work/todos/bugs/26-07-25.bug.orchestration-return-path.md`](../../todos/bugs/26-07-25.bug.orchestration-return-path.md)). `depends-on` M1; phase 2 is a verdict-gated stub by design.
 
 ## Objective
 
@@ -45,8 +47,8 @@ Settled in the mission-architect operator dialog, 26-07-25. These bind the phase
 
 | # | Phase | Gist | Difficulty | Status |
 | --- | --- | --- | --- | --- |
-| 1 | [probes](1.probes.md) | Environment pin; the five-probe battery through an operator-launched probe-parent session; verdicts + reconciliation table | medium | pending |
-| 2 | [doctrine](2.doctrine.md) | Verdict-gated: constrained idiom + continuation rule + nudge graduation + A3 reconciliation + ADR; enactment + bug disposition — or the R4 escalation | high | pending — stub; harden via `/plan` after phase 1 |
+| 1 | [probes](1.probes.md) | Environment pin; the five-probe battery through an operator-launched probe-parent session; verdicts + reconciliation table | medium | **PARTIAL (26-07-26)** — P1-a falsified H′, early exit at 1 of 10 probes; needs re-specification against the topology that actually holds |
+| 2 | [doctrine](2.doctrine.md) | Verdict-gated: constrained idiom + continuation rule + nudge graduation + A3 reconciliation + ADR; enactment + bug disposition — or the R4 escalation | high | **blocked** — premise inverted; the four anticipated landings rest on a falsified topology |
 
 ## Acceptance
 

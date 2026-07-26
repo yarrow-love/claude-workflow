@@ -7,7 +7,7 @@ The active mission's phased roadmap — mission `v2.repo-hygiene` (chartered 26-
 | # | Milestone | Gist | Depends on | Status |
 | --- | --- | --- | --- | --- |
 | 1 | [janitor](1.janitor/MILESTONE.md) | Four phases: floor (doctrine + § Structure schema + declaration) → competency (`janitor.md`, `/clean`) → wiring (blessing lens, where-artifacts-land, advisory order-close, blocking milestone-close, child-collection rule A3) → prove (dogfood pass, `reference-gate`, enactment, fold rehearsal) | — | done (26-07-25) |
-| 2 | [return-path](2.return-path/MILESTONE.md) | A4: probe the orchestration return-path topology on the pinned CLI (five falsifiable probes, operator-launched probe-parent) → settle doctrine from verdicts (constrained idiom, continuation rule, nudge graduation, A3 reconciliation) or escalate the reserved tier-ladder finding | 1 | pending (planned 26-07-25; phase 2 verdict-gated) |
+| 2 | [return-path](2.return-path/MILESTONE.md) | A4: probe the orchestration return-path topology on the pinned CLI (five falsifiable probes, operator-launched probe-parent) → settle doctrine from verdicts (constrained idiom, continuation rule, nudge graduation, A3 reconciliation) or escalate the reserved tier-ladder finding | 1 | in progress (planned 26-07-25) — phase 1 run PARTIAL 26-07-26: the probes **falsified** the assumed topology on CLI 2.1.220 (results route down to the dispatcher, not up to the root — a version flip against M1's 2.1.218 evidence). Phase 2 blocked; milestone-tier re-plan pending |
 
 ## Conventions
 
