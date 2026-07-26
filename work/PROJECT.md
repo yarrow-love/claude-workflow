@@ -6,8 +6,8 @@ Operational facts for agent roles working **on this repo** (the canonical workfl
 
 - **What this is**: the canonical, project-generic Claude agentic workflow — `.claude/` is the product, `work/` is its own live work system. See root `CLAUDE.md` for the two-hats rule (genericity is the acceptance test for `.claude/` changes).
 - **Quality gate** (documentation-and-tooling repo — the gate fits the artifact):
-  1. Reference resolution — every path referenced in `.claude/` resolves: ``grep -rhoE 'git show [A-Za-z0-9._<>-]+:[A-Za-z0-9._/<>-]+|(\.claude/bin|work|docs|src|tmp)/[A-Za-z0-9._/<>-]+' .claude --include='*.md' | grep -v '^git show ' | sed 's/[.,)`:]*$//' | grep -vE '<|>' | sort -u`` and check existence. The leading alternative consumes `git show <ref>:<path>` expressions whole so their paths are never extracted: **tag-qualified paths are provenance data, not tree references — the gate checks the tree, tags carry history.** Provenance pointers must therefore be written as complete `git show <ref>:<path>` expressions (never elided), which is what makes them recognizable; do not exempt individual paths instead. Sanctioned lazy-creates (created by their commands, not scaffolded): `src/_archive/` (at first sub-codebase retirement), `tmp/*` (runtime stream logs), `work/MISSION.md` (at `/plan` mission tier), `work/PROJECT.md` (authored at bootstrap step 3 — absent in a bare template tree), `work/todos/BACKLOG.md` (at first `/triage`), `work/sessions/MANIFEST` (at the first archive sweep), `work/design/` contents — DESIGN.md, system/, sessions/ (at the founding `/design`; the README is scaffolded).
-  2. Tooling smoke test — `bun .claude/bin/session-archive` and `bun .claude/bin/consult` with no args print usage and exit 1; `bun .claude/bin/commit-guard` from an interactive terminal (TTY) prints usage and exits 1, and on empty or invalid stdin exits 0 silently (the backstop never breaks a session); `cd work/sessions && sha256sum -c MANIFEST`.
+  1. Reference resolution — `bun .claude/bin/reference-gate check`. The engine reads its scope roots, exclusions, planning-artifact roots and sanctioned absences from § Structure below; it holds no project facts of its own, so amending the axis means amending the declaration, never the script. Two reference classes, and the distinction is the doctrine the gate exists to enforce: **tag-qualified `<ref>:<path>` expressions are provenance data, not tree references — the gate checks the tree, tags carry history.** Provenance is now checked too, resolved against the ref it names, warning rather than failing on refs not yet cut (`.claude/ADR.md` forward-cites the open mission's close tag by design). Semantics: **failures block**; warnings surface and are read at janitor passes, never blocking — an unresolved reference inside a planning-artifact root is a plan naming a path it will create, not drift. Provenance pointers should still be written as complete `git show <ref>:<path>` expressions as a matter of style, but the engine also recognizes the bare `<ref>:<path>` form defensively, so the doctrine no longer rests on the writer's discipline alone.
+  2. Tooling smoke test — `bun .claude/bin/session-archive`, `bun .claude/bin/consult` and `bun .claude/bin/reference-gate` with no args print usage and exit 1; `bun .claude/bin/commit-guard` from an interactive terminal (TTY) prints usage and exits 1, and on empty or invalid stdin exits 0 silently (the backstop never breaks a session); `cd work/sessions && sha256sum -c MANIFEST`.
   3. `/initialize` passes (the full audit; BASELINE integrity, hooks resolve, scaffold conformance).
 - **Session callbacks**: stamp per `work/README.md` § The callback grammar. Machine: `play`.
 - **Footgun ledger**: `work/footguns/` (empty).
@@ -51,28 +51,41 @@ Present by convention, ignored by policy (declared so they do not read as undecl
 
 ### Sanctioned absences
 
-Transcribed from quality-gate item 1 (§ All roles) — created by their commands, not scaffolded:
+The authoritative sanctioned-absence list, read by `reference-gate` — quality-gate item 1 (§ All roles) invokes the gate rather than restating it. Created by their commands, not scaffolded:
 
 - `src/_archive/` — at first sub-codebase retirement
-- `tmp/*` — runtime stream logs
+- `tmp/*` — runtime stream logs; **not consumed by the reference gate** — `tmp/` left the scope roots below, so no `tmp/`-prefixed string is ever extracted as a tree reference. Declared for the cleanliness and scaffold axes, which do read it
 - `work/MISSION.md` — at `/plan` mission tier
 - `work/PROJECT.md` — authored at bootstrap step 3 — absent in a bare template tree
 - `work/todos/BACKLOG.md` — at first `/triage`
 - `work/sessions/MANIFEST` — at the first archive sweep
-- `work/design/` contents (`DESIGN.md`, `system/`, `sessions/`) — at the founding `/design`; the README is scaffolded
+- `work/design/DESIGN.md` — at the founding `/design`
+- `work/design/system/` — its contents, at the founding `/design`; the `README.md` is scaffolded
+- `work/design/sessions/` — its contents, at the founding `/design`; the `README.md` is scaffolded
 
 ### Reference-gate scope roots
 
+The prefixes under which a written path counts as a tree reference. The gate's scan set is tracked files, which is why gitignored scratch (`tmp/`) is absent: ignored scratch is runtime coordinates, not tree content.
+
+- `./` — the repo root itself: root-level tracked markdown is scanned. The directory bullets below are the extraction prefixes
 - `.claude/`
 - `work/`
 - `docs/`
 - `src/`
-- `tmp/`
 
 ### Reference-gate exclusions
 
 - `work/proposals/` — historical record; rewriting is forbidden (root `CLAUDE.md`), so gating would manufacture permanently-unfixable failures
 - `work/notes/` — pre-proposal scratch, same protection
+
+### Planning-artifact roots
+
+Containers whose references are **temporal**: a plan naming a path it will create is correct, and a not-yet-built path is mechanically indistinguishable from a since-archived one — both are simply absent. An unresolved reference written in these containers therefore warns, never fails.
+
+- `work/todos/`
+- `work/milestones/`
+- `work/MISSION.md`
+- `work/design/`
 
 ## Front-end surface (manager, inspector, designer, implementer)
 

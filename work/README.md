@@ -113,7 +113,7 @@ The declaration's home is **`work/PROJECT.md` § Structure**; its schema — sub
 | **root discipline** | Does anything sit at the organizational root that the declaration does not allow? | § Root-file allowlist (packaging manifests: § Package roots) |
 | **product/non-product separation** | Is the shipped artifact cleanly separated from what merely supports it — nothing straddling the declared boundary? | § Product / non-product boundary |
 | **tracked-tree cleanliness** | Is anything tracked that should not be, or ignored that should be — machine-local state, build output, scratch, secrets — and does retired material sit in its declared archive rather than the working tree? | § Archive conventions, plus the project's own `.gitignore` (the ignore-side declaration) |
-| **whole-canon reference integrity** | Does every path the canon references resolve in the tree, with every absence sanctioned rather than silently tolerated? | § Sanctioned absences, § Reference-gate scope roots, § Reference-gate exclusions |
+| **whole-canon reference integrity** | Does every path the canon references resolve in the tree, with every absence sanctioned rather than silently tolerated? | § Sanctioned absences, § Reference-gate scope roots, § Reference-gate exclusions, § Planning-artifact roots |
 | **work-tracking fidelity** | Do the work documents follow the tier ladder's forms — frontmatter, stamps, sections, filing? | Template canon (`todos/README.md` and this document) — shipped identically everywhere; the one axis that needs no declaration |
 
 ## The follow-through rule
