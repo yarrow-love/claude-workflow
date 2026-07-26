@@ -7,7 +7,7 @@ sessions:
 
 # M1 — janitor: the declared-structure floor, the competency, and the proof
 
-> Status: in progress — phases 1–3 done 26-07-25; phase 4 (prove) in flight, its dogfood pass complete and the `reference-gate` remedy order it filed now executing. The mission's single milestone (operator amendment at commission): the four phases below carry what a three-milestone shape would have. Campaign log: [`work/todos/26-07-25.execute-m1-janitor.md`](../../todos/26-07-25.execute-m1-janitor.md).
+> Status: **done (26-07-25)** — all four phases closed; the milestone's own blocking hygiene pass ran and released with its contestable findings explicitly escalated. The mission's single milestone (operator amendment at commission): the four phases below carry what a three-milestone shape would have. Campaign log: [`work/todos/_done/26-07-25.execute-m1-janitor.md`](../../todos/_done/26-07-25.execute-m1-janitor.md).
 
 ## Objective
 
