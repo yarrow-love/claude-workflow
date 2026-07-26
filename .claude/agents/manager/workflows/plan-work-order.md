@@ -49,7 +49,7 @@ Feature:
 ---
 
 ## Implementation Plan
-(manager brief from planner's full report)
+(manager brief from planner's full report — phased steps with file paths, decision points, and where any new files land against the declared structure)
 ```
 
 Bug:
@@ -67,7 +67,7 @@ Bug:
 ---
 
 ## Resolution Plan
-(manager brief from planner's full report)
+(manager brief from planner's full report — phased steps with file paths, decision points, and where any new files land against the declared structure)
 ```
 
 Refactor:
@@ -85,5 +85,5 @@ Refactor:
 ---
 
 ## Refactor Plan
-(manager brief from planner's full report)
+(manager brief from planner's full report — phased steps with file paths, decision points, and where any new files land against the declared structure)
 ```

@@ -46,7 +46,7 @@ When the codebase-memory MCP is available, ground the plan's shape in the graph 
 For each phase:
 
 - **Title** — What this phase accomplishes
-- **Steps** — Numbered list of specific changes with file paths
+- **Steps** — Numbered list of specific changes with file paths; when a phase creates files, state where they land and against which declared category (`work/PROJECT.md` § Structure) — the blessing gate reads the plan for it
 - **Dependencies** — Which phases must complete first (if any)
 
 ### Decision Points

@@ -63,7 +63,7 @@ After code review, resolve **mechanical** findings (localized fixes, no design i
 
 ## Architect Blessing
 
-Every prepared work order is submitted to the Architect before execution — a mandatory agent-side gate between the written plan and the operator sign-off (work-order step 7; it equally concludes `/plan`'s plan-work-order). The Architect reads the order whole and returns a verdict: **`BLESSED`**, or numbered critique directives.
+Every prepared work order is submitted to the Architect before execution — a mandatory agent-side gate between the written plan and the operator sign-off (work-order step 7; it equally concludes `/plan`'s plan-work-order). The Architect reads the order whole and returns a verdict: **`BLESSED`**, or numbered critique directives — judging service-to-intent and, wearing the [janitor](../janitor.md)'s hat as the plan-time hygiene lens, whether the order states where its artifacts land, consistent with the project's structure declaration.
 
 - **Blesser resolution — standing handle first.** When the order's `sessions:` frontmatter carries a consultable planning handle (the last `architect@…` entry, machine-local), consult it via `bun .claude/bin/consult "<handle>" "<question>"` per Planner Callback (the script owns the restore ladder + the read-only fork boundary) — the upstream spec's author is the right judge of whether the order serves its intent; independence is not the point here, authority-of-intent is. The blessing is a read-and-critique, which the read-only fork supports fully (it Reads the order and returns a verdict, losing only the ability to act). When no handle exists or the consult fails, dispatch a fresh architect subagent briefed with the work order, the mission/milestone context it descends from, and the ask: *bless or critique*.
 - **Always flagship.** The blessing runs `fable` (fall back to `opus` if unavailable) regardless of the order's `difficulty` — it is one bounded read-and-critique, not a planning session; the planner downshift does not apply to it.
@@ -142,19 +142,26 @@ When a workflow touches the project's front-end surface (see the supplement), di
 
 **When live inspection isn't meaningfully automatable** (undeployed changes, OS-level dialogs, multi-participant flows): say so explicitly in the Front-end Inspection section with the rationale and a concrete manual verification recipe for the operator. Never imply automated verification that didn't happen.
 
+## Turn discipline
+
+**A Manager's turn may not end between dispatch and collection.** Dispatch is never completion; the only legitimate turn-ends are the `## Acceptance Verdict`, a pause-and-ask question, or an explicit `ESCALATE` — the vocabulary's home is [work-order automatic mode](workflows/execute-work-order-automatically.md) § Acceptance Verdict, which this rule names rather than extends. Collect every dispatched child — result received and folded into the work doc — before ending a turn.
+
+**The topology is why.** A child's report travels only by *collection*, and a depth-2 agent cannot address its parent by name, so an uncollected child's report strands upward to whoever is active above: the work is done, the record is not, and the session that receives the report is not the one that can file it. This rule is the **prevention**, at the dispatch site; the Executor's SendMessage nudge is the **recovery** when it is breached ([executor](../executor/CLAUDE.md) § The Manager boundary — an Agent-tool subagent); detection at boundaries is the hygiene pass's work-tracking-fidelity axis ([janitor](../janitor.md) § The five audit axes).
+
 ## Closing Out
 
 After implementation, review, and front-end inspection (if applicable) are complete, the close-out runs immediately on completion/sign-off, before any reply prose (`work/README.md` § The follow-through rule):
 
 1. Run the project quality gate
-2. Group changes into related commits (one per phase or logical unit)
-3. Write the "Summary" section to the work document:
+2. **Hygiene checklist — advisory.** Wear the [janitor](../janitor.md)'s hat for a light pass over what this order touched: is the tree still consistent with the parts of the structure declaration (`work/PROJECT.md` § Structure) the order reached? Route anything found by `janitor.md` § The remedy ladder — mechanical fixes ride the commits below; everything else is noted or filed. It **never blocks this close**: whole-repo drift is invisible at order scale, and blocking here would tax every order for drift it cannot see. The blocking pass is the milestone's (`janitor.md` § The hat pattern).
+3. Group changes into related commits (one per phase or logical unit)
+4. Write the "Summary" section to the work document:
    - What changed (files, commits)
    - Design decisions made during implementation
    - Deferred work with enough detail to seed a future todo
    - Anything that diverged from the plan and why
-4. If the work completes a milestone phase: update the corresponding `work/milestones/` entry and reconcile the footgun ledger (`work/footguns/` + the CLAUDE.md index) (add new footguns, trim resolved ones) in the same `Document:` commit
-5. Move the document from its inbox to `work/todos/_done/`
+5. If the work completes a milestone phase: update the corresponding `work/milestones/` entry and reconcile the footgun ledger (`work/footguns/` + the CLAUDE.md index) (add new footguns, trim resolved ones) in the same `Document:` commit
+6. Move the document from its inbox to `work/todos/_done/`
 
 ## Standing Behaviors
 

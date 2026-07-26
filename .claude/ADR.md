@@ -38,6 +38,14 @@ Tag: `v1.subagent-boundary-closed`. Converted the Executor→Manager boundary fr
 - **Parent-mode permission dominance.** No per-call lever makes a subagent stricter than its parent, so a campaign's autonomy scope is the dispatching session's own permission mode, decided once at the Reconnaissance gate.
 - **Headless as documented fallback.** The `claude -p` child-session pattern survives, demoted from default, for genuinely independent permission scoping or beyond-cap depth; state the cause at the dispatch site.
 
+## Mission v2 — repo hygiene (26-07-25)
+
+Tag: `v2.repo-hygiene-closed` — forward-cited, and so are the paths: the tag is cut at close, and the close ceremony first moves instance content under `work/missions/<v>/`, so the pointers below name the archive's locations rather than the working tree's. Both resolve only from that tag onward. Gave repo hygiene an owner and a gate.
+
+**D1 — Structure is declared; the system reconciles actual against declared.** No fixed layout is right in every repo, so the portable universal is the *obligation to declare one*: each project's declaration lives at `work/PROJECT.md` § Structure, its schema pinned in `.claude/BASELINE.md`, and the pass audits the axes stated once in `work/README.md` § The declared-structure floor. `.claude/` carries the axes and the mechanism, never a project's facts — the genericity test is what keeps the floor portable. Provenance: `git show v2.repo-hygiene-closed:work/missions/v2.repo-hygiene/proposals/_enacted/26-07-25.repo-hygiene.md`.
+
+**D2 — The Janitor is a competency worn as a hat, and the gates are deliberately asymmetric.** Defined once in `.claude/agents/janitor.md` and assumed by whichever session presides at a boundary — Architect at blessing, Manager at order close, Executor at milestone close — never dispatched as a specialist; `/clean` is the operator-run escape hatch, not the habit. Order close is **advisory** because whole-repo drift is invisible at order scale, and blocking there would tax every order for drift it cannot see; milestone close is **blocking**, the scale at which the whole tree is in view and one clean pass per milestone is affordable. Provenance: `git show v2.repo-hygiene-closed:work/missions/v2.repo-hygiene/MISSION.md`.
+
 ## Standing hazards
 
 ### The consult DENY list is name-deny-only for the deferred/built-in tool class
