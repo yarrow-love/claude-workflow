@@ -2,6 +2,7 @@
 sessions:
   - architect@play/76ba13c6-e6f5-4933-9e6c-7ef3fbdd6b7d # mission architect (stub)
   - architect@play/5d30e2de-8145-4fbd-b80c-c48bd99dff9c # milestone architect
+  - executor@play/9362ff9f-c270-4704-97cc-14d527ba9f12 # campaign executor
 ---
 
 # M1 — janitor: the declared-structure floor, the competency, and the proof
