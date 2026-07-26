@@ -5,7 +5,7 @@ Run the full reconciliation pass over [$ARGUMENTS] (empty means the whole repo).
 The pass **composes three things**; it is not a fourth overlapping tool:
 
 - **The work-inbox slice** of work-tracking fidelity delegates to `/triage` — inbox frontmatter, dispositions, archive routing, and the prioritized ledger, per [triage-todos](.claude/agents/manager/workflows/triage-todos.md). The residual stays the pass's own check (`janitor.md` § The five audit axes).
-- **The whole-canon reference-integrity axis** — every path the canon references resolves in the tree, every absence sanctioned rather than silently tolerated, within the declared scope roots and exclusions.
+- **The whole-canon reference-integrity axis**, both halves — resolution and consistency — within the declared scope roots and exclusions. The asks live in the floor table (`work/README.md` § The declared-structure floor); the technique, and what the gate does and does not mechanize, is [janitor.md](.claude/agents/janitor.md) § The reference-integrity method.
 - **The axis nothing else covers** — source-tree structure against the declaration: root discipline, the product/non-product boundary, tracked-tree cleanliness.
 
 Doc drift is `/document`'s remit and is not one of the five axes.

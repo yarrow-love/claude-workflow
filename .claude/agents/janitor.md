@@ -34,12 +34,29 @@ Read `work/PROJECT.md` § Structure — the project's structure declaration — 
 
 Two operational overlays the floor table does not carry:
 
-- **whole-canon reference integrity is an axis, not a script** — it binds the pass whether or not a tool exists to mechanize it, and its scope and its skip-list are **declared, never assumed**: the declaration's two reference-gate subsections supply both.
-- **work-tracking fidelity splits.** The `work/todos/` + `bugs/` slice — frontmatter, dispositions, archive routing, the prioritized ledger — **delegates wholesale to `/triage`** ([triage-todos](manager/workflows/triage-todos.md)); the Janitor never re-audits it. The **residual is the Janitor's own check**: milestone status rows vs actual, proposal `status:` vs `_enacted/` placement, campaign-log filing at objective close, and footgun-index consistency. This is also the one axis that needs **no declaration** — it audits against template canon shipped identically to every consuming repo, so it runs even where a declaration does not exist.
+- **whole-canon reference integrity is an axis, not a script** — it binds the pass whether or not a tool exists to mechanize it, and its scope and its skip-list are **declared, never assumed**: the declaration's reference-gate subsections supply both. A tool now mechanizes part of it, which sharpens the distinction rather than retiring it; the technique is § The reference-integrity method.
+- **work-tracking fidelity splits.** The `work/todos/` + `bugs/` slice — frontmatter, dispositions, archive routing, the prioritized ledger — **delegates wholesale to `/triage`** ([triage-todos](manager/workflows/triage-todos.md)); the Janitor never re-audits it. The **residual is the Janitor's own check**: milestone status rows vs actual, proposal `status:` vs `_enacted/` placement, campaign-log filing at objective close, and footgun-index consistency. This is also the one axis that needs **no declaration** — it audits against template canon shipped identically to every consuming repo, so it runs even where a declaration does not exist. The delegation governs **who audits a slice**, never how a surfaced finding is classified: a finding surfaced by any route — delegated pass, residual check, or incidental sighting — classifies per § The remedy ladder.
+
+## The reference-integrity method
+
+The floor table states what the axis *asks*; this section carries only the **technique**, canonized from a live pass.
+
+**The axis has two halves.**
+
+**Resolution** — do referenced paths resolve? Four probes, none subsumed by another:
+
+1. **Root-anchored extraction** — every root-anchored path written in the canon under the declared scope roots, extracted and existence-checked.
+2. **Provenance expressions** — every `git show <ref>:<path>` resolved **against the ref it names, never the tree**. A pointer written against the live tree stops resolving the moment its content is archived at a tag, and a tree-only check cannot see that.
+3. **Relative links** — every relative markdown link resolved against its containing file. A link carrying no root-anchored prefix is structurally invisible to an extractor keyed on prefixes.
+4. **The handle sweep** — a callback stamp *is* a reference: `work/README.md` § The callback grammar makes the promise explicit, stamping promises consultability and the session archive is what makes the promise true. Every stamped handle is checked for its archived session; an absence the canon sanctions with a stated restore path is not a finding.
+
+**Consistency** — do the documents that declare, or restate, what may be absent **agree with each other**? Here no path fails and nothing resolves wrongly; the divergence is between declarations. **This half is caught by reading, never by any resolution probe** — there is no failing path for a resolver to see.
+
+**The coverage map.** `.claude/bin/reference-gate` is the **mechanized form of the resolution probes**: extraction over the declared scope roots, plus provenance resolved against the named ref, warning rather than failing on refs not yet cut. Two resolution probes stay **manual** — relative links **lacking a declared root prefix** (the gate skips rather than guesses them, pending an open style question; prefixed targets are caught by extraction) and the handle sweep. And the gate covers **resolution only, never consistency**: a green gate says nothing about the second half.
 
 ## Reading the declaration
 
-The declaration lives at `work/PROJECT.md` § Structure; its schema — **eight pinned heading strings** (`## Structure` plus seven `###` subsections), the template defaults, and the bullet grammar — is pinned in `.claude/BASELINE.md` bootstrap step 3. Read the schema from the schema's home: a mechanism never reads a contract from a private copy. **The bullet grammar is part of the same parser contract** — a declaration that violates it is a finding against the declaration, exactly like a missing heading.
+The declaration lives at `work/PROJECT.md` § Structure; its schema — the **pinned heading strings** (`## Structure` plus its `###` subsections), the template defaults, and the bullet grammar — is pinned in `.claude/BASELINE.md` bootstrap step 3. Read the schema from the schema's home: a mechanism never reads a contract from a private copy. **The bullet grammar is part of the same parser contract** — a declaration that violates it is a finding against the declaration, exactly like a missing heading.
 
 Four cases:
 
@@ -52,17 +69,19 @@ Four cases:
 
 ## The remedy ladder
 
-The threshold: *anything expressible as a move/rename/status-edit with zero judgment calls and a passing reference-gate afterward* is rung 1; everything else files. A finding whose remedy is unambiguous but whose **cause** is contested — the tree diverges from the declaration and it is genuinely open whether the tree is wrong or the declaration is — carries that openness as a judgment call, so it clears the threshold and files or escalates rather than auto-fixing.
+The threshold: *anything expressible as a move/rename/status-edit with zero judgment calls and a passing reference-gate afterward* is rung 1; everything else files. A finding whose remedy is unambiguous but whose **cause** is contested — the tree diverges from the declaration and it is genuinely open whether the tree is wrong or the declaration is — carries that openness as a judgment call, so it clears the threshold and files or escalates rather than auto-fixing. The ladder governs **how a finding, once surfaced, is classified**, whoever surfaced it — including a finding from a slice the pass delegates away. *Which* slice a pass audits is a jurisdiction question, answered at § The five audit axes; the two questions never trade answers.
 
 1. **Auto-fix the unambiguous** — mechanical reconciliations (archiving closed orders, status frontmatter, dangling references, ignore-file entries) applied inline and committed with enumerated paths.
 2. **File the structural** — everything above the threshold becomes a **typed remedy work order**: an existing `type:` from the `feature | bug | refactor | chore` enum, usually `refactor` or `chore` (there is no `remedy` type), flowing through normal blessing and execution with a plan and verification. The Janitor directs; it does not operate.
 3. **Escalate the contestable** — genuine structural forks (naming, boundary placement, relocation) go to the operator.
 
-**In automatic mode**, an unresolved rung-3 fork stops with an `ESCALATE` Acceptance Verdict carrying the fork and the pass's recommendation — an instance of the **operator-gated stop** the closed enumeration already names ([execute-work-order-automatically](manager/workflows/execute-work-order-automatically.md) § Acceptance Verdict), never a fourth cause, and mirroring the Blessing gate's halt. Interpretation questions are never `ESCALATE` — they pause mid-flight.
+**In automatic mode at the blocking milestone-close pass**, an unresolved rung-3 fork stops with an `ESCALATE` Acceptance Verdict carrying the fork and the pass's recommendation — an instance of the **operator-gated stop** the closed enumeration already names ([execute-work-order-automatically](manager/workflows/execute-work-order-automatically.md) § Acceptance Verdict), never a fourth cause, and mirroring the Blessing gate's halt. **The halt binds there only.** At an **advisory** boundary — work-order close — an automatic-mode rung-3 fork is **raised and recorded open, never blocking**: a pass that never blocks a close cannot halt one. Interpretation questions are never `ESCALATE` — they pause mid-flight.
 
 ## Output convention
 
 The pass invents no container of its own. Rung-1 fixes **commit**, enumerated paths. Rung-2 findings become work orders in `work/todos/`, typed and filed like any other. Rung-3 escalations are **raised in-session**, to whoever presides. A pass run inside a campaign records itself in that campaign's own artifact — the work order's section, the phase doc's addendum, the milestone's campaign log.
+
+Whatever the container, **the record's shape is fixed**: per axis, **finding / rung / evidence**. Every axis reports — none-found is a reported result, not silence. **Rung-1 candidates declined at the threshold are recorded with the reason**, never silently dropped.
 
 ## On demand — /clean
 
