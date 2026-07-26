@@ -4,4 +4,4 @@ Closed missions, archived whole and in-repo — `<v>.<slug>/` with `MISSION.md`,
 
 | Mission | Outcome | Result | Report |
 | --- | --- | --- | --- |
-| `v1.subagent-boundary` | accomplished | Executor→Manager dispatch converted to native subagents; observability apparatus retired; `.claude/ADR.md` established; `main` purified to the project-generic template | [closing.md](v1.subagent-boundary/closing.md) |
+| `v1.subagent-boundary` | accomplished | Executor→Manager dispatch converted to native subagents; observability apparatus retired; `.claude/ADR.md` established; `main` purified to the project-generic template | `git show v1.subagent-boundary-closed:work/missions/v1.subagent-boundary/closing.md` |

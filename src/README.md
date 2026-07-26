@@ -4,4 +4,4 @@ The source container. The repo root is reserved for project organization — `do
 
 **Retirement**: a retired or archived sub-codebase (dead experimentation, superseded prototypes) moves to `src/_archive/<name>/` — conventionally named after the branch it rode. The underscore marks lifecycle state, as everywhere in the work system (`_done/`, `_enacted/`, …). Archived source keeps its record in the tree but leaves the live surface: the AST graph indexes only live `src/` subdirectories (the root `.cbmignore` whitelist — `src/_archive/` is excluded), so graph answers always describe the current system.
 
-In this repo: reserved for future workflow *software* (e.g. the deferred work-queue runner — `work/proposals/_deferred/26-07-11.work-queue-tier.md`). The bootstrap itself is documentation + `bun` scripts and lives in `.claude/`.
+In this repo: reserved for future workflow *software* (e.g. the deferred work-queue runner — `git show v1.subagent-boundary-closed:work/missions/v1.subagent-boundary/proposals/26-07-11.work-queue-tier.md`). The bootstrap itself is documentation + `bun` scripts and lives in `.claude/`.
