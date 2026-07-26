@@ -16,7 +16,7 @@
 | `runbooks/` | Operational procedure docs + operator-applied config payloads | Mission-versioned; triaged at open (carried / retired / watch) |
 | `sessions/` | The durable transcript archive behind callback stamps (`<machine>/<uuid>.jsonl.gz` + `MANIFEST`) | Archive-on-stamp + `/archive` sweeps; moved into the closing mission's archive |
 | `notes/` | Pre-proposal context: ideas not mature enough to propose, observations not settled enough to document | Operator scratch; graduates into proposals or evaporates |
-| `PROJECT.md` | The project supplement: operational facts agents read (quality gate, front-end surface, runtime evidence, per-role notes) | Persists across missions; re-certified like a carried footgun |
+| `PROJECT.md` | The project supplement: operational facts agents read (quality gate, structure declaration — § Structure, front-end surface, runtime evidence, per-role notes) | Persists across missions; re-certified like a carried footgun |
 
 Retired: `objectives/` — real objectives live in `todos/` and `milestones/`; proto-ideas in `notes/` and `proposals/`.
 
@@ -95,6 +95,24 @@ Conventions:
 | Machine | OS / shell | Repo path | Notes |
 | --- | --- | --- | --- |
 | `<machine>` | `<os>` / `<shell>` | `<repo-path>` | Single machine today; add a row per machine at bootstrap |
+
+## The declared-structure floor
+
+**Stated here once; referenced everywhere else.**
+
+> Every consuming project declares its structure; the system owns reconciling actual against declared.
+
+No fixed structure the template could ship is right everywhere — ecosystems force files to the root, product boundaries invert between repos, archives grow where the work does. Four of the five audit axes below are therefore not universally *specifiable*; the fifth, **work-tracking fidelity**, is — it reads template canon shipped identically to every consuming repo. Inverted, that meta-pattern is the true maximal-minimum universal: what is portable is not any particular structure but the obligation to declare one, and the system's obligation to reconcile the actual tree against the declaration.
+
+The declaration's home is **`work/PROJECT.md` § Structure**; its schema — subsection headings, bullet grammar, template defaults — is pinned in `.claude/BASELINE.md` bootstrap step 3. The reconciliation pass audits five axes, each reading its project-specific content from the declaration (the one exception marked in its row):
+
+| Axis | What the pass asks | What answers it |
+| --- | --- | --- |
+| **root discipline** | Does anything sit at the organizational root that the declaration does not allow? | § Root-file allowlist (packaging manifests: § Package roots) |
+| **product/non-product separation** | Is the shipped artifact cleanly separated from what merely supports it — nothing straddling the declared boundary? | § Product / non-product boundary |
+| **tracked-tree cleanliness** | Is anything tracked that should not be, or ignored that should be — machine-local state, build output, scratch, secrets — and does retired material sit in its declared archive rather than the working tree? | § Archive conventions, plus the project's own `.gitignore` (the ignore-side declaration) |
+| **whole-canon reference integrity** | Does every path the canon references resolve in the tree, with every absence sanctioned rather than silently tolerated? | § Sanctioned absences, § Reference-gate scope roots, § Reference-gate exclusions |
+| **work-tracking fidelity** | Do the work documents follow the tier ladder's forms — frontmatter, stamps, sections, filing? | Template canon (`todos/README.md` and this document) — shipped identically everywhere; the one axis that needs no declaration |
 
 ## The follow-through rule
 

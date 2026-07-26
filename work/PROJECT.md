@@ -13,6 +13,67 @@ Operational facts for agent roles working **on this repo** (the canonical workfl
 - **Footgun ledger**: `work/footguns/` (empty).
 - **Toolchain**: `bun` (the `bin/` scripts are bun scripts; `.claude/bin/package.json` is the executable interface).
 
+## Structure
+
+The declaration the declared-structure floor reads (`work/README.md` § The declared-structure floor), authored against the schema in `.claude/BASELINE.md` bootstrap step 3 — this section doubles as that schema's exemplar.
+
+### Root-file allowlist
+
+Tracked:
+
+- `CLAUDE.md` — agent entry (harness-fixed name)
+- `README.md` — human onramp
+- `.gitignore`
+- `.cbmignore` — graph-index whitelist
+- `.claude/` — the product (manifest: `.claude/BASELINE.md`)
+- `.archive/` — repo-local cold storage; convention-created, scaffolded with its README
+- `docs/` — knowledge container
+- `src/` — source container
+- `work/` — process container
+
+Present by convention, ignored by policy (declared so they do not read as undeclared drift):
+
+- `tmp/` — gitignored scratch / runtime stream logs
+
+### Product / non-product boundary
+
+- `.claude/` is the shipped artifact — the project-generic bootstrap manifested by `.claude/BASELINE.md`; genericity is its acceptance test (root `CLAUDE.md`). Everything else — `work/`, `docs/`, `src/`, the root keystones — supports its development and is project-shaped by design.
+
+### Package roots
+
+- `.claude/bin/` — the sole sanctioned package root (`.claude/bin/package.json`). Nothing else may carry a packaging manifest; "no packaging leaks to root" is this repo's instance of the axis.
+
+### Archive conventions
+
+- `work/missions/<v>/` — closed missions, archived whole; design history reachable through `<v>-closed` tags
+- `src/_archive/` — retired sub-codebases, created on first retirement
+- `.archive/` — cold storage: material that leaves the working tree but not the repo
+
+### Sanctioned absences
+
+Transcribed from quality-gate item 1 (§ All roles) — created by their commands, not scaffolded:
+
+- `src/_archive/` — at first sub-codebase retirement
+- `tmp/*` — runtime stream logs
+- `work/MISSION.md` — at `/plan` mission tier
+- `work/PROJECT.md` — authored at bootstrap step 3 — absent in a bare template tree
+- `work/todos/BACKLOG.md` — at first `/triage`
+- `work/sessions/MANIFEST` — at the first archive sweep
+- `work/design/` contents (`DESIGN.md`, `system/`, `sessions/`) — at the founding `/design`; the README is scaffolded
+
+### Reference-gate scope roots
+
+- `.claude/`
+- `work/`
+- `docs/`
+- `src/`
+- `tmp/`
+
+### Reference-gate exclusions
+
+- `work/proposals/` — historical record; rewriting is forbidden (root `CLAUDE.md`), so gating would manufacture permanently-unfixable failures
+- `work/notes/` — pre-proposal scratch, same protection
+
 ## Front-end surface (manager, inspector, designer, implementer)
 
 - **None.** This repo has no application UI; `interface` scope does not occur, the inspector is never dispatched, and the designer's remit is limited to documentation shape. (In a consuming project, this section carries: the serve recipe, target URLs, auth bootstrap, test posture, the app-side token home, and the external design tool in use, per `designer.md` — the design container itself is fixed convention: `work/design/`.)
