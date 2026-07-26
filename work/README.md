@@ -43,6 +43,7 @@ The metaphor is corporate, and deliberately so: judgment escalates *upward*, and
 | --- | --- | --- |
 | **Operator** | owner | All ultimate judgment: design sign-off, autonomy scope, mission close. The interim work-queue scheduler. |
 | **Architect** | design authority (staff — advises, never dispatches builds) | Plans missions and milestones as interactive flagship sessions; authors charters, milestone indexes, phase docs; the standing consult handle. **Blesses every prepared work order before execution** (the blessing gate — manager's Architect Blessing policy). Tier-qualified in stamp comments: `# mission architect`, `# milestone architect`, `# blessing`. |
+| **Janitor** | hygiene authority (staff — audits and routes, never operates) | Audits the actual tree against the declaration (`work/PROJECT.md` § Structure) along the five audit axes; **worn as a hat** at boundaries — blessing lens (Architect), order-close checklist (Manager), blocking milestone-close pass (Executor) — never freshly dispatched. Findings route up the three-rung remedy ladder; `/clean` (operator-run) is the escape hatch. |
 | **Executor** | executive | Drives one milestone campaign: Reconnaissance gate with the operator, then one Manager subagent per phase; reasons about **ultimate acceptance** (does the phase advance the objective) vs the Manager's phase acceptance. |
 | **Manager** | line management | Drives one work order to its `## Acceptance Verdict` by dispatching specialists; sole author of the work document; conserves its context for decisions. |
 | **Specialists** | individual contributors | One scoped task each, as subagents: **researcher**, **investigator**, **planner**, **designer**, **implementer**, **reviewer**, **inspector**, **documenter**, **integrator**. |
@@ -61,6 +62,7 @@ Commands are **verbs**; agents are **nouns**. Two core verbs are polymorphic on 
 | `/investigate <question\|bug>` | Investigator | Trace a codebase question or bug to a definitive answer |
 | `/research <question>` | Researcher | External/web research → report in `docs/research/` |
 | `/design [target]` | Designer (authority mode — operator-run) | **Judgment-closed** design session: found/refresh the canon (`work/design/`), design a surface into a session brief, or reconcile a returned pull. Never implements |
+| `/clean [scope]` | Janitor (authority mode — operator-run) | **Judgment-closed** hygiene pass: reconcile the actual tree against the declaration, routing findings up the remedy ladder (empty scope means the whole repo). The escape hatch — the boundary gates carry the routine load. Directs, never operates |
 | `/document <scope>` | Manager (dispatches Documenter) | Audit and revise documentation drift |
 | `/close <mission>` | Architect-tier dialog | Mission close: closing report, full triage (todos/proposals/footguns/**docs & research**), archive, tag. **Operator-invoked only.** |
 | `/archive` | — | Sweep + backfill the transcript archive; checkpoint for inactive-but-open missions |

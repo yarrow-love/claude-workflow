@@ -12,11 +12,11 @@ Design rationale: [`.claude/ADR.md`](ADR.md) — the decision register; the full
 - `executor/CLAUDE.md` + `executor/workflows/` (all files)
 - `architect/CLAUDE.md` + `architect/workflows/` (all files)
 - `researcher/CLAUDE.md` + `researcher/capabilities/` (all files)
-- `planner.md`, `investigator.md`, `implementer.md`, `reviewer.md`, `inspector.md`, `designer.md`, `documenter.md`, `integrator.md`
+- `planner.md`, `investigator.md`, `implementer.md`, `reviewer.md`, `inspector.md`, `designer.md`, `janitor.md`, `documenter.md`, `integrator.md`
 
 ### Commands (`.claude/commands/`)
 
-- `plan.md`, `execute.md`, `design.md`, `triage.md`, `investigate.md`, `research.md`, `document.md`, `close.md`, `archive.md`, `initialize.md`
+- `plan.md`, `execute.md`, `design.md`, `clean.md`, `triage.md`, `investigate.md`, `research.md`, `document.md`, `close.md`, `archive.md`, `initialize.md`
 
 ### Tooling (`.claude/bin/`)
 
