@@ -243,7 +243,7 @@ These are **prepared so you confirm rather than derive.** Read each, confirm or 
 | --- | --- |
 | `work/todos/26-07-25.execute-m1-janitor.md` (campaign log, `in-progress`) | **File to `_done/` at milestone close, then archive with the mission.** It is the M1 campaign log; it closes when the Executor's blocking milestone-close pass returns |
 | `work/todos/26-07-25.prove-pass.md` (`open`) | **File to `_done/`, then archive.** Phase 4a's dogfood-pass record; its findings are already routed |
-| `work/todos/26-07-25.prove-close.md` (`open`) | **File to `_done/`, then archive.** This order — 4c. Its own close-out is the last thing filed before the ceremony |
+| `work/todos/_done/26-07-25.prove-close.md` (filed at 4c close) | **Archive with the mission.** Phase 4c's order — the one this runbook was written under; it filed itself to `_done/` at its own close-out, before the ceremony |
 | `work/todos/bugs/26-07-25.bug.janitor-audit-method-gap.md` (`open`) | **Carries to a future mission.** 4a's instrument filing: the pass was blind to a declaration-consistency class. Not a defect this ceremony can settle |
 | `work/todos/bugs/26-07-25.bug.orchestration-return-path.md` (`open`) | **Carries.** The orchestration return-path defect; paired with the standing proposal below. Operator-gated |
 | **Divergence B** — the footgun-index convention (eight files instructing roles to reconcile an index the purified root `CLAUDE.md` does not carry) | **Raised and open by operator ruling; 4a staged it.** Carries as a design question. **Do not resolve it in the ceremony** — it spans seven `.claude/` policy docs plus `work/footguns/README.md`, and closing it silently would close a rung-3 escalation without an answer |
