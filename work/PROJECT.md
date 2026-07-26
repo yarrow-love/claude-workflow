@@ -10,7 +10,7 @@ Operational facts for agent roles working **on this repo** (the canonical workfl
   2. Tooling smoke test — `bun .claude/bin/session-archive`, `bun .claude/bin/consult` and `bun .claude/bin/reference-gate` with no args print usage and exit 1; `bun .claude/bin/commit-guard` from an interactive terminal (TTY) prints usage and exits 1, and on empty or invalid stdin exits 0 silently (the backstop never breaks a session); `cd work/sessions && sha256sum -c MANIFEST`.
   3. `/initialize` passes (the full audit; BASELINE integrity, hooks resolve, scaffold conformance).
 - **Session callbacks**: stamp per `work/README.md` § The callback grammar. Machine: `play`.
-- **Footgun ledger**: `work/footguns/` (empty).
+- **Footgun ledger**: `work/footguns/` — one entry, [`claude-bin.md`](footguns/claude-bin.md): `.claude/bin/` script-authoring traps.
 - **Toolchain**: `bun` (the `bin/` scripts are bun scripts; `.claude/bin/package.json` is the executable interface).
 
 ## Structure
