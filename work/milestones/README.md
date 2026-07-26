@@ -6,7 +6,7 @@ The active mission's phased roadmap — mission `v2.repo-hygiene` (chartered 26-
 
 | # | Milestone | Gist | Depends on | Status |
 | --- | --- | --- | --- | --- |
-| 1 | [janitor](1.janitor/MILESTONE.md) | Declared-structure floor into canon → Janitor competency + `/clean` + gate wiring → dogfood-validate, enact, fold prep | — | pending |
+| 1 | [janitor](1.janitor/MILESTONE.md) | Four phases: floor (doctrine + § Structure schema + declaration) → competency (`janitor.md`, `/clean`) → wiring (blessing lens, where-artifacts-land, advisory order-close, blocking milestone-close) → prove (dogfood pass, `reference-gate`, enactment, fold rehearsal) | — | pending (planned 26-07-25) |
 
 ## Conventions
 

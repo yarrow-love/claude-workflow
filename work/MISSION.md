@@ -47,6 +47,12 @@ The proposal's design, at mission scale: the declared-structure floor into canon
 - **Proposals**: `26-07-25.repo-hygiene` (adopted) enacts via this mission — files to `_enacted/` in the validation phase. v1's `_deferred/` set persists untouched.
 - **Design canon / runbooks**: empty scaffold on this branch; v1's `fold-and-close.md` runbook inherited by archive reference (D5).
 
+## Amendments
+
+**A1 — Footprint: `.claude/bin/` enters scope (26-07-25, operator-approved at milestone planning).** Neither the proposal's "Surfaces touched" list nor this charter's Scope names `.claude/bin/` — an omission by abstraction (surfaces were enumerated from the doctrine-and-wiring perspective; mechanization was never confronted), which under D1 leaves it undecided rather than implicitly permitted. Resolved: **`.claude/bin/reference-gate` lands this mission**, carrying the whole-canon reference-integrity axis as executable product, with its BASELINE manifest row and tooling smoke-test row. Rationale (mission architect, consulted): D2's "mechanism" was written against *a project's facts*, not against code — `.claude/bin/` is already product, and the declaredness split maps as **engine → product, facts → seam**; a generic script that reads its sanctioned-absence list from the declaration is the purest embodiment of D2 in the mission, more so than the status quo where a generic mechanism sits camouflaged as a project fact inside `work/PROJECT.md`. A prose-only axis every consuming project re-authors is precisely the "prose without an owner" failure this mission exists to kill. Delivery: via a typed rung-2 remedy work order under normal blessing during the dogfood phase, which gives the pass a real rung-2 subject. Scope and success criterion 2 read as extended accordingly.
+
+**A2 — `work/PROJECT.md § Structure` carries a sanctioned-absences subsection (26-07-25).** Interpretation of D2, bound at milestone planning: the declaration must be a list a *mechanism* can read, not prose buried in a gate recipe. Sanctioned absences are structural facts; § Structure is the declared home for structural facts. This gives the sanctioned-absence set exactly one authoritative home — which is also the disposition D6's seeded divergence A resolves into, and therefore must **not** be pre-applied before the dogfood pass detects it.
+
 ## Success criteria
 
 1. The floor is canon: PROJECT.md § Structure defaults in BASELINE's bootstrap guidance, doctrine in `work/README.md`, and the genericity test holds — zero project-shaped facts entered `.claude/`.
