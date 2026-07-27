@@ -87,5 +87,5 @@ Recorded so the P4 ledger authors from charter-verified state, not from the prop
 
 | # | Milestone | Gist | Depends on | Status |
 | --- | --- | --- | --- | --- |
-| 1 | [protocol](milestones/1.protocol/MILESTONE.md) | Two phases (hardened 26-07-27): author (mechanical fix as commit #1 + the protocol doc + BASELINE final form) → rewire (the remaining seven sites — eight total, manager card added at hardening) | — | pending |
+| 1 | [protocol](milestones/1.protocol/MILESTONE.md) | Two phases (hardened 26-07-27): author (mechanical fix as commit #1 + the protocol doc + BASELINE final form) → rewire (the remaining seven sites — eight total, manager card added at hardening) | — | done (26-07-27) |
 | 2 | [hazard-and-evidence](milestones/2.hazard-and-evidence/MILESTONE.md) | ADR standing hazard (shared-store family) + P4 version ledger → interim `git commit --only` documentation → live spot-check + enactment filing | 1 | pending |

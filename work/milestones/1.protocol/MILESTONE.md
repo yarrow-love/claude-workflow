@@ -7,9 +7,11 @@ sessions:
 
 # Milestone 1 — protocol
 
+> **Closed accomplished 26-07-27.** Both phases passed phase and ultimate acceptance on one Manager pass each; the blocking hygiene pass ran clean. Campaign record: [`work/todos/_done/26-07-27.execute-protocol.md`](../../todos/_done/26-07-27.execute-protocol.md).
+
 > **Hardened 26-07-27** (operator dialog: two phases, not the stub's three — the mechanical fix rides phase 1 as its mandated first commit, avoiding the double-touch of BASELINE's graph bullet; the `.claude/protocols/` class is defined by its BASELINE manifest section, no directory README, per the `.claude/` precedent). Charter: [`work/MISSION.md`](../../MISSION.md); spec: the adopted proposal (charter D1); determinations D2/D3/D4/D6 bind every phase.
 >
-> **Amended 26-07-27 at the Reconnaissance gate** (campaign log: [`work/todos/26-07-27.execute-protocol.md`](../../todos/26-07-27.execute-protocol.md) § Reconnaissance; architect rulings A1–A9). The site count moves **eight → nine**: reconnaissance found `src/README.md:5` asserting the trust-the-index bargain verbatim in a bootstrap-copied scaffold file, outside every acceptance criterion. The charter's success-criterion-3 numeral is **not** rewritten — the operative clause is the totality ("all … sites point at the protocol"), the numeral a charter-time enumeration snapshot already superseded once at hardening; close-out measures the totality (architect attestation, `architect@play/2bd4068f-a96d-4295-afb8-8fee72bbeb43`).
+> **Amended 26-07-27 at the Reconnaissance gate** (campaign log: [`work/todos/_done/26-07-27.execute-protocol.md`](../../todos/_done/26-07-27.execute-protocol.md) § Reconnaissance; architect rulings A1–A9). The site count moves **eight → nine**: reconnaissance found `src/README.md:5` asserting the trust-the-index bargain verbatim in a bootstrap-copied scaffold file, outside every acceptance criterion. The charter's success-criterion-3 numeral is **not** rewritten — the operative clause is the totality ("all … sites point at the protocol"), the numeral a charter-time enumeration snapshot already superseded once at hardening; close-out measures the totality (architect attestation, `architect@play/2bd4068f-a96d-4295-afb8-8fee72bbeb43`).
 
 ## Objective
 
@@ -33,7 +35,7 @@ The codebase-graph protocol into product: the two knowingly-wrong BASELINE lines
 | # | Phase | Gist | Status |
 | --- | --- | --- | --- |
 | 1 | [author](1.author.md) | Mechanical truth fix as commit #1, then the protocol doc authored and BASELINE's graph bullet + manifest rewritten once, into final form | done (26-07-27) |
-| 2 | [rewire](2.rewire.md) | The remaining eight sites point at the protocol under the verified-freshness trust model; D6 guard verified across all of them | pending |
+| 2 | [rewire](2.rewire.md) | The remaining eight sites point at the protocol under the verified-freshness trust model; D6 guard verified across all of them | done (26-07-27) |
 
 ## Acceptance
 
