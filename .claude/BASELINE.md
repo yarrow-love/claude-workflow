@@ -18,6 +18,12 @@ Design rationale: [`.claude/ADR.md`](ADR.md) — the decision register; the full
 
 - `plan.md`, `execute.md`, `design.md`, `clean.md`, `triage.md`, `investigate.md`, `research.md`, `document.md`, `close.md`, `archive.md`, `initialize.md`
 
+### Protocols (`.claude/protocols/`)
+
+Cross-agent operational protocols: procedures more than one role enacts, stated once and pointed at from role cards rather than restated in each.
+
+- `codebase-graph.md` — working against the codebase knowledge graph: freshness verification, wedged-store recovery, evidence-passing dispatch, and the consuming seam those procedures read.
+
 ### Tooling (`.claude/bin/`)
 
 - `.claude/bin/session-archive`, `.claude/bin/consult`, `.claude/bin/commit-guard`, `.claude/bin/reference-gate`, `.claude/bin/package.json`
@@ -72,8 +78,8 @@ Baseline keys: `permissions.allow` entries `Bash(claude:*)` (child-session dispa
   # (https://github.com/DeusData/codebase-memory-mcp/releases):
   curl -fsSL https://raw.githubusercontent.com/DeusData/codebase-memory-mcp/main/install.sh | bash
   ```
-- **Codebase graph index** (codebase-memory-mcp): the repo indexed — `codebase-memory-mcp cli index_repository --repo-path <repo>`. Index policy: **local, gitignored** — `.codebase-memory/` joins `.gitignore` (reindexing is cheap; no binary artifacts in git). **Index surface — live source only**: the committed root `.cbmignore` (gitignore syntax, layered over `.gitignore`) whitelists `src/` subdirectories and excludes everything else, including `src/_archive/` (retired sub-codebases — convention: `src/README.md`); one project at the repo root, never per-subsystem (cross-subsystem edges are the monorepo's value). Read-heavy roles (researcher, investigator, planner, reconnaissance) prefer graph queries over grep fan-outs when the MCP is present.
-- **Files**: `work/PROJECT.md` present and answering the supplement questions (quality gate, structure declaration — § Structure, front-end surface, runtime evidence, library list, doc surface); root `CLAUDE.md` present; the `work/` scaffold complete.
+- **Codebase graph index** (codebase-memory-mcp): the repo indexed — `codebase-memory-mcp cli index_repository --repo-path <repo>`. **Where the store lives**: outside the repo, in a per-user cache directory — in the documented flow no index artifact is ever written into the tree. The exception, acknowledged: an opt-in export mode can write a repo-local graph artifact for team-sharing bootstraps, and this bootstrap never invokes it. Policy, stated as policy: graph artifacts are **never committed**, and `.codebase-memory/` stays in `.gitignore` as defence-in-depth for that opt-in case — not as a description of where the index lives (reindexing is cheap; no binary artifacts in git). **Index surface — live source only**: the committed root `.cbmignore` (gitignore syntax, layered over `.gitignore`) whitelists `src/` subdirectories and excludes everything else, including `src/_archive/` (retired sub-codebases — convention: `src/README.md`); one project at the repo root, never per-subsystem (cross-subsystem edges are the monorepo's value). **Freshness is verified, never inferred** — not from the presence of an index row, not from `head_sha`, not from `index_status`; the verification recipe is `.claude/protocols/codebase-graph.md` § Verifying freshness, and `auto_watch` is the background refresher, unreliable on bulk moves and renames. **Store health** is observable read-only by the wedge canary — a `.db-wal` far larger than its `.db` — at the store location the consuming seam declares (`work/PROJECT.md` § Codebase graph); recovery is `.claude/protocols/codebase-graph.md` § Recovering a wedged store. Read-heavy roles (researcher, investigator, planner, reconnaissance) prefer graph queries over grep fan-outs when the MCP is present, on the trust model `.claude/protocols/codebase-graph.md` § Evidence-passing dispatch states.
+- **Files**: `work/PROJECT.md` present and answering the supplement questions (quality gate, structure declaration — § Structure, front-end surface, codebase-graph seam — § Codebase graph, runtime evidence, library list, doc surface); root `CLAUDE.md` present; the `work/` scaffold complete.
 - **Settings**: every hook in `settings.json` points at an existing file; baseline permission entries present; the `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` env cap present and `"2"`.
 - **Git hygiene**: secrets patterns and large-format assets gitignored; `tmp/` gitignored.
 - **Retention**: CLI transcript `cleanupPeriodDays` raised so the local cache outlives a campaign.

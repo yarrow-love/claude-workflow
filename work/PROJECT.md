@@ -92,6 +92,10 @@ Containers whose references are **temporal**: a plan naming a path it will creat
 
 - **None.** This repo has no application UI; `interface` scope does not occur, the inspector is never dispatched, and the designer's remit is limited to documentation shape. (In a consuming project, this section carries: the serve recipe, target URLs, auth bootstrap, test posture, the app-side token home, and the external design tool in use, per `designer.md` — the design container itself is fixed convention: `work/design/`.)
 
+## Codebase graph
+
+- **None.** This repo has no indexable `src/`, so no project is indexed here and the graph procedures never fire — read-heavy roles work from grep and file reads. (In a consuming project, this section records: the install variant in use; the store directory; the derived project name for the repo; the per-OS process-check and kill commands; the per-OS store-file delete command; a known-moved-path candidate for the flip check — a path a committed refactor removed, plus the path the code moved to, refreshed when it stops matching a recent refactor; and the refresher's log location. The procedures that read these values: `.claude/protocols/codebase-graph.md`.)
+
 ## Runtime evidence (investigator)
 
 - The `bin/` scripts' stdout/stderr and exit codes; the `work/sessions/MANIFEST`; the harness's own behavior (which commands/agents load — visible in a fresh session's registry).

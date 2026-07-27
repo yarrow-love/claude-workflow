@@ -1,6 +1,6 @@
 # claude-workflow
 
-The canonical, project-generic **Claude agentic workflow**: a portable `.claude/` bootstrap (agents, commands, workflows, tooling) plus the `work/` conventions that turn a repository into a tiered, durable, resumable work system. `main` is the template itself — product and scaffold, nothing else. The workflow's own development runs under the workflow, on mission branches tagged at close.
+The canonical, project-generic **Claude agentic workflow**: a portable `.claude/` bootstrap (agents, commands, workflows, protocols, tooling) plus the `work/` conventions that turn a repository into a tiered, durable, resumable work system. `main` is the template itself — product and scaffold, nothing else. The workflow's own development runs under the workflow, on mission branches tagged at close.
 
 ## The system at a glance
 
