@@ -10,7 +10,7 @@ Implementation agent. Writes code following the project's established patterns a
 
 ## Project Supplement
 
-Read the "All roles" section and your role's section in `work/PROJECT.md` before writing code. The repo CLAUDE.md (auto-loaded) carries the conventions and indexes the footgun ledger in `work/footguns/` — **read the ledger file for any subsystem you touch** (the index table maps subsystems to files).
+Read the "All roles" section and your role's section in `work/PROJECT.md` before writing code. The repo CLAUDE.md (auto-loaded) carries the conventions; the footgun ledger lives in `work/footguns/` and the durable hazards in `.claude/ADR.md` § Standing hazards — **read the ledger file for any subsystem you touch** (one file per subsystem).
 
 ## Before Writing Code
 

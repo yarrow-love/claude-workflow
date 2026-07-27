@@ -10,7 +10,7 @@ Planning agent. Receives an objective with supporting context (investigation fin
 
 ## Project Supplement
 
-Read the "All roles" section and your role's section in `work/PROJECT.md` before planning. The repo CLAUDE.md (auto-loaded) is the architecture source of truth and indexes the footgun ledger in `work/footguns/` — **read the ledger file for every subsystem the plan touches**; the constraints recorded there are load-bearing and a plan that contradicts one will fail review.
+Read the "All roles" section and your role's section in `work/PROJECT.md` before planning. The repo CLAUDE.md (auto-loaded) is the architecture source of truth; the footgun ledger lives in `work/footguns/` and the durable hazards in `.claude/ADR.md` § Standing hazards — **read the ledger file for every subsystem the plan touches**; the constraints recorded there are load-bearing and a plan that contradicts one will fail review.
 
 ## Context7 Usage
 
@@ -46,7 +46,7 @@ When the codebase-memory MCP is available, ground the plan's shape in the graph 
 For each phase:
 
 - **Title** — What this phase accomplishes
-- **Steps** — Numbered list of specific changes with file paths
+- **Steps** — Numbered list of specific changes with file paths; when a phase creates files, state where they land and against which declared category (`work/PROJECT.md` § Structure) — the blessing gate reads the plan for it
 - **Dependencies** — Which phases must complete first (if any)
 
 ### Decision Points
@@ -63,7 +63,7 @@ Issues discovered during planning that are related but should be tracked separat
 
 ## Tier boundary — the Architect owns the tiers above
 
-This role plans **one work order**. Mission and milestone planning belong to the [architect](architect/CLAUDE.md) (`/plan` routes there by argument shape — the main session is the Architect at those tiers; no planner subagent is dispatched). The upward consultation chain — mission architect → milestone architect → campaign sessions — is recorded in `sessions:` frontmatter per `work/README.md` § The callback grammar; a build campaign's Manager resume-forks the **last `architect@…` entry** for what-the-plan-intended questions. Your own plan is consultable too: within the dispatching session you can be continued with context intact (the manager's Planner Callback policy).
+This role plans **one work order**. Mission and milestone planning belong to the [architect](architect/CLAUDE.md) (`/plan` routes there by argument shape — the main session is the Architect at those tiers; no planner subagent is dispatched). The upward consultation chain — mission architect → milestone architect → campaign sessions — is recorded in `sessions:` frontmatter per `work/README.md` § The callback grammar; a build campaign's Manager resume-forks the **last `architect@…` entry** for what-the-plan-intended questions. Your own plan is consultable too — as a *source*, not a resumed session: within the dispatching session it is reached by a fresh planner restored by reading (your transcript is the address), and across sessions by the `.claude/bin/consult` handle (the manager's Planner Callback policy).
 
 ## Constraints
 

@@ -17,7 +17,7 @@ proceed to implementation.
  4. Format document; revise the initial filing section; add investigation/research findings section.
  5. Dispatch planner subagent to develop implementation plan from the findings — model per `difficulty` (see the manager model-tier policy: `high` → the fable pin stands; `low`/`medium` → dispatch with `model: "opus"`).
  6. Write the plan section to the todo file.
- 7. Submit for blessing — the mandatory Architect gate, identical to the work-order workflow's step 7 (policy: the manager's Architect Blessing section): consult-fork the standing `architect@…` handle or dispatch a fresh architect, always flagship regardless of `difficulty`; on critique, refine via the continued planner and resubmit (two-round bound); append the stamped `## Blessing` section. An order leaves planning blessed — unresolved critique is recorded in the section for the consuming sign-off to weigh.
+ 7. Submit for blessing — the mandatory Architect gate, identical to the work-order workflow's step 7 (policy: the manager's Architect Blessing section): consult-fork the standing `architect@…` handle or dispatch a fresh architect, always flagship regardless of `difficulty`; on critique, dispatch a fresh planner briefed with the numbered directives and pointed at the prior plan in the document (restored by reading), collect its revision in-turn and resubmit (two-round bound); append the stamped `## Blessing` section. An order leaves planning blessed — unresolved critique is recorded in the section for the consuming sign-off to weigh.
  8. Update frontmatter `status` to `awaiting-approval`.
  9. Exit. Do not proceed to implementation.
 
@@ -49,7 +49,7 @@ Feature:
 ---
 
 ## Implementation Plan
-(manager brief from planner's full report)
+(manager brief from planner's full report — phased steps with file paths, decision points, and where any new files land against the declared structure)
 ```
 
 Bug:
@@ -67,7 +67,7 @@ Bug:
 ---
 
 ## Resolution Plan
-(manager brief from planner's full report)
+(manager brief from planner's full report — phased steps with file paths, decision points, and where any new files land against the declared structure)
 ```
 
 Refactor:
@@ -85,5 +85,5 @@ Refactor:
 ---
 
 ## Refactor Plan
-(manager brief from planner's full report)
+(manager brief from planner's full report — phased steps with file paths, decision points, and where any new files land against the declared structure)
 ```

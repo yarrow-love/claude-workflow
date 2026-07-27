@@ -63,11 +63,11 @@ After code review, resolve **mechanical** findings (localized fixes, no design i
 
 ## Architect Blessing
 
-Every prepared work order is submitted to the Architect before execution — a mandatory agent-side gate between the written plan and the operator sign-off (work-order step 7; it equally concludes `/plan`'s plan-work-order). The Architect reads the order whole and returns a verdict: **`BLESSED`**, or numbered critique directives.
+Every prepared work order is submitted to the Architect before execution — a mandatory agent-side gate between the written plan and the operator sign-off (work-order step 7; it equally concludes `/plan`'s plan-work-order). The Architect reads the order whole and returns a verdict: **`BLESSED`**, or numbered critique directives — judging service-to-intent and, wearing the [janitor](../janitor.md)'s hat as the plan-time hygiene lens, whether the order states where its artifacts land, consistent with the project's structure declaration.
 
 - **Blesser resolution — standing handle first.** When the order's `sessions:` frontmatter carries a consultable planning handle (the last `architect@…` entry, machine-local), consult it via `bun .claude/bin/consult "<handle>" "<question>"` per Planner Callback (the script owns the restore ladder + the read-only fork boundary) — the upstream spec's author is the right judge of whether the order serves its intent; independence is not the point here, authority-of-intent is. The blessing is a read-and-critique, which the read-only fork supports fully (it Reads the order and returns a verdict, losing only the ability to act). When no handle exists or the consult fails, dispatch a fresh architect subagent briefed with the work order, the mission/milestone context it descends from, and the ask: *bless or critique*.
 - **Always flagship.** The blessing runs `fable` (fall back to `opus` if unavailable) regardless of the order's `difficulty` — it is one bounded read-and-critique, not a planning session; the planner downshift does not apply to it.
-- **Refinement loop, bounded.** On critique, refine via the **continued planner** (the author holds the rationale), revise the plan section, and resubmit. Two rounds maximum. Unresolved after the bound: in the manual workflow, carry both positions to the sign-off — the operator adjudicates; in automatic mode, stop with an `ESCALATE` verdict carrying the Architect's position — autonomous execution never proceeds over an unblessed order.
+- **Refinement loop, bounded.** On critique, refine via a **fresh planner, restored by reading** — briefed with the critique directives, the plan section, and a pointer to the prior planner's transcript (the recorded `agentId` is the address), where the rationale is held. Never a continuation: you are mid-turn at step 7, so a resumed planner's revision would arrive with no act of yours left to collect it (`work/README.md` § The collection invariant). Revise the plan section and resubmit. Two rounds maximum. Unresolved after the bound: in the manual workflow, carry both positions to the sign-off — the operator adjudicates; in automatic mode, stop with an `ESCALATE` verdict carrying the Architect's position — autonomous execution never proceeds over an unblessed order.
 - **Record it.** Append a stamped `## Blessing` section (`> architect@<machine>/<session-id> # blessing` — the consult fork's own session id when consulted, yours when the architect ran as your subagent): the verdict, each directive, and how it was resolved. The blessing is provenance, not authority — new design decisions surfaced by the critique still escalate to the operator.
 
 ## Available Agents
@@ -93,33 +93,35 @@ Each subagent starts with zero context. Prompts must be:
 - **Scoped** — One phase or focused task per agent. Don't overload.
 - **Directive** — Tell the agent exactly what to do, not what to figure out.
 
-**Fresh vs continued — dispatch by what the task needs.** Fresh dispatch when *independence* is the point: the reviewer and inspector must not inherit the implementer's assumptions — never continue them from a build context, regardless of token pressure. Continuation (SendMessage to a previously-dispatched agent, context intact) when the task *extends held context*. A continued agent acting in a different capacity stamps the acting role over the session id, per the grammar.
+**Fresh either way — dispatch by what the task needs.** Fresh when *independence* is the point: the reviewer and inspector must not inherit the implementer's assumptions — never continue them from a build context, regardless of token pressure. **Fresh, restored by reading** when the task needs *held context*: brief the new agent from the work doc first, then add targeted reads of the prior agent's transcript or task output where the held context genuinely matters (the recorded `agentId` is the address; targeted reads, never bulk — coordinates pinned in `.claude/ADR.md`). The re-brief costs tokens a continuation would not have spent; pay it — the spend lands on the specialist re-reading documents rather than on your own context, and the alternative is an answer nothing would ever collect. Continuation is not a Manager mechanic: **send-then-read is the second half of the root allowance**, stated once in `work/README.md` § The collection invariant and scoped there to the Executor. Where a continued agent exists anyway — the Executor's nudge, a consult-fork — and it acts in a different capacity, it stamps the acting role over the session id, per the grammar.
 
 ### Dispatch classification (settled 26-07-11)
 
 The authoritative per-step policy for both workflows. Model pins re-certified unchanged at the same settlement (planner→fable with the `difficulty` downshift, implementer/designer→opus, rest→sonnet); validation against real campaign cost data (each Manager's cost rides the dispatch result surface) is deferred to the first campaign's close — a cheaper tier for mechanical steps reopens there, not before.
 
+**Send-then-read is the second half of the root allowance, not a general collection mechanic** (`work/README.md` § The collection invariant): it presupposes a sender whose next act arrives independently of the awaited answer, and only the Executor has one. So the single SendMessage `continued` row below is the root-scoped phase build, whose actor is the Executor. Every row you run as a Manager is **fresh, restored by reading** instead — brief from the work doc, then targeted reads of the prior agent's transcript or task output where held context genuinely matters (the recorded `agentId` is the address). The other `continued` rows are consult-forks (`.claude/bin/consult`): a synchronous, read-only round trip inside your own turn, unaffected by any of this. Trace the mechanism; never pattern-match on the word.
+
 | Dispatch | Mode | Why |
 | --- | --- | --- |
 | investigate (work-order 2) — researcher / investigator | fresh | first touch; no prior context exists |
-| plan (work-order 5) — planner | fresh, then **continued** for questions | first contact is fresh; plan questions ride the author (Planner Callback) |
+| plan (work-order 5) — planner | fresh; questions ride a **fresh planner, restored by reading** | the author is still the right source, reached by reading its transcript (Planner Callback) — a continuation's answer would have no act of yours left to collect it |
 | bless (work-order 7) — architect | **continued** (consult-fork the standing handle); fresh fable dispatch when none exists | the upstream spec's author judges service-to-intent — authority-of-intent, not independence, is the point (Architect Blessing) |
-| build (work-order 9) — implementer per phase | fresh | self-contained briefs by design; each becomes the continuation anchor for its phase downstream |
+| build (work-order 9) — implementer per phase | fresh | self-contained briefs by design; each phase's brief, record and diff are what the downstream fresh dispatches read |
 | review (work-order 10) — reviewer | **fresh — required** | independence is the step's purpose; never continue from a build context |
-| resolve findings (work-order 11) — implementer | **continued** | extending the build context that produced the code |
-| gate failure (work-order 12) | judgment — see the step | obvious break → continued implementer directly; non-obvious → fresh investigator (diagnosis must not inherit the builder's assumptions), then continued implementer fixes |
+| resolve findings (work-order 11) — implementer | **fresh, restored by reading** | the build context is recovered by the findings, the phase's record, and its diff; resuming the builder would strand the fix — nothing would schedule the read |
+| gate failure (work-order 12) | judgment — see the step; **fresh** on either arm | obvious break → fresh implementer briefed with the gate output and the phase's diff; non-obvious → fresh investigator (diagnosis must not inherit the builder's assumptions), then a fresh implementer fixes |
 | inspect (work-order 14) — inspector | **fresh — required** | sees what a user sees |
-| doc wrap-up (work-order 16) — implementer as documenter | **continued** | transcribes held intent; documenter conventions bind |
-| trivial mid-flow bugs (work-order 19) — implementer | continued when adjacent, else fresh | a nearby build context is the cheapest correct fixer |
+| doc wrap-up (work-order 16) — implementer as documenter | **fresh, restored by reading** | the diff plus the work doc is the brief — held intent is legible there; documenter conventions bind |
+| trivial mid-flow bugs (work-order 19) — implementer | **fresh** | adjacency is realized by pointing the fresh agent at the phase's record and diff, not by resuming the agent that holds it |
 | reconnaissance (milestone 3) — researchers | fresh | first touch; findings travel to child Managers via documents — subagents don't cross the session boundary |
-| phase build (milestone 7.1) — subagent Manager | SendMessage **continuation** for residuals; **fresh subagent** for re-plans | incremental residuals extend context; a re-plan needs clean premises |
+| phase build (milestone 7.1) — subagent Manager | SendMessage **continuation** for residuals; **fresh subagent** for re-plans | incremental residuals extend context; a re-plan needs clean premises. Root-scoped, and the exemplar the rows above follow: the actor is the Executor, the one seat whose next act arrives on its own — that is what the other rows lack, not nerve |
 | consults — architect / planner / designer | **continued** (resume-fork) | by design: the author answers intent — plan questions ride the architect, brief questions ride the designer authority session |
 
 ## Planner Callback
 
 The plan's author is a consultable resource — prefer calling it back over rebuilding context in a fresh agent:
 
-- **Within a session:** a previously-dispatched planner subagent can be continued with its context intact (send a follow-up to the same agent rather than spawning anew). When a reviewer finding seems to contradict the plan, or an implementer reports a plan assumption doesn't hold, ask the planner that wrote it.
+- **Within a session:** when a reviewer finding seems to contradict the plan, or an implementer reports a plan assumption doesn't hold, the planner that wrote it is still the right *source* — what changes is how you reach it. Not a continuation: dispatch **fresh, restored by reading** — brief the new planner from the work doc, then add targeted reads of the prior planner's transcript or task output where the held rationale genuinely matters (the recorded `agentId` is the address; targeted reads, never bulk). A resumed planner's answer would arrive with no act of yours left to collect it — the one-line test: *would I act again even if this answer never arrived?*
 - **Across sessions:** a milestone planned by `/plan work/milestones/<m>` carries an append-only `sessions:` callback list in its MILESTONE.md frontmatter (copied into seeded work docs); the consultation handle is the **last `architect@<machine>/<session-id>` entry** — earlier architect entries are upstream (the mission architect that stubbed the milestone). Consult it with `bun .claude/bin/consult "<handle>" "<question>"` — the required consult path (the script owns the restore-before-resume ladder, the read-only fork boundary, and the repo-binding guard; a raw `claude -p --resume … --fork-session` recipe bypasses all three and must not be used). Machine-local: valid only where the entry's `<machine>` segment matches this host; otherwise degrade to documents + a fresh dispatch. (Legacy forms: `planner@…` entries annotated `# milestone architect`, or `plan-session:` + `plan-machine:` — the same handle, pre-convention.)
 - **The boundary — interpretation vs decision.** The consulted author answers what-the-plan-intended questions; it never owns **new** design decisions — those still escalate to the user. Always instruct the consult to "flag if this needs a human decision," and treat that flag as ESCALATE. When an escalation does reach the user, attach the consult's analysis — the user reacts to an articulated position instead of answering cold.
 - **Discipline:** distill every consult into the work doc (the canonical record; consults are advisory). Reserve consults for genuine forks — routine questions are answered by work docs and researchers. `--model fable`, falling back to `opus` if unavailable.
@@ -142,19 +144,26 @@ When a workflow touches the project's front-end surface (see the supplement), di
 
 **When live inspection isn't meaningfully automatable** (undeployed changes, OS-level dialogs, multi-participant flows): say so explicitly in the Front-end Inspection section with the rationale and a concrete manual verification recipe for the operator. Never imply automated verification that didn't happen.
 
+## Turn discipline
+
+**The collection invariant binds every dispatch** (`work/README.md` § The collection invariant — stated there once): pass `run_in_background: false` explicitly on every Agent-tool dispatch, and never end a turn while a child you launched is live. **A Manager's turn may not end between dispatch and collection.** That bound is also why you may not continue a completed agent for work your verdict depends on: send-then-read presupposes a next act arriving independently of the awaited answer, and a Manager — barred from polling and from ending its turn — has none, so nothing would ever schedule the read (`work/README.md` § The collection invariant, the precondition clause; the substitute is **fresh, restored by reading**). Dispatch is never completion; the only legitimate turn-ends are the `## Acceptance Verdict`, a pause-and-ask question, or an explicit `ESCALATE` — the vocabulary's home is [work-order automatic mode](workflows/execute-work-order-automatically.md) § Acceptance Verdict, which this rule names rather than extends. A child is collected when its result is received *and* folded into the work doc; its `agentId` rides the dispatch ledger, written at dispatch time (`work/todos/README.md` § Document structure — the dispatch record).
+
+**The obligation, not a topology.** An uncollected child has no route to you that canon may rely on — collection inside your own turn is the only sanctioned path, and a continuation's answer lands at the root, with no route back to a sender below the root: read, never await — send-then-read, the root's mechanic, stated once in `work/README.md` § The collection invariant. This rule is the **prevention**, at the dispatch site; the Executor's SendMessage nudge is the **recovery** when it is breached ([executor](../executor/CLAUDE.md) § The Manager boundary — an Agent-tool subagent), and it is root-scoped — a Manager never nudges a specialist expecting a reply; detection at boundaries is the hygiene pass's work-tracking-fidelity axis ([janitor](../janitor.md) § The five audit axes).
+
 ## Closing Out
 
 After implementation, review, and front-end inspection (if applicable) are complete, the close-out runs immediately on completion/sign-off, before any reply prose (`work/README.md` § The follow-through rule):
 
 1. Run the project quality gate
-2. Group changes into related commits (one per phase or logical unit)
-3. Write the "Summary" section to the work document:
+2. **Hygiene checklist — advisory.** Wear the [janitor](../janitor.md)'s hat for a light pass over what this order touched: is the tree still consistent with the parts of the structure declaration (`work/PROJECT.md` § Structure) the order reached? Route anything found by `janitor.md` § The remedy ladder — mechanical fixes ride the commits below; everything else is noted or filed. It **never blocks this close**: whole-repo drift is invisible at order scale, and blocking here would tax every order for drift it cannot see. The blocking pass is the milestone's (`janitor.md` § The hat pattern).
+3. Group changes into related commits (one per phase or logical unit)
+4. Write the "Summary" section to the work document:
    - What changed (files, commits)
    - Design decisions made during implementation
    - Deferred work with enough detail to seed a future todo
    - Anything that diverged from the plan and why
-4. If the work completes a milestone phase: update the corresponding `work/milestones/` entry and reconcile the footgun ledger (`work/footguns/` + the CLAUDE.md index) (add new footguns, trim resolved ones) in the same `Document:` commit
-5. Move the document from its inbox to `work/todos/_done/`
+5. If the work completes a milestone phase: update the corresponding `work/milestones/` entry and reconcile the footgun ledger (`work/footguns/` + `.claude/ADR.md` § Standing hazards) (add new footguns, trim resolved ones) in the same `Document:` commit
+6. Move the document from its inbox to `work/todos/_done/`
 
 ## Standing Behaviors
 

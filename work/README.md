@@ -16,7 +16,7 @@
 | `runbooks/` | Operational procedure docs + operator-applied config payloads | Mission-versioned; triaged at open (carried / retired / watch) |
 | `sessions/` | The durable transcript archive behind callback stamps (`<machine>/<uuid>.jsonl.gz` + `MANIFEST`) | Archive-on-stamp + `/archive` sweeps; moved into the closing mission's archive |
 | `notes/` | Pre-proposal context: ideas not mature enough to propose, observations not settled enough to document | Operator scratch; graduates into proposals or evaporates |
-| `PROJECT.md` | The project supplement: operational facts agents read (quality gate, front-end surface, runtime evidence, per-role notes) | Persists across missions; re-certified like a carried footgun |
+| `PROJECT.md` | The project supplement: operational facts agents read (quality gate, structure declaration — § Structure, front-end surface, runtime evidence, per-role notes) | Persists across missions; re-certified like a carried footgun |
 
 Retired: `objectives/` — real objectives live in `todos/` and `milestones/`; proto-ideas in `notes/` and `proposals/`.
 
@@ -43,6 +43,7 @@ The metaphor is corporate, and deliberately so: judgment escalates *upward*, and
 | --- | --- | --- |
 | **Operator** | owner | All ultimate judgment: design sign-off, autonomy scope, mission close. The interim work-queue scheduler. |
 | **Architect** | design authority (staff — advises, never dispatches builds) | Plans missions and milestones as interactive flagship sessions; authors charters, milestone indexes, phase docs; the standing consult handle. **Blesses every prepared work order before execution** (the blessing gate — manager's Architect Blessing policy). Tier-qualified in stamp comments: `# mission architect`, `# milestone architect`, `# blessing`. |
+| **Janitor** | hygiene authority (staff — audits and routes, never operates) | Audits the actual tree against the declaration (`work/PROJECT.md` § Structure) along the five audit axes; **worn as a hat** at boundaries — blessing lens (Architect), order-close checklist (Manager), blocking milestone-close pass (Executor) — never freshly dispatched. Findings route up the three-rung remedy ladder; `/clean` (operator-run) is the escape hatch. |
 | **Executor** | executive | Drives one milestone campaign: Reconnaissance gate with the operator, then one Manager subagent per phase; reasons about **ultimate acceptance** (does the phase advance the objective) vs the Manager's phase acceptance. |
 | **Manager** | line management | Drives one work order to its `## Acceptance Verdict` by dispatching specialists; sole author of the work document; conserves its context for decisions. |
 | **Specialists** | individual contributors | One scoped task each, as subagents: **researcher**, **investigator**, **planner**, **designer**, **implementer**, **reviewer**, **inspector**, **documenter**, **integrator**. |
@@ -61,6 +62,7 @@ Commands are **verbs**; agents are **nouns**. Two core verbs are polymorphic on 
 | `/investigate <question\|bug>` | Investigator | Trace a codebase question or bug to a definitive answer |
 | `/research <question>` | Researcher | External/web research → report in `docs/research/` |
 | `/design [target]` | Designer (authority mode — operator-run) | **Judgment-closed** design session: found/refresh the canon (`work/design/`), design a surface into a session brief, or reconcile a returned pull. Never implements |
+| `/clean [scope]` | Janitor (authority mode — operator-run) | **Judgment-closed** hygiene pass: reconcile the actual tree against the declaration, routing findings up the remedy ladder (empty scope means the whole repo). The escape hatch — the boundary gates carry the routine load. Directs, never operates |
 | `/document <scope>` | Manager (dispatches Documenter) | Audit and revise documentation drift |
 | `/close <mission>` | Architect-tier dialog | Mission close: closing report, full triage (todos/proposals/footguns/**docs & research**), archive, tag. **Operator-invoked only.** |
 | `/archive` | — | Sweep + backfill the transcript archive; checkpoint for inactive-but-open missions |
@@ -96,6 +98,24 @@ Conventions:
 | --- | --- | --- | --- |
 | `<machine>` | `<os>` / `<shell>` | `<repo-path>` | Single machine today; add a row per machine at bootstrap |
 
+## The declared-structure floor
+
+**Stated here once; referenced everywhere else.**
+
+> Every consuming project declares its structure; the system owns reconciling actual against declared.
+
+No fixed structure the template could ship is right everywhere — ecosystems force files to the root, product boundaries invert between repos, archives grow where the work does. Four of the five audit axes below are therefore not universally *specifiable*; the fifth, **work-tracking fidelity**, is — it reads template canon shipped identically to every consuming repo. Inverted, that meta-pattern is the true maximal-minimum universal: what is portable is not any particular structure but the obligation to declare one, and the system's obligation to reconcile the actual tree against the declaration.
+
+The declaration's home is **`work/PROJECT.md` § Structure**; its schema — subsection headings, bullet grammar, template defaults — is pinned in `.claude/BASELINE.md` bootstrap step 3. The reconciliation pass audits five axes, each reading its project-specific content from the declaration (the one exception marked in its row):
+
+| Axis | What the pass asks | What answers it |
+| --- | --- | --- |
+| **root discipline** | Does anything sit at the organizational root that the declaration does not allow? | § Root-file allowlist (packaging manifests: § Package roots) |
+| **product/non-product separation** | Is the shipped artifact cleanly separated from what merely supports it — nothing straddling the declared boundary? | § Product / non-product boundary |
+| **tracked-tree cleanliness** | Is anything tracked that should not be, or ignored that should be — machine-local state, build output, scratch, secrets — and does retired material sit in its declared archive rather than the working tree? | § Archive conventions, plus the project's own `.gitignore` (the ignore-side declaration) |
+| **whole-canon reference integrity** | Two halves. **Resolution**: does every path the canon references resolve, with every absence sanctioned rather than silently tolerated? **Consistency**: do the documents that declare what may be absent agree with each other? The second is caught by reading, never by a resolution probe. | § Sanctioned absences, § Reference-gate scope roots, § Reference-gate exclusions, § Planning-artifact roots |
+| **work-tracking fidelity** | Do the work documents follow the tier ladder's forms — frontmatter, stamps, sections, filing? | Template canon (`todos/README.md` and this document) — shipped identically everywhere; the one axis that needs no declaration |
+
 ## The follow-through rule
 
 **Stated here once; referenced everywhere else.**
@@ -105,6 +125,30 @@ On receiving sign-off — or completing self-closing work — the session's **fi
 - A turn never ends with approved-but-uncommitted artifacts.
 - The **only** legitimate way a turn ends with uncommitted approved work is an **explicitly stated reason** — canonically "uncommitted pending your sign-off" while the pause awaits it. State the reason; make the state visible, never ambient.
 - **No standing per-workflow commit exceptions.** Every close-out commits on the same terms; a doc that fails review is reverted or revised afterward (rare), not gated pre-commit.
+
+## The collection invariant
+
+**Stated here once; referenced everywhere else.**
+
+> A dispatch is complete only when the child's result is in the dispatcher's own context; a Manager's Acceptance Verdict may not issue while any dispatched child is unaccounted for.
+
+Unconditional — no role, seat, or depth is exempt — and scoped to **Agent-tool dispatch**: the Executor's Bash-tool headless fallback is a registered product path governed by its own recipe, and nothing here revokes it. The operative form is **in-turn collection**, in two halves, because "the result reached my context eventually" does not satisfy the invariant — only collection inside the dispatching turn does:
+
+- **The caller passes `run_in_background: false` explicitly, always.**
+- **The callee's turn does not end until every child it dispatched has returned inside that turn** — dispatch is never completion, and no verdict issues while a child is unaccounted for.
+
+**Dispatch collection, by role** — the one allowance, layered on the invariant. No session introspects its depth; the role ladder above is the depth oracle:
+
+- A **Manager** or **specialist**, in any seat — including a Manager the operator runs directly — dispatches every Agent-tool child with `run_in_background: false` and collects it **in-turn**; it never ends a turn while a child it launched is live. Fan-out is parallel dispatches in a single message, collected together in that turn.
+- The **Executor** — the campaign's root by construction — may dispatch with `run_in_background: true` and end its turn while children run; it collects at its **turn boundaries** via harness notifications, reads progress from the work-doc ledger, and steers mid-flight by SendMessage.
+- **No role collects a background result by in-turn waiting.** There is no in-turn delivery path for a background result at any tier, and a session that polls for one starves it. Background results cross turn boundaries only — "the root may await" means *end the turn and receive*, never poll inside one.
+- **Why the split is safe**: a child that collects in-turn is exactly a child whose own dispatcher's synchronous collection the platform honors — the rule enforces itself downward. The root's allowance exists because the root's collector is the harness loop itself, the one delivery path stable across known routings.
+
+**Continuations are not dispatches — send-then-read.** A SendMessage to a previously-dispatched agent resumes it, still holding the context it built, and the send is reliable, but its *answer* has no route back to a sender below the root: it is collected by **reading** — the resumed agent's transcript or task output, when the sender next acts. Absence means still-pending; never loop on it. The resumed agent's completion notification surfacing at the root is expected noise, not an error — and it is also the mechanic's hinge, because *when the sender next acts* is a precondition, not a formality. **Send-then-read presupposes a sender whose next act arrives independently of the awaited answer** — on this platform, the root, whose collector is the harness loop: that completion notification is itself the wake-up, so the read has a guaranteed trigger. Send-then-read is therefore the second half of the root allowance, not a general collection mechanic. The **Executor** send-then-reads; a **Manager or specialist, in any seat**, never continues a completed agent for work its verdict depends on — bound to in-turn collection it may neither poll nor end its turn, so nothing ever schedules the read — and dispatches **fresh, restored by reading** instead. The one-line test: *would I act again even if this answer never arrived?* Consult-forks via `.claude/bin/consult` are unaffected — a synchronous read-only round trip inside the caller's own turn, not a SendMessage continuation. And because an agent cannot determine its own id, every continuation or parent-reaching address must be injected from above — recorded at dispatch time in the work doc's dispatch ledger (`work/todos/README.md` § Document structure). The platform behaviors this section leans on — the read's transcript and task-output coordinates among them — are named, each with its version pin, in `.claude/ADR.md` § Standing hazards and the mission decision block that recorded them.
+
+**Fresh, restored by reading** — the substitute for a continuation, and the reason no verdict-bearing role needs one. Relocating the deliverable to the work doc is not the cure: that write is asynchronous too, so it buys no legal ordering either. What a continuation bought was *held context*, and held context is recoverable synchronously — dispatch fresh, brief the agent from the work doc first, then add targeted reads of the prior agent's transcript or task output where held context genuinely matters. The recorded `agentId` is the address; targeted reads, never bulk.
+
+The whole rule in one sentence: **the invariant is unconditional; only the allowance is role-scoped; and nobody, anywhere, waits in-turn for a background result.**
 
 ## Historical rename mapping
 
