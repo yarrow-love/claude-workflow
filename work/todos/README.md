@@ -60,6 +60,8 @@ The workflow appends `<h2>` sections separated by `---`, each prefaced by its au
 
 The Manager is the document's sole author after filing: subagent reports are distilled into briefs (never pasted), consistent voice throughout.
 
+**The dispatch record.** A ledger line that records a dispatch carries the dispatched child's `agentId`, verbatim from the Agent tool result. An agent cannot determine its own id, so the address a later session needs — a SendMessage nudge, or the targeted reads behind *fresh, restored by reading* — exists only if the dispatcher wrote it down at dispatch time. The slot rides the entry already being written: a work order's `## Progress` ledger (`- 09:14 implementer dispatched — phase 2 (agentId: <id>)`), a campaign log's `## Phase Ledger`.
+
 ## Phased series
 
 A subdirectory `<series>/` holds ordered orders `<i>.<objective>.md` + an `index.md` ledger (order table, dependency chain, execution notes). Use it when an effort needs decomposition and ordering but not milestone ceremony (no `## Acceptance` at the container level — each order closes on its own criteria). At series close, the whole directory moves to `_done/<series>/`. Orders within a series reference each other by number via `depends-on`.
