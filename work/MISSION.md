@@ -81,4 +81,4 @@ The gap the episode exposed is real and is being fixed: the amendment **claimed*
 | # | Milestone | Gist | Depends on | Status |
 | --- | --- | --- | --- | --- |
 | 1 | [janitor](milestones/1.janitor/MILESTONE.md) | The whole arc as phases: floor into canon → competency + gate wiring → dogfood-validate, enact, fold prep | — | pending |
-| 2 | [return-path](milestones/2.return-path/MILESTONE.md) | A4: probe the orchestration return-path topology on the pinned CLI → settle doctrine from verdicts (constrained idiom, continuation rule, A3 reconciliation) or escalate the reserved tier-ladder finding | 1 | pending (planned 26-07-25) |
+| 2 | [return-path](milestones/2.return-path/MILESTONE.md) | A4: probe the orchestration return-path topology on the pinned CLI → settle doctrine from verdicts (constrained idiom, continuation rule, A3 reconciliation) or escalate the reserved tier-ladder finding | 1 | in progress (re-planned 26-07-26 after phase 1 inverted the premise; see the milestone) |
