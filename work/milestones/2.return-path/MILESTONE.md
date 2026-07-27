@@ -11,7 +11,7 @@ sessions:
 
 > Status: **in progress — re-planned 26-07-26 at milestone tier** after phase 1 ran PARTIAL and inverted the premise. P1-a falsified H′ on CLI 2.1.220: a depth-2 child's asynchronous result was delivered to its depth-1 dispatcher after that dispatcher's turn ended — the inverse of the chartered topology, and a version flip against M1's 2.1.218 evidence. The re-plan (operator dialog, four forks settled) keeps the milestone on evidence-then-doctrine rails: phase 2 runs a **cartography battery** against the topology that actually holds, phase 3 lands **version-robust doctrine** via a pre-authored decision table. Phase 1's record stands as history: [`work/todos/26-07-26.probes.md`](../../todos/26-07-26.probes.md); campaign: [`work/todos/26-07-26.execute-m2-return-path.md`](../../todos/26-07-26.execute-m2-return-path.md).
 >
-> Originally planned 26-07-25 in the mission-architect dialog (charter A4; design authority: the adopted proposal [`work/proposals/26-07-25.return-path.md`](../../proposals/26-07-25.return-path.md) and the seeding filing [`work/todos/bugs/26-07-25.bug.orchestration-return-path.md`](../../todos/bugs/26-07-25.bug.orchestration-return-path.md)). `depends-on` M1.
+> Originally planned 26-07-25 in the mission-architect dialog (charter A4; design authority: the adopted proposal [`work/proposals/_enacted/26-07-25.return-path.md`](../../proposals/_enacted/26-07-25.return-path.md) and the seeding filing [`work/todos/bugs/26-07-25.bug.orchestration-return-path.md`](../../todos/bugs/26-07-25.bug.orchestration-return-path.md)). `depends-on` M1.
 
 ## Objective
 
@@ -65,7 +65,7 @@ Settled in the milestone-architect operator dialog, 26-07-26, after phase 1's pr
 | --- | --- | --- | --- | --- |
 | 1 | [probes](1.probes.md) | Battery 1 (hypothesis-test): P1-a falsified H′; early exit at 1 of 10 probes; delivery-to-dispatcher observed at n=1 | medium | **closed PARTIAL (26-07-26)** — premise inverted; record historical |
 | 2 | [cartography](2.cartography.md) | Battery 2 (map): the `run_in_background` discriminant first, then delivery replication, fan-out, continuation/stopped-vs-deferred, upward addressing, type control, surfaces, forensic re-read — no early exit (R7) | medium | **closed PASS (26-07-26)** — all six acceptance items met; discriminant named as a deterministic callee-side rule; three return paths mapped |
-| 3 | [doctrine](3.doctrine.md) | Version-robust doctrine (R9) via the pre-authored decision table + architect consult (R10): routing-independent invariant, idiom clause, continuation rule, nudge graduation, A3 reconciliation, ADR flip entry + standing hazard, filings — or the tabled escalations | high | in progress — rows **1 (modified), 5, 6** fired; fork A at the operator |
+| 3 | [doctrine](3.doctrine.md) | Version-robust doctrine (R9) via the pre-authored decision table + architect consult (R10): routing-independent invariant, idiom clause, continuation rule, nudge graduation, A3 reconciliation, ADR flip entry + standing hazard, filings — or the tabled escalations | high | **closed PASS (26-07-26)** — all six acceptance items met; the invariant stated once in `work/README.md`, canon thinned to references, ADR D3 + standing hazard landed, filings complete |
 
 ## Acceptance
 
