@@ -4,6 +4,7 @@ sessions:
   - architect@play/76ba13c6-e6f5-4933-9e6c-7ef3fbdd6b7d # milestone architect (same session — M2 planned in the mission-architect dialog, charter A4)
   - executor@play/2cb889b5-b570-4b6d-b435-c315de40e68d # campaign executor (26-07-26)
   - architect@play/af2462db-cc36-4d78-b87b-ff3d94902168 # milestone architect — re-plan after the premise inversion (26-07-26)
+  - executor@play/8fe0fe38-cfe6-4ae9-ac66-24894da08919 # campaign executor — resumed against the re-plan (26-07-26)
 ---
 
 # M2 — return-path: map the topology that actually holds, then fix the model
