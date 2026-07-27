@@ -32,7 +32,7 @@ The codebase-graph protocol into product: the two knowingly-wrong BASELINE lines
 
 | # | Phase | Gist | Status |
 | --- | --- | --- | --- |
-| 1 | [author](1.author.md) | Mechanical truth fix as commit #1, then the protocol doc authored and BASELINE's graph bullet + manifest rewritten once, into final form | pending |
+| 1 | [author](1.author.md) | Mechanical truth fix as commit #1, then the protocol doc authored and BASELINE's graph bullet + manifest rewritten once, into final form | done (26-07-27) |
 | 2 | [rewire](2.rewire.md) | The remaining eight sites point at the protocol under the verified-freshness trust model; D6 guard verified across all of them | pending |
 
 ## Acceptance
