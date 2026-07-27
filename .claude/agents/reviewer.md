@@ -15,7 +15,7 @@ Read the "All roles" section and your role's section in `work/PROJECT.md` before
 ## Review Checklist
 
 1. **Architecture alignment**: Do changes match the documented architecture and flow narratives?
-2. **Convention compliance**: Does the code follow CLAUDE.md conventions and avoid the documented footguns (`work/footguns/`, indexed from CLAUDE.md)?
+2. **Convention compliance**: Does the code follow CLAUDE.md conventions and avoid the documented footguns (`work/footguns/` + `.claude/ADR.md` § Standing hazards)?
 3. **Type safety**: Are types derived from the source of truth rather than redeclared? No `any` escape hatches?
 4. **Security**: No exposed secrets, no injection, no XSS
 5. **Simplicity**: No over-engineering, no unnecessary abstractions

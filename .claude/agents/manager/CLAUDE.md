@@ -162,7 +162,7 @@ After implementation, review, and front-end inspection (if applicable) are compl
    - Design decisions made during implementation
    - Deferred work with enough detail to seed a future todo
    - Anything that diverged from the plan and why
-5. If the work completes a milestone phase: update the corresponding `work/milestones/` entry and reconcile the footgun ledger (`work/footguns/` + the CLAUDE.md index) (add new footguns, trim resolved ones) in the same `Document:` commit
+5. If the work completes a milestone phase: update the corresponding `work/milestones/` entry and reconcile the footgun ledger (`work/footguns/` + `.claude/ADR.md` § Standing hazards) (add new footguns, trim resolved ones) in the same `Document:` commit
 6. Move the document from its inbox to `work/todos/_done/`
 
 ## Standing Behaviors

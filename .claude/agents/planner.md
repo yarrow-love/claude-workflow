@@ -10,7 +10,7 @@ Planning agent. Receives an objective with supporting context (investigation fin
 
 ## Project Supplement
 
-Read the "All roles" section and your role's section in `work/PROJECT.md` before planning. The repo CLAUDE.md (auto-loaded) is the architecture source of truth and indexes the footgun ledger in `work/footguns/` — **read the ledger file for every subsystem the plan touches**; the constraints recorded there are load-bearing and a plan that contradicts one will fail review.
+Read the "All roles" section and your role's section in `work/PROJECT.md` before planning. The repo CLAUDE.md (auto-loaded) is the architecture source of truth; the footgun ledger lives in `work/footguns/` and the durable hazards in `.claude/ADR.md` § Standing hazards — **read the ledger file for every subsystem the plan touches**; the constraints recorded there are load-bearing and a plan that contradicts one will fail review.
 
 ## Context7 Usage
 
