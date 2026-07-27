@@ -245,24 +245,28 @@ These are **prepared so you confirm rather than derive.** Read each, confirm or 
 | `work/todos/_done/26-07-25.prove-pass.md` (filed at the milestone-close pass) | **Archive with the mission.** Phase 4a's dogfood-pass record; its findings are already routed. The Executor's blocking close pass found it still in the inbox and filed it as a rung-1 fix — the move then broke *this row's* own pointer, which `reference-gate` caught as the ceremony's first live FAIL |
 | `work/todos/_done/26-07-25.prove-close.md` (filed at 4c close) | **Archive with the mission.** Phase 4c's order — the one this runbook was written under; it filed itself to `_done/` at its own close-out, before the ceremony |
 | `work/todos/_done/26-07-25.bug.janitor-audit-method-gap.md` (`done` 26-07-26) | **Archive with the mission.** 4a's instrument filing. **No longer carries** — the Mission Architect ruled it executable before M2, and it was executed: `janitor.md` gained the reference-integrity method and the axis's consistency half, the class the pass was blind to. Its filing to `_done/` broke this row's pointer — the **third** `FAIL` of this cause the gate has caught, after the two below, and the standing evidence that A4-7 is a live convention defect rather than a stale one |
-| `work/todos/bugs/26-07-25.bug.orchestration-return-path.md` (`open`) | **Carries.** The orchestration return-path defect; paired with the standing proposal below. Operator-gated |
+| `work/todos/bugs/26-07-25.bug.orchestration-return-path.md` (`done` 26-07-26) | **Archive with the mission.** The orchestration return-path defect — **resolved by M2 phase 3**, with `resolution:` frontmatter and a `## Resolution (26-07-26)` section in place. It deliberately stays in `work/todos/bugs/` rather than filing to `_done/`: the charter's A4 and the filing's own `## Architect Judgment` reference it there, and § 7's enumeration already moves it into the archive |
 | **Divergence B** — the footgun-index convention (eight files instructing roles to reconcile an index the purified root `CLAUDE.md` does not carry) | **Raised and open by operator ruling; 4a staged it.** Carries as a design question. **Do not resolve it in the ceremony** — it spans seven `.claude/` policy docs plus `work/footguns/README.md`, and closing it silently would close a rung-3 escalation without an answer |
 | **4a's open forks** | **Carry as raised-not-resolved.** They are recorded in `26-07-25.prove-pass.md`, which archives with the mission and stays reachable at the tag |
-| `work/proposals/26-07-25.return-path.md` (`status: proposed`) | **STANDING — do NOT archive it.** A separate, newly-filed proposal under operator review, unrelated to this milestone's enactment. See the note below: it needs a deliberate decision, not a default |
+| `work/proposals/_enacted/26-07-25.return-path.md` (`status: enacted` 26-07-26) | **Archives wholesale with the mission**, per `work/README.md` § Layout — it rides the `git mv work/proposals/_enacted` in § 7, under the same archive-shape constraint. Adopted 26-07-25, enacted 26-07-26 by M2 phase 3; the "standing proposal" decision below has dissolved |
 | `work/proposals/_enacted/26-07-25.repo-hygiene.md` | **Archives wholesale with the mission**, per `work/README.md` § Layout. Its archived path is **constrained** — see § 7 |
 | `work/footguns/claude-bin.md` | **Carries as a live ledger entry, or promotes to `.claude/ADR.md` § Standing hazards.** The `.claude/bin/` JSDoc comment-close hazard is *already* in § Standing hazards on the product side, so the ledger entry is arguably redundant; v1's precedent was to absorb the ledger into ADR and note it in the report. **Operator call.** Note that `work/PROJECT.md` § All roles declares this ledger's contents by name, and that file is stripped whole — so the declaration does not need reconciling, it disappears |
 | `work/notes/26-07-25.child-collection-evidence.md` | **Operator call.** `work/README.md` § Layout gives `notes/` no archive lifecycle ("graduates into proposals or evaporates"), and v1 archived no notes. It is strip-side either way; the only question is whether the tag preserves it under `work/notes/` or under the mission archive |
 | `work/runbooks/` | **Retire with the mission — including this runbook.** It archives as the workflow's second close-and-fold recipe; the next mission inherits it by reading it out of the archive, not by keeping it live on `main` |
 | `docs/research/` | **Nothing to triage** — empty |
 
-### The standing proposal — a decision, not a default
+### The standing proposal — a decision that dissolved
 
-`work/proposals/26-07-25.return-path.md` is on the **strip list**: purification removes it from `main` along with everything else under `work/proposals/`. That is correct — the template ships no instance proposals. The question is where the *tag* preserves it, and there are two precedents in tension:
+This subsection recorded an open call: the return-path proposal was triaged **standing**, and where the *tag* should preserve it had two precedents in tension — `work/README.md` § Layout (*"`_enacted/` archives wholesale with the mission; standing proposals persist"*) against v1's actual practice, whose `proposals/` directory on the tag carries `26-07-11.work-queue-tier.md`, `26-07-22.lan-intercom.md` and `26-07-22.claude-intercom.md`, all standing at close.
 
-- **`work/README.md` § Layout** says: "At `/close`, `_enacted/` archives wholesale with the mission; **standing proposals persist**." Persisting means staying at `work/proposals/26-07-25.return-path.md` on the branch.
-- **v1's actual practice** archived standing proposals *into* the mission archive — v1's `proposals/` directory on the tag carries `26-07-11.work-queue-tier.md`, `26-07-22.lan-intercom.md`, `26-07-22.claude-intercom.md`, all of which were standing at close.
+**The call no longer arises.** The proposal was **enacted 26-07-26** by M2 phase 3 and now sits at `work/proposals/_enacted/26-07-25.return-path.md`. It therefore archives wholesale with the mission under § Layout's uncontested half, exactly as `26-07-25.repo-hygiene.md` does — which is the point `work/proposals/README.md` makes about enactment: it files the close-time triage in advance.
 
-**Prepared recommendation, not a decision:** follow § Layout and leave it in `work/proposals/`. **Consequence to state out loud either way:** after the fold it is recoverable only as `git show v2.repo-hygiene-closed:<path>`, and carrying it forward means the next mission's `/plan` re-seeds it onto the new branch. Nothing carries itself.
+Two consequences survive the dissolution:
+
+- **The § 7 archive-shape constraint binds it too.** It rides `git mv work/proposals/_enacted`, so the `_enacted/` segment must be preserved on the way into the archive — see § 7 before typing that command.
+- **After the fold it is recoverable only as `git show v2.repo-hygiene-closed:<path>`.** Nothing carries itself; a successor mission that wants it re-seeds it deliberately.
+
+The tension itself stays live for the *next* standing proposal this repo closes with. It was not resolved here — it was outrun.
 
 ---
 
@@ -312,7 +316,7 @@ git mv work/sessions/play                     "$A/sessions/"
 git mv work/sessions/MANIFEST                 "$A/sessions/"
 ```
 
-**Not moved:** `work/proposals/26-07-25.return-path.md` (standing — § 6), `work/notes/26-07-25.child-collection-evidence.md` (operator call — § 6), `work/PROJECT.md` (stripped whole — § 9.6). Re-derive the enumeration against `git ls-files` at ceremony time; the rehearsal's list is 26 files plus the session store.
+**Not moved:** `work/notes/26-07-25.child-collection-evidence.md` (operator call — § 6), `work/PROJECT.md` (stripped whole — § 9.6). The return-path proposal has **left this list**: enacted 26-07-26, it now rides `git mv work/proposals/_enacted` above (§ 6). Re-derive the enumeration against `git ls-files` at ceremony time; the rehearsal's list is 26 files plus the session store.
 
 **`git mv work/proposals/_enacted` leaves `work/proposals/` without its `.gitkeep`.** § 9.0's `purify.sh` restores it. This is why that step exists even though it is currently a no-op.
 
@@ -686,7 +690,7 @@ If that now fails, **do not force.** Reset to `$(cat /tmp/fold-pre-ref)`, reconc
    ls /tmp/fold               # the scripts live here, not in the repo
    ```
 5. **Optional, explicitly non-gating: `git gc`.** Safe operator hygiene, deliberately **outside** the ceremony. Never let its absence block anything.
-6. **Hand back.** The next mission's `/plan` inherits: the carried todos from § 6, divergence B, the standing return-path proposal (which must be **re-seeded**, not carried automatically — § 6), and any charter material the closing report flagged. Seeding the next mission is **not** part of this ceremony.
+6. **Hand back.** The next mission's `/plan` inherits: the carried todos from § 6, divergence B, and any charter material the closing report flagged. The return-path proposal is **not** among them — enacted 26-07-26, it archives wholesale with the mission (§ 6). Seeding the next mission is **not** part of this ceremony.
 
 ---
 
