@@ -7,7 +7,7 @@ The active mission's phased roadmap — mission `v2.repo-hygiene` (chartered 26-
 | # | Milestone | Gist | Depends on | Status |
 | --- | --- | --- | --- | --- |
 | 1 | [janitor](1.janitor/MILESTONE.md) | Four phases: floor (doctrine + § Structure schema + declaration) → competency (`janitor.md`, `/clean`) → wiring (blessing lens, where-artifacts-land, advisory order-close, blocking milestone-close, child-collection rule A3) → prove (dogfood pass, `reference-gate`, enactment, fold rehearsal) | — | done (26-07-25) |
-| 2 | [return-path](2.return-path/MILESTONE.md) | A4, re-planned 26-07-26 after phase 1 falsified the chartered topology (CLI 2.1.220 routes results down to the dispatcher — a version flip against 2.1.218): phase 2 runs a cartography battery (the `run_in_background` discriminant first, no early exit) → phase 3 lands version-robust doctrine via a pre-authored decision table + architect consult, or escalates | 1 | in progress (re-planned 26-07-26) — phase 1 closed PARTIAL (historical); phases 2–3 `/execute`-ready |
+| 2 | [return-path](2.return-path/MILESTONE.md) | A4, re-planned 26-07-26 after phase 1 falsified the chartered topology (CLI 2.1.220 routes results down to the dispatcher — a version flip against 2.1.218): phase 2 runs a cartography battery (the `run_in_background` discriminant first, no early exit) → phase 3 lands version-robust doctrine via a pre-authored decision table + architect consult, or escalates | 1 | done (26-07-26) — closed accomplished through the blocking janitor gate; phase 1's PARTIAL stands as history |
 
 ## Conventions
 
