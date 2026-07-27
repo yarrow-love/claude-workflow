@@ -2,6 +2,7 @@
 sessions:
   - architect@play/2bd4068f-a96d-4295-afb8-8fee72bbeb43 # mission architect — stub at charter
   - architect@play/2bd4068f-a96d-4295-afb8-8fee72bbeb43 # milestone architect — hardened 26-07-27, same session, milestone hat
+  - executor@play/2c481bc6-cd99-42ad-8395-48fe66481dbf # campaign executor — /execute 26-07-27
 ---
 
 # Milestone 1 — protocol
