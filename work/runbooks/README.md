@@ -13,4 +13,3 @@ A runbook describes *how a thing is operated*, which is mission-versioned in pra
 
 | Runbook | Purpose |
 | --- | --- |
-| [`fold-and-close.md`](fold-and-close.md) | Close mission `v2.repo-hygiene` and fold branch `26-07-25` into a purified `main` — ceremony, derivation recipe, and the fold rehearsal record |

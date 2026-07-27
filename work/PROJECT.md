@@ -45,7 +45,7 @@ Present by convention, ignored by policy (declared so they do not read as undecl
 
 ### Archive conventions
 
-- `work/missions/<v>/` — closed missions, archived whole; design history reachable through `<v>-closed` tags
+- `work/missions/<v>/` — closed missions, archived whole and in-tree on `dev` (since the v2 close); design history also reachable through `<v>-closed` tags
 - `src/_archive/` — retired sub-codebases, created on first retirement
 - `.archive/` — cold storage: material that leaves the working tree but not the repo
 
@@ -77,6 +77,7 @@ The prefixes under which a written path counts as a tree reference. The gate's s
 
 - `work/proposals/` — historical record; rewriting is forbidden (root `CLAUDE.md`), so gating would manufacture permanently-unfixable failures
 - `work/notes/` — pre-proposal scratch, same protection
+- `work/missions/` — archived missions, in-tree on `dev` since the v2 close (26-07-26): frozen history under the never-rewritten rule, whose era-bound references would otherwise manufacture the same permanently-unfixable failures the tag-only model never scanned
 
 ### Planning-artifact roots
 

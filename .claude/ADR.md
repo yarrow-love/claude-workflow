@@ -110,6 +110,7 @@ Each mission branches from **`dev`, the process branch** — the branch *is* the
 | Mission | Close tag | Outcome |
 | --- | --- | --- |
 | `v1.subagent-boundary` | `v1.subagent-boundary-closed` | Executor→Manager converted to native subagent dispatch; whole-tree archives; template purified (D4) |
+| `v2.repo-hygiene` | `v2.repo-hygiene-closed` | Janitor competency + declared-structure floor; dispatch doctrine rebuilt version-robust (D3); `dev` process branch adopted at close |
 
 ### Founding provenance
 
