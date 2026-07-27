@@ -126,6 +126,28 @@ On receiving sign-off — or completing self-closing work — the session's **fi
 - The **only** legitimate way a turn ends with uncommitted approved work is an **explicitly stated reason** — canonically "uncommitted pending your sign-off" while the pause awaits it. State the reason; make the state visible, never ambient.
 - **No standing per-workflow commit exceptions.** Every close-out commits on the same terms; a doc that fails review is reverted or revised afterward (rare), not gated pre-commit.
 
+## The collection invariant
+
+**Stated here once; referenced everywhere else.**
+
+> A dispatch is complete only when the child's result is in the dispatcher's own context; a Manager's Acceptance Verdict may not issue while any dispatched child is unaccounted for.
+
+Unconditional — no role, seat, or depth is exempt — and scoped to **Agent-tool dispatch**: the Executor's Bash-tool headless fallback is a registered product path governed by its own recipe, and nothing here revokes it. The operative form is **in-turn collection**, in two halves, because "the result reached my context eventually" does not satisfy the invariant — only collection inside the dispatching turn does:
+
+- **The caller passes `run_in_background: false` explicitly, always.**
+- **The callee's turn does not end until every child it dispatched has returned inside that turn** — dispatch is never completion, and no verdict issues while a child is unaccounted for.
+
+**Dispatch collection, by role** — the one allowance, layered on the invariant. No session introspects its depth; the role ladder above is the depth oracle:
+
+- A **Manager** or **specialist**, in any seat — including a Manager the operator runs directly — dispatches every Agent-tool child with `run_in_background: false` and collects it **in-turn**; it never ends a turn while a child it launched is live. Fan-out is parallel dispatches in a single message, collected together in that turn.
+- The **Executor** — the campaign's root by construction — may dispatch with `run_in_background: true` and end its turn while children run; it collects at its **turn boundaries** via harness notifications, reads progress from the work-doc ledger, and steers mid-flight by SendMessage.
+- **No role collects a background result by in-turn waiting.** There is no in-turn delivery path for a background result at any tier, and a session that polls for one starves it. Background results cross turn boundaries only — "the root may await" means *end the turn and receive*, never poll inside one.
+- **Why the split is safe**: a child that collects in-turn is exactly a child whose own dispatcher's synchronous collection the platform honors — the rule enforces itself downward. The root's allowance exists because the root's collector is the harness loop itself, the one delivery path stable across known routings.
+
+**Continuations are not dispatches — send-then-read.** A SendMessage to a previously-dispatched agent resumes it with context intact, and the send is reliable, but its *answer* has no route back to a sender below the root: it is collected by **reading** — the resumed agent's transcript or task output, when the sender next acts. Absence means still-pending; never loop on it. The resumed agent's completion notification surfacing at the root is expected noise, not an error. Consult-forks via `.claude/bin/consult` are unaffected — a synchronous read-only round trip inside the caller's own turn, not a SendMessage continuation. And because an agent cannot determine its own id, every continuation or parent-reaching address must be injected from above: **dispatchers record child `agentId`s in the work doc at dispatch time.** The platform behaviors this section leans on — the read's transcript and task-output coordinates among them — are named, each with its version pin, in `.claude/ADR.md` § Standing hazards and the mission decision block that recorded them.
+
+The whole rule in one sentence: **the invariant is unconditional; only the allowance is role-scoped; and nobody, anywhere, waits in-turn for a background result.**
+
 ## Historical rename mapping
 
 Imported documents (notably `work/proposals/`) and old callback stamps retain the previous vocabulary — **they are never rewritten**; read them through this mapping:
