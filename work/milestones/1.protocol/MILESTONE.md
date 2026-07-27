@@ -1,22 +1,41 @@
 ---
 sessions:
   - architect@play/2bd4068f-a96d-4295-afb8-8fee72bbeb43 # mission architect — stub at charter
+  - architect@play/2bd4068f-a96d-4295-afb8-8fee72bbeb43 # milestone architect — hardened 26-07-27, same session, milestone hat
 ---
 
 # Milestone 1 — protocol
 
-> **Stub** — gist-level at charter (26-07-27); hardens just-in-time via `/plan work/milestones/1.protocol/`. Charter: [`work/MISSION.md`](../../MISSION.md); spec: the adopted proposal (charter D1).
+> **Hardened 26-07-27** (operator dialog: two phases, not the stub's three — the mechanical fix rides phase 1 as its mandated first commit, avoiding the double-touch of BASELINE's graph bullet; the `.claude/protocols/` class is defined by its BASELINE manifest section, no directory README, per the `.claude/` precedent). Charter: [`work/MISSION.md`](../../MISSION.md); spec: the adopted proposal (charter D1); determinations D2/D3/D4/D6 bind every phase.
 
-## Objective (gist)
+## Objective
 
-The codebase-graph protocol into product: the two knowingly-wrong BASELINE lines fixed, the protocol document authored at `.claude/protocols/codebase-graph.md` (charter D2), and every graph-prescribing site rewired to point at it under the verified-freshness trust model (charter D3/D4) without weakening graph-first economics (charter D6).
+The codebase-graph protocol into product: the two knowingly-wrong BASELINE lines dead, `.claude/protocols/codebase-graph.md` authored as the single product-side home for the P1 verification recipe, the P3 recovery procedure, and the P2 evidence-passing contract, and every graph-prescribing site rewired to point at it under the verified-freshness trust model — without weakening graph-first economics (D6).
 
-## Phase gists
+## Scope
 
-1. **mechanical** — fix `.claude/BASELINE.md:75`: current flag-form CLI recipe; `auto_index`/`auto_watch` truthfully split (`auto_index` governs only a first index of a new project; `auto_watch` is the refresher, and it is exactly what the evidence shows failing on renames — so BASELINE stops claiming any config key "keeps the index fresh"). Same-commit `/initialize` step-2 `auto_index` reference correction. Small, first, unblocks the rest.
-2. **author** — `.claude/protocols/` founded (directory conventions + BASELINE manifest rows) and `codebase-graph.md` written: the P1 verification recipe (moved-path flip, `expected == actual` gate, full-re-index triggers, file-wins rule, `head_sha`/`index_status` as non-signals), the P3 recovery procedure (process-count precondition, WAL canary, kill-all → delete-store → single-server rebuild → verify), the P2 evidence-passing contract (what the dispatcher verifies, what rides the brief, the grep fallback rule). Consuming-seam guidance states *what* a project records in `work/PROJECT.md` — never a fact of any project. Transcription sources: the proposal; `~/dev/lasers/work/runbooks/codebase-memory.md` §§ interim-guidance/9/10 (evidence, not canon — rewrite generic).
-3. **rewire** — the seven sites point at the protocol: BASELINE § Expectations bullet; researcher `CLAUDE.md` § Codebase Graph + Process step 3; `investigator.md`; `planner.md`; `execute-milestone.md` step 3 (recon becomes verify-once-pass-evidence); `initialize.md` step 2 (health per the protocol, not index-row presence); root `README.md:20`. Genericity test on every change; BASELINE manifest updated same-commit as any file lands.
+- The mechanical truth fix (BASELINE's deprecated raw-JSON CLI form; the `auto_index`-keeps-it-fresh claim; `initialize.md`'s echo of the `auto_index` recipe) — phase 1, mandated first commit.
+- `.claude/protocols/` founded: the BASELINE manifest section that defines the class (cross-agent operational protocols — procedures more than one role enacts, stated once, pointed at from role cards) and the first member, `codebase-graph.md`.
+- The rewire of every graph-prescribing site — **eight**, not the proposal's six: the charter added root `README.md` step 3, and milestone grounding added `manager/CLAUDE.md` (its brief and dispatch-record conventions are where P2's evidence must ride).
 
-## Dependencies
+## Out of scope
 
-None (first milestone). M2 depends on this one: the hazard entry points at the protocol's recovery section, and the spot-check executes the recipe as-written from the landed text.
+- The ADR standing hazard, the P4 version ledger, the interim git fix, the live spot-check, enactment filing — all M2 (`2.hazard-and-evidence`).
+- Any `.claude/bin/` tooling — the protocol is doctrine, not mechanization; a verification script is a candidate future proposal, not this milestone.
+- Consuming-repo changes (`lasers` fixes `lasers`); upstream contributions.
+
+## Phases
+
+| # | Phase | Gist | Status |
+| --- | --- | --- | --- |
+| 1 | [author](1.author.md) | Mechanical truth fix as commit #1, then the protocol doc authored and BASELINE's graph bullet + manifest rewritten once, into final form | pending |
+| 2 | [rewire](2.rewire.md) | The remaining seven sites point at the protocol under the verified-freshness trust model; D6 guard verified across all of them | pending |
+
+## Acceptance
+
+Milestone-level — the Executor's ultimate-acceptance test, over and above each phase's own criteria:
+
+1. Charter success criteria 1–3 are discharged: the mechanical fix is an identifiable standalone landing; the protocol is product (manifested, generic, carrying recipe + recovery + contract); all eight sites point at it and none names `head_sha`/`index_status` as a freshness signal.
+2. D6 holds everywhere: every rewired role card still prescribes the graph first for structure questions — the trust model changed, the tool choice did not.
+3. The genericity test passes on every `.claude/` change: zero machine- or project-shaped facts (no absolute paths, no `lasers`, no per-OS command specifics — those route to the `work/PROJECT.md` seam guidance the protocol itself states).
+4. `bun .claude/bin/reference-gate check` — 0 failures; BASELINE manifest updated in the same commit as any file it lists.
