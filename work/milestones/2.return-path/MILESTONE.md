@@ -64,8 +64,8 @@ Settled in the milestone-architect operator dialog, 26-07-26, after phase 1's pr
 | # | Phase | Gist | Difficulty | Status |
 | --- | --- | --- | --- | --- |
 | 1 | [probes](1.probes.md) | Battery 1 (hypothesis-test): P1-a falsified H′; early exit at 1 of 10 probes; delivery-to-dispatcher observed at n=1 | medium | **closed PARTIAL (26-07-26)** — premise inverted; record historical |
-| 2 | [cartography](2.cartography.md) | Battery 2 (map): the `run_in_background` discriminant first, then delivery replication, fan-out, continuation/stopped-vs-deferred, upward addressing, type control, surfaces, forensic re-read — no early exit (R7) | medium | pending |
-| 3 | [doctrine](3.doctrine.md) | Version-robust doctrine (R9) via the pre-authored decision table + architect consult (R10): routing-independent invariant, idiom clause, continuation rule, nudge graduation, A3 reconciliation, ADR flip entry + standing hazard, filings — or the tabled escalations | high | pending |
+| 2 | [cartography](2.cartography.md) | Battery 2 (map): the `run_in_background` discriminant first, then delivery replication, fan-out, continuation/stopped-vs-deferred, upward addressing, type control, surfaces, forensic re-read — no early exit (R7) | medium | **closed PASS (26-07-26)** — all six acceptance items met; discriminant named as a deterministic callee-side rule; three return paths mapped |
+| 3 | [doctrine](3.doctrine.md) | Version-robust doctrine (R9) via the pre-authored decision table + architect consult (R10): routing-independent invariant, idiom clause, continuation rule, nudge graduation, A3 reconciliation, ADR flip entry + standing hazard, filings — or the tabled escalations | high | in progress — rows **1 (modified), 5, 6** fired; fork A at the operator |
 
 ## Acceptance
 
