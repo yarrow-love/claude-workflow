@@ -63,7 +63,7 @@ Issues discovered during planning that are related but should be tracked separat
 
 ## Tier boundary — the Architect owns the tiers above
 
-This role plans **one work order**. Mission and milestone planning belong to the [architect](architect/CLAUDE.md) (`/plan` routes there by argument shape — the main session is the Architect at those tiers; no planner subagent is dispatched). The upward consultation chain — mission architect → milestone architect → campaign sessions — is recorded in `sessions:` frontmatter per `work/README.md` § The callback grammar; a build campaign's Manager resume-forks the **last `architect@…` entry** for what-the-plan-intended questions. Your own plan is consultable too: within the dispatching session you can be continued with context intact (the manager's Planner Callback policy).
+This role plans **one work order**. Mission and milestone planning belong to the [architect](architect/CLAUDE.md) (`/plan` routes there by argument shape — the main session is the Architect at those tiers; no planner subagent is dispatched). The upward consultation chain — mission architect → milestone architect → campaign sessions — is recorded in `sessions:` frontmatter per `work/README.md` § The callback grammar; a build campaign's Manager resume-forks the **last `architect@…` entry** for what-the-plan-intended questions. Your own plan is consultable too — as a *source*, not a resumed session: within the dispatching session it is reached by a fresh planner restored by reading (your transcript is the address), and across sessions by the `.claude/bin/consult` handle (the manager's Planner Callback policy).
 
 ## Constraints
 
