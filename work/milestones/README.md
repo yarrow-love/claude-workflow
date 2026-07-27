@@ -7,7 +7,7 @@ The active mission's phased roadmap — mission `v3.memory-protocol` (chartered 
 | # | Milestone | Gist | Depends on | Status |
 | --- | --- | --- | --- | --- |
 | 1 | [protocol](1.protocol/MILESTONE.md) | Hardened 26-07-27, two phases: **author** (mechanical truth fix as mandated commit #1, then `.claude/protocols/codebase-graph.md` — P1 verification recipe + P3 recovery + P2 evidence-passing contract — with BASELINE's graph bullet + `### Protocols` manifest section in final form) → **rewire** (the remaining seven sites, incl. the manager-card brief hook found at hardening, under the verified-freshness trust model; D6 guard) | — | done (26-07-27) |
-| 2 | [hazard-and-evidence](2.hazard-and-evidence/MILESTONE.md) | ADR standing hazard (shared-mutable-store family, both instances) + P4 version-pin ledger absorbing the charter evidence delta → interim `git commit --only` documentation → live spot-check of the recipe as-written + enactment filing | 1 | pending |
+| 2 | [hazard-and-evidence](2.hazard-and-evidence/MILESTONE.md) | Hardened 26-07-27, two phases: **doctrine** (ADR v3 block + P4 ledger reconciling M1's fourteen-fact inventory + the shared-store family hazard; the matched-pair `/initialize` applicability fix under the whole-expectation ruling; interim `git commit --only`; the skeleton rider) → **validate** (the lasers throwaway-branch spot-check with feedback loop, operator-gated single-process window; `/initialize` green; enactment filing) | 1 | pending |
 
 ## Conventions
 
