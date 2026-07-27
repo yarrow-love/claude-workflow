@@ -1,13 +1,13 @@
 # Milestones
 
-The active mission's phased roadmap — mission `v2.repo-hygiene` (chartered 26-07-25, branch `26-07-25`; charter: [`work/MISSION.md`](../MISSION.md)).
+The active mission's phased roadmap — mission `v3.memory-protocol` (chartered 26-07-27, branch `v3.memory-protocol`; charter: [`work/MISSION.md`](../MISSION.md)).
 
 ## Roadmap
 
 | # | Milestone | Gist | Depends on | Status |
 | --- | --- | --- | --- | --- |
-| 1 | [janitor](../missions/v2.repo-hygiene/milestones/1.janitor/MILESTONE.md) | Four phases: floor (doctrine + § Structure schema + declaration) → competency (`janitor.md`, `/clean`) → wiring (blessing lens, where-artifacts-land, advisory order-close, blocking milestone-close, child-collection rule A3) → prove (dogfood pass, `reference-gate`, enactment, fold rehearsal) | — | done (26-07-25) |
-| 2 | [return-path](../missions/v2.repo-hygiene/milestones/2.return-path/MILESTONE.md) | A4, re-planned 26-07-26 after phase 1 falsified the chartered topology (CLI 2.1.220 routes results down to the dispatcher — a version flip against 2.1.218): phase 2 runs a cartography battery (the `run_in_background` discriminant first, no early exit) → phase 3 lands version-robust doctrine via a pre-authored decision table + architect consult, or escalates | 1 | done (26-07-26) — closed accomplished through the blocking janitor gate; phase 1's PARTIAL stands as history |
+| 1 | [protocol](1.protocol/MILESTONE.md) | The mechanical BASELINE fix (deprecated CLI form; the `auto_index` freshness claim) → author `.claude/protocols/codebase-graph.md` (P1 verification recipe + P3 recovery + P2 evidence-passing contract) → rewire the seven graph-prescribing sites under the verified-freshness trust model | — | pending |
+| 2 | [hazard-and-evidence](2.hazard-and-evidence/MILESTONE.md) | ADR standing hazard (shared-mutable-store family, both instances) + P4 version-pin ledger absorbing the charter evidence delta → interim `git commit --only` documentation → live spot-check of the recipe as-written + enactment filing | 1 | pending |
 
 ## Conventions
 
