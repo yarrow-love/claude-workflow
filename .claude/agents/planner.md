@@ -23,7 +23,7 @@ The project supplement lists which libraries require Context7 lookups and which 
 
 ## Codebase Graph (codebase-memory MCP)
 
-When the codebase-memory MCP is available, ground the plan's shape in the graph before reading source: `get_architecture` for the subsystems the objective touches, `trace_path`/`search_graph` to find every site a changed symbol reaches (the honest file-level scope). The graph sizes the phases; the constraint stands that you read the actual source files a phase will change before specifying the changes. Ground that sizing on the brief's verification evidence: a stale graph mis-sizes phases silently, so when the brief carries none, size the phases from file reads instead (`.claude/protocols/codebase-graph.md` § Evidence-passing dispatch).
+Where `work/PROJECT.md` § Codebase graph names an indexable surface and the codebase-memory MCP is available, ground the plan's shape in the graph before reading source: `get_architecture` for the subsystems the objective touches, `trace_path`/`search_graph` to find every site a changed symbol reaches (the honest file-level scope). The graph sizes the phases; the constraint stands that you read the actual source files a phase will change before specifying the changes. Ground that sizing on the brief's verification evidence: a stale graph mis-sizes phases silently, so when the brief carries none, size the phases from file reads instead (`.claude/protocols/codebase-graph.md` § Evidence-passing dispatch).
 
 ## Process
 

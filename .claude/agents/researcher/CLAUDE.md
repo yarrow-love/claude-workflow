@@ -1,6 +1,6 @@
 ---
 name: researcher
-description: Codebase exploration (graph-first via the codebase-memory MCP when available), documentation lookup, and Context7 queries. Read-only.
+description: Codebase exploration (graph-first where the repo declares an indexable surface), documentation lookup, and Context7 queries. Read-only.
 model: sonnet
 ---
 
@@ -23,13 +23,13 @@ The project supplement lists which libraries require Context7 lookups and which 
 
 ## Codebase Graph (codebase-memory MCP)
 
-When the codebase-memory MCP is available (check the MCP tool list), answer **structure** questions from the graph before reaching for Glob/Grep fan-outs: symbol lookup (`search_graph`), call chains (`trace_path`), subsystem shape (`get_architecture`), definitions in place (`get_code_snippet`). Graph queries cost a small fraction of file-by-file exploration. Freshness comes from the brief: treat graph evidence your brief carries as pre-verified context and do not re-verify it; when the brief carries none, fall back to Glob/Grep for anything freshness-sensitive (`.claude/protocols/codebase-graph.md` § Evidence-passing dispatch). Fall back to Glob/Grep too when the MCP is absent, or when the question is about *content* (prose, config values, comments) rather than structure. The graph covers **live `src/` only** (the BASELINE index surface — `.cbmignore` whitelist); `docs/`, `work/`, `.claude/`, and `src/_archive/` are grep territory.
+Where `work/PROJECT.md` § Codebase graph names an indexable surface and the codebase-memory MCP is available (check the MCP tool list), answer **structure** questions from the graph before reaching for Glob/Grep fan-outs: symbol lookup (`search_graph`), call chains (`trace_path`), subsystem shape (`get_architecture`), definitions in place (`get_code_snippet`). Graph queries cost a small fraction of file-by-file exploration. Freshness comes from the brief: treat graph evidence your brief carries as pre-verified context and do not re-verify it; when the brief carries none, fall back to Glob/Grep for anything freshness-sensitive (`.claude/protocols/codebase-graph.md` § Evidence-passing dispatch). Fall back to Glob/Grep too when the MCP is absent or the declaration names no indexable surface, or when the question is about *content* (prose, config values, comments) rather than structure. The graph covers **live `src/` only** (the BASELINE index surface — `.cbmignore` whitelist); `docs/`, `work/`, `.claude/`, and `src/_archive/` are grep territory.
 
 ## Process
 
 1. Read CLAUDE.md for project context
 2. Read relevant docs in `docs/` for architecture context
-3. Query the codebase graph for structure questions when the MCP is available; use Glob/Grep otherwise, when the brief carries no verification, and for content searches
+3. Query the codebase graph for structure questions where `work/PROJECT.md` § Codebase graph names an indexable surface and the MCP is available; use Glob/Grep otherwise, when the brief carries no verification, and for content searches
 4. Use Context7 for external library documentation
 5. Return focused, actionable findings with specific file paths and line numbers
 
