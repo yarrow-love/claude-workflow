@@ -14,7 +14,7 @@ Conventions, tier ladder, role ladder, command family, callback grammar: **[`wor
 - **BASELINE.md tracks the manifest** — adding/removing/moving a bootstrap file updates `.claude/BASELINE.md` in the same commit.
 - **Historical documents are never rewritten** — archived orders and proposals keep their era's vocabulary; `work/README.md` carries the rename mapping.
 - **No packaging leaks to root** — the one sanctioned `package.json` lives at `.claude/bin/`.
-- **Commits**: imperative `Add:` / `Fix:` / `Update:` / `Organize:` / `Document:` prefixes; enumerate paths (never `git add -A` / `git add .`); Co-Authored-By footer per harness convention.
+- **Commits**: imperative `Add:` / `Fix:` / `Update:` / `Organize:` / `Document:` prefixes; enumerate paths (never `git add -A` / `git add .`); commit with `git commit --only <paths>` so a concurrent session's pending hunks in the same files are never absorbed (the shared-store hazard: `.claude/ADR.md` § Standing hazards); Co-Authored-By footer per harness convention.
 
 ## Standing hazards
 
