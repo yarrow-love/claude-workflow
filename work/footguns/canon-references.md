@@ -2,6 +2,8 @@
 
 Read before writing a cross-document pointer into any canon file (`.claude/`, root keystones, `work/` canon).
 
+The **durable statement** is `.claude/agents/janitor.md` § The reference-integrity method, whose coverage map names the bare-prose blind class and the unprefixed-link skip as product doctrine that ships to every consuming repo. This ledger is the fuller local account — the discovery narrative, the archive-time demonstration, and the checks — and it archives with the mission; the coverage map does not. Adjudicated at mission v3.memory-protocol M2 phase 1: promotion to `.claude/ADR.md` § Standing hazards was declined because a standing hazard is a read-before-touching-this-subsystem gate, and this trap's subsystem is *writing any pointer anywhere* — a gate that fires on everything fires on nothing.
+
 ## A pointer written bare in prose is invisible to the reference gate
 
 **Discovered 26-07-27**, rewiring nine graph-prescribing sites to `.claude/protocols/codebase-graph.md` (mission v3.memory-protocol, M1 phase 2).

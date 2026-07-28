@@ -35,7 +35,15 @@ The shared-mutable-store family into `.claude/ADR.md` as a standing hazard with 
 | # | Phase | Gist | Status |
 | --- | --- | --- | --- |
 | 1 | [doctrine](1.doctrine.md) | ADR v3 block + ledger + family hazard; the matched-pair applicability fix; the interim git fix; the skeleton rider; footgun adjudication | done (26-07-27) |
-| 2 | [validate](2.validate.md) | The lasers throwaway-branch spot-check with feedback loop; `/initialize` green; enactment filing | pending |
+| 2 | [validate](2.validate.md) | The lasers throwaway-branch spot-check with feedback loop; `/initialize` green; enactment filing | done (26-07-27) |
+
+## Closed accomplished — 26-07-27
+
+> executor@play/a377b823-57a2-4f74-b03b-049170e6cef3
+
+Both phases done in one Manager pass each; the blocking hygiene pass ran clean (two rung-1 fixes, no rung-2 or rung-3 findings). All five milestone acceptance criteria met — charter success criteria 4–7 discharged, both bugs resolved in place, the P4 ledger reconciling the whole recorded inventory as a sixteen-item union with its arithmetic stated, `~/dev/lasers` as found in git state, and the reference gate at 0 failures.
+
+The milestone's defining moment was the spot-check approaching charter failure criterion 2 — a correctly-formed flip returning 3 and 5 where canon says 0 — and the investigation showing all eight rows to be orphan `Folder` nodes from a superseded index generation, with zero `File` nodes under the same paths. **The operator confirmed the read** (ordinary discrepancy, not falsification), which is where the charter reserves it. Seven protocol amendments came out of the run; the flip query now counts `File` nodes rather than all labels. Campaign log: [`work/todos/_done/26-07-27.execute-hazard-and-evidence.md`](../../todos/_done/26-07-27.execute-hazard-and-evidence.md); evidence: [`work/notes/26-07-27.codebase-graph-spot-check.md`](../../notes/26-07-27.codebase-graph-spot-check.md).
 
 ## Acceptance
 
