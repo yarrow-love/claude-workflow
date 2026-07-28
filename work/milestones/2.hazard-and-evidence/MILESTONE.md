@@ -2,6 +2,7 @@
 sessions:
   - architect@play/2bd4068f-a96d-4295-afb8-8fee72bbeb43 # mission architect — stub at charter
   - architect@play/2bd4068f-a96d-4295-afb8-8fee72bbeb43 # milestone architect — hardened 26-07-27, post-M1, same session
+  - executor@play/a377b823-57a2-4f74-b03b-049170e6cef3 # campaign executor — /execute 26-07-27
 ---
 
 # Milestone 2 — hazard-and-evidence
@@ -42,6 +43,6 @@ Milestone-level — the Executor's ultimate-acceptance test, over and above each
 
 1. Charter success criteria 4–7 are discharged: the hazard is standing with its ledger; the interim git fix is documented and the backlog row reflects it; the spot-check ran the recipe as-written with evidence recorded and discrepancies fed back; the proposal is enacted and both the quality gate and `/initialize` are green under the amended applicability semantics.
 2. The close-blocking bug and the skeleton bug are resolved through their normal workflow (resolution frontmatter + section; they stay in `bugs/` for the close ceremony per precedent).
-3. The P4 ledger reconciles the **whole** recorded inventory — M1's fourteen version-shaped facts and two reconciliation notes (`work/todos/_done/26-07-27.author.md` § Acceptance Verdict), M1's two named 0.9.1-flip candidates, the charter's evidence-delta issue set — each as a ledger row or an explicit exclusion with reason; no silent drops.
-4. `lasers` is left exactly as found: original branch checked out, throwaway branch deleted, working tree clean, store re-indexed at the original checkpoint and verified.
+3. The P4 ledger reconciles the **whole** recorded inventory — M1's version-shaped facts and reconciliation notes (`work/todos/_done/26-07-27.author.md` § Summary + § Investigation I6; citation corrected and the thirteen-vs-fourteen discrepancy governed at the Reconnaissance gate, decision D-E), M1's two named 0.9.1-flip candidates, the charter's evidence-delta issue set — each as a ledger row or an explicit exclusion with reason; no silent drops.
+4. `lasers` is left as found **in its git state** — original branch checked out, throwaway branch deleted, working tree clean, nothing pushed, no ignored content stranded — with the store deliberately left **repaired**: re-indexed at the original checkpoint and flip-verified, its three-day-stale pre-state captured first. (Operator ruling at the Reconnaissance gate, decision D-B: as found, the store held a stale index across a 342-file committed refactor; restoring that is re-breaking a known-wrong store, and derived edges would not survive a restore identically in any case.)
 5. `bun .claude/bin/reference-gate check` — 0 failures; genericity holds on every `.claude/` change, with the one deliberate exception the charter's P4 defines: the ADR ledger is the sanctioned home for version strings and issue numbers.
