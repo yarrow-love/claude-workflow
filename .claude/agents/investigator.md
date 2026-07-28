@@ -23,7 +23,7 @@ The project supplement lists which libraries require Context7 lookups.
 
 ## Codebase Graph (codebase-memory MCP)
 
-When the codebase-memory MCP is available, use the graph for the tracing legwork: `trace_path` follows a call chain from entry point to failure site in one query; `search_graph` finds every caller of the failing symbol (blast-radius survey); `get_code_snippet` pulls definitions without opening whole files. Verify the decisive evidence by reading the actual source at the located lines — the graph locates, the file confirms. Fall back to manual tracing when the MCP is absent or the index is stale.
+Where `work/PROJECT.md` § Codebase graph names an indexable surface and the codebase-memory MCP is available, use the graph for the tracing legwork: `trace_path` follows a call chain from entry point to failure site in one query; `search_graph` finds every caller of the failing symbol (blast-radius survey); `get_code_snippet` pulls definitions without opening whole files. Verify the decisive evidence by reading the actual source at the located lines — the graph locates, the file confirms. When the two disagree, **the file wins**: trace manually for the answer you needed and report the disagreement as staleness evidence — re-verifying and re-indexing are the dispatcher's acts, not yours (`.claude/protocols/codebase-graph.md` § Evidence-passing dispatch). Treat graph evidence your brief carries as pre-verified context; when the brief carries none, fall back to manual tracing, as you do when the MCP is absent or the declaration names no indexable surface.
 
 ## Process
 
