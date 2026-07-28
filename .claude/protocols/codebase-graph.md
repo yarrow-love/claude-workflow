@@ -6,17 +6,21 @@ The one-sentence version: **the graph is a cache.** Verified, it is the cheapest
 
 ## Verifying freshness
 
-**The known-moved-path flip.** Pick a path a committed refactor removed, together with the path the code moved to. Query the graph for nodes whose file path contains the removed path and expect a count of **0**; query the path the code moved to and expect a count **above 0**. A graph still holding nodes under the removed path is stale, whatever it reports about itself.
+**The known-moved-path flip.** Pick a path a committed refactor removed, together with the path the code moved to. Query the graph for `File` nodes whose file path contains the removed path and expect a count of **0**; query the path the code moved to and expect a count **above 0**. A graph still holding `File` nodes under the removed path is stale, whatever it reports about itself.
 
 ```
-MATCH (n) WHERE n.file_path CONTAINS '<removed path>' RETURN count(n)
+MATCH (f:File) WHERE f.file_path CONTAINS '<removed path>' RETURN count(f)
 ```
+
+Container and legacy node types can survive a full re-index, so the flip counts **code-bearing `File` nodes** rather than every node under the path — counting every node reports staleness on a graph that was just correctly rebuilt.
 
 `<removed path>` is **repo-relative** — path values in the graph are repo-relative, so an absolute or `<repo>`-prefixed string matches nothing and the check passes vacuously. The concrete path pair is seam content.
 
-**The property is `file_path`, not `path`.** A `WHERE` clause written against `path` returns zero rows, and zero rows is exactly what a clean result looks like: a false pass, indistinguishable from success. Two actions follow. Write `file_path`. And **confirm property names with `keys()` / `properties()` before trusting any negative result** — a count of 0 is evidence only if the property it was counted on exists.
+**An empty result set is the zero.** A count with no matches may return no rows at all rather than a row containing `0`, so read no rows as the count it stands for rather than as a query that failed. It is also exactly what a query against a property that does not exist returns — which is why the confirmation below is not optional.
 
-**The `expected_* == actual_*` gate.** Read it on every `index_repository` result, and read it as a shape rather than a single number: every `expected_*` field must equal its `actual_*` counterpart. A surplus of stored over expected means stale rows were not purged — a different failure from an under-count, needing the same repair.
+**The property is `file_path`, not `path`.** A `WHERE` clause written against `path` returns zero rows, and zero rows is exactly what a clean result looks like: a false pass, indistinguishable from success. Two actions follow. Write `file_path`. And **confirm property names before trusting any negative result** — a count of 0 is evidence only if the property it was counted on exists. Take **`keys()` as the authority** on queryable attribute names: the two introspection calls may **partition** a node's attributes between them rather than mirror each other, so a name absent from `properties()` is not absent from the node — treating them as interchangeable manufactures the false negative this step exists to prevent.
+
+**The `expected_* == actual_*` gate.** Read it on every `index_repository` result, and read it as a shape rather than a single number: every `expected_*` field must equal its `actual_*` counterpart. A surplus of stored over expected means stale rows were not purged — a different failure from an under-count, needing the same repair. The converse does not hold: the gate certifies the **current generation's** extraction against its own expectation, so rows of a type the indexer no longer emits fall outside **both** sides of the comparison and a clean gate passes straight over them. **A clean gate is not evidence that no stale rows remain** — that is what the flip discriminates.
 
 **Full re-index triggers.** Re-index the whole project, at a committed checkpoint, after any of: a bulk move or rename; a branch switch; a binary upgrade; any graph result a file contradicts.
 
@@ -36,7 +40,7 @@ A verification is evidence only for the server process that performed it. A sess
 
 ### Silent staleness: the declined refresh
 
-The background refresher can decline work under memory pressure, and a declined re-index is **silently** stale. Nothing in the graph reports the refusal, no result changes shape, and every query keeps answering from the older snapshot. The refusal is visible only in the refresher's own log — its rejection and out-of-memory events — whose location the seam declares. Read that log whenever a re-index appears to have had no effect.
+The background refresher can decline work under memory pressure, and a declined re-index is **silently** stale. Nothing in the graph reports the refusal, no result changes shape, and every query keeps answering from the older snapshot. The refusal is visible only in the refresher's own log — its rejection and out-of-memory events — whose location the seam declares. Read that log whenever a re-index appears to have had no effect. An **empty or absent** log is not a clean read. It is ambiguous between "no refusals" and "no logging at all" — the log location may be created on demand and stay empty until something noteworthy happens — so it is evidence in neither direction. Establish that the log is being written before reading silence as reassurance; until then this discriminant is unavailable and the flip is the only check standing.
 
 ### The query dialect is restricted
 
@@ -64,7 +68,7 @@ Mechanism, in one sentence: concurrent holders block the write-ahead log's check
 
 Before any store operation, and before any graph-dependent dispatch, **confirm that exactly one server process is running against the store.** Only the shared coordination daemon is a singleton — per-session servers are not deduplicated, so every client that connects spawns its own server against the same store, and a reconnect **adds** a process rather than replacing one.
 
-The observable discriminant, stated as one: **never assume a reconnect replaced a server — count processes.** The precondition is checked, not inferred. The process-check command is per-OS and belongs to the seam.
+The observable discriminant, stated as one: **never assume a reconnect replaced a server — count processes.** The precondition is checked, not inferred. The process-check command is per-OS and belongs to the seam. Validate that command against a known-nonzero count before trusting it. A name-matching form can return **0** on a platform that truncates or normalizes process names, and a zero from a wrong command is indistinguishable from a satisfied precondition — the same false-pass shape as a `WHERE` clause written against a property that does not exist.
 
 ### The sanctioned recovery
 
@@ -110,6 +114,8 @@ Every machine-specific value the procedures above need is declared once, per pro
 - the **refresher's log location**.
 
 The moved-path pair **decays** — refresh it when it stops corresponding to a recent committed refactor, or the flip check degenerates into a query that would return 0 against any graph.
+
+**When the seam is not yet authored.** Every consuming repo is in this state the moment the protocol lands, and the procedures above still need their values. Until the section exists, assemble the values once, in the open: take each from whatever the project already records — an operating runbook, an install record, the tool's own configuration output — and **verify it live, read-only, at the moment of recording**. Where the source has nothing for a value, derive it and verify it the same way; where the work has not yet produced a value, mark it pending rather than guessing. Write the block where the work is recorded, cite it from every step that consumes a value, and treat it as the section's draft — the first procedure that needs the seam is what authors it. Two rules hold throughout: **never substitute another project's values**, and **never run a procedure against a value that was transcribed but not verified** — an unverified value is exactly how a check passes vacuously. A **missing** § Codebase graph is a failure to be closed, not a declaration; this is what a run does while that failure is open, never a reason to leave it open.
 
 ## Why the graph still comes first
 
