@@ -34,7 +34,7 @@ The shared-mutable-store family into `.claude/ADR.md` as a standing hazard with 
 
 | # | Phase | Gist | Status |
 | --- | --- | --- | --- |
-| 1 | [doctrine](1.doctrine.md) | ADR v3 block + ledger + family hazard; the matched-pair applicability fix; the interim git fix; the skeleton rider; footgun adjudication | pending |
+| 1 | [doctrine](1.doctrine.md) | ADR v3 block + ledger + family hazard; the matched-pair applicability fix; the interim git fix; the skeleton rider; footgun adjudication | done (26-07-27) |
 | 2 | [validate](2.validate.md) | The lasers throwaway-branch spot-check with feedback loop; `/initialize` green; enactment filing | pending |
 
 ## Acceptance
