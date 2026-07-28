@@ -8,7 +8,7 @@ sessions:
 
 # Mission v3 — the codebase-memory protocol: verified freshness, evidence-passing dispatch, and the shared-store hazard
 
-> Chartered 26-07-27 by operator commission, founded on the standing proposal [`work/proposals/26-07-26.codebase-memory-protocol.md`](proposals/26-07-26.codebase-memory-protocol.md) — filed at the v2 close for exactly this purpose; its four pillars bind this mission (D1). Third mission this repo has chartered (predecessor: `v2.repo-hygiene`, closed accomplished 26-07-26), and the first opened under the `dev` process-branch model: the mission rides branch `v3.memory-protocol` off `dev` (mission = branch). Operator rulings at charter: theme scope is **protocol + hazard family** (the git-index remedy fork stays deferred); the doctrine home is **`.claude/protocols/`** (operator-named); acceptance is **docs + live spot-check**.
+> Chartered 26-07-27 by operator commission, founded on the standing proposal [`work/proposals/_enacted/26-07-26.codebase-memory-protocol.md`](proposals/_enacted/26-07-26.codebase-memory-protocol.md) — filed at the v2 close for exactly this purpose; its four pillars bind this mission (D1). Third mission this repo has chartered (predecessor: `v2.repo-hygiene`, closed accomplished 26-07-26), and the first opened under the `dev` process-branch model: the mission rides branch `v3.memory-protocol` off `dev` (mission = branch). Operator rulings at charter: theme scope is **protocol + hazard family** (the git-index remedy fork stays deferred); the doctrine home is **`.claude/protocols/`** (operator-named); acceptance is **docs + live spot-check**.
 
 ## Objective / why now
 
@@ -37,7 +37,7 @@ Surfaces: the six sites the proposal names, plus the seventh the charter groundi
 
 ## Settlement — determinations
 
-**D1 — The proposal binds.** The four pillars, the six-site defect table, the enactment shape, and the graph-first economics clause of `work/proposals/26-07-26.codebase-memory-protocol.md` are this mission's spec. Where a milestone doc and the proposal disagree, the proposal wins until this charter explicitly revises it.
+**D1 — The proposal binds.** The four pillars, the six-site defect table, the enactment shape, and the graph-first economics clause of `work/proposals/_enacted/26-07-26.codebase-memory-protocol.md` are this mission's spec. Where a milestone doc and the proposal disagree, the proposal wins until this charter explicitly revises it.
 
 **D2 — The doctrine home is `.claude/protocols/` (operator-named at charter).** A new manifested product directory class: cross-agent operational protocols — procedures more than one role enacts, stated once and pointed at from role cards. First member: the codebase-graph protocol (P1 verification recipe, P3 recovery procedure, P2 evidence-passing contract). The v2 D2 mapping extends: **doctrine → product, machine and project facts → the `work/PROJECT.md` seam** (install variant, store paths, per-OS recovery commands — the `lasers` runbook §§ interim-guidance/9/10 model the split and are the transcription source). Genericity remains the acceptance test.
 
@@ -62,7 +62,7 @@ Recorded so the P4 ledger authors from charter-verified state, not from the prop
 
 - **Footguns**: `work/footguns/claude-bin.md` — **carried, re-certified live** (this mission plans no `.claude/bin/` work, but the ledger is the live seam; untouched otherwise).
 - **Todos**: `bugs/26-07-25.bug.concurrent-tree-commit-absorption.md` — **live, now aligned to this mission (D5)**: the hazard entry names it, M2 lands the interim `git commit --only` documentation, the remedy fork stays deferred. Backlog row updated at charter.
-- **Proposals**: `26-07-26.codebase-memory-protocol.md` — **adopted at this charter**; stays in the root until the enacting work completes (M2 files it to `_enacted/`). The `_deferred/` set persists untouched.
+- **Proposals**: `work/proposals/_enacted/26-07-26.codebase-memory-protocol.md` — **adopted at this charter**; stays in the root until the enacting work completes (M2 files it to `_enacted/`). The `_deferred/` set persists untouched.
 - **Runbooks**: none live (v2's fold-and-close runbook retired into its archive; this close will author its own edition against the dev model at `/close` time).
 - **Design**: no canon founded (the scaffold is empty by MVP allowance) — nothing to triage.
 - **Notes**: `work/notes/26-07-25.child-collection-evidence.md` stays live per the v2 close ruling.
