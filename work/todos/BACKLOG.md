@@ -6,15 +6,15 @@ Prioritized ledger of the active `work/todos/` inbox. Rewritten end-to-end by `/
 
 | Item | Type | Priority | Disposition | Aligns | Note |
 |---|---|---|---|---|---|
-| [role-cards-capability-gated](bugs/26-07-27.bug.role-cards-capability-gated.md) | bug | low | live | v3 (M2 P1, D-C) | Five role-card sites open "When the codebase-memory MCP is available…", gating graph usage on capability rather than on the seam declaration — so on a machine with the MCP installed and the repo declaring `None`, all five say "use the graph" with nothing to use. Ruled out of phase 1's scope at the Reconnaissance gate (D-C) on the argument that the evidence-passing rule already degrades them gracefully, making this redundancy rather than contradiction. Natural home for OH-4's one-word `<hostname>`/`<machine>` repair in `execute-milestone.md:8`. |
 | [concurrent-tree-commit-absorption](bugs/26-07-25.bug.concurrent-tree-commit-absorption.md) | bug | medium | live | v3 (D5) | Interim-mitigated (v3 M2 phase 1, 26-07-27): `git commit --only <paths>` is now the documented commit idiom (root `CLAUDE.md` § Conventions) and the hazard family is standing in `.claude/ADR.md` § Standing hazards with the git instance named and this filing cited; the remedy design fork — worktree isolation vs. staging discipline — remains deferred and is named as deferred in the hazard entry. |
 
-## Closed this pass (26-07-27, v3 M2)
+## Closed in v3.memory-protocol (26-07-27, M2)
 
-- [initialize-presence-probe-unconditional](bugs/26-07-27.bug.initialize-presence-probe-unconditional.md) — the close-blocking defect, resolved by phase 1's matched-pair amendment. **Discharge confirmed here**: phase 2's `/initialize` run reads check 2b **inapplicable per declaration**, which is exactly the status the fix was written to produce, verified against the landed wording rather than assumed. The proof is **partial** while check 2a (`chrome-devtools`) fails — that failure is machine-side and unrelated to this bug, but it means the audit as a whole is not green, so the bug's own discharge is evidenced by check 2b in isolation rather than by a green run.
-- [milestone-log-skeleton-sessions](bugs/26-07-27.bug.milestone-log-skeleton-sessions.md) — resolved by phase 1's rider commit, landed last per the dispatched-file-ownership hazard.
+- [role-cards-capability-gated](../missions/v3.memory-protocol/todos/bugs/26-07-27.bug.role-cards-capability-gated.md) — filed out of phase 1's Reconnaissance gate (D-C) and resolved in the same pass (commit `0edbbe3`): seven `.claude/` role-card gates realigned from per-machine capability onto the per-repo seam declaration (`work/PROJECT.md` § Codebase graph), with the `<hostname>` → `<machine>` rider in `.claude/agents/executor/workflows/execute-milestone.md`.
+- [initialize-presence-probe-unconditional](../missions/v3.memory-protocol/todos/bugs/26-07-27.bug.initialize-presence-probe-unconditional.md) — the close-blocking defect, resolved by phase 1's matched-pair amendment. **Discharge confirmed here**: phase 2's `/initialize` run reads check 2b **inapplicable per declaration**, which is exactly the status the fix was written to produce, verified against the landed wording rather than assumed. The proof is **partial** while check 2a (`chrome-devtools`) fails — that failure is machine-side and unrelated to this bug, but it means the audit as a whole is not green, so the bug's own discharge is evidenced by check 2b in isolation rather than by a green run.
+- [milestone-log-skeleton-sessions](../missions/v3.memory-protocol/todos/bugs/26-07-27.bug.milestone-log-skeleton-sessions.md) — resolved by phase 1's rider commit, landed last per the dispatched-file-ownership hazard.
 
-Both stay in `bugs/` with `status: done` and `resolution:` frontmatter for the close ceremony, per D-L.
+All three carry `status: done` and `resolution:` frontmatter, per D-L; they stayed in `work/todos/bugs/` until the close ceremony carried them into `work/missions/v3.memory-protocol/todos/bugs/`.
 
 ## Closed earlier (26-07-26)
 
