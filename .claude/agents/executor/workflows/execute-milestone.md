@@ -37,6 +37,11 @@
 **Document structure:**
 
 ```markdown
+---
+sessions:
+  - executor@<machine>/<session-id> # campaign executor
+---
+
 # Execute: <Objective>
 
 ## Objective
