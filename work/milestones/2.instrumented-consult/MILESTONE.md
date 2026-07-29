@@ -55,7 +55,8 @@ The Executor's ultimate-acceptance test:
 4. **The boundary trap is closed** — `permission_denials` is never the signal; a successful out-of-allowlist tool use is detected and surfaced, demonstrated against a fixture.
 5. **The standing hazard is honest** — `.claude/ADR.md`'s DENY-drift entry describes the reconciled state and restates the name-deny-only limitation that survives it.
 6. **Genericity holds** — nothing repo-shaped enters `.claude/`; the change works verbatim in a fresh consuming repo.
-7. **Quality gate green** — `reference-gate check`, the tooling smoke test (`consult` with no args still prints usage and exits 1), and `/initialize`.
+7. **Quality gate** — the tooling smoke test (`consult` with no args still prints usage and exits 1) and `/initialize`. ***Amended by operator ruling, 26-07-29**: this milestone closes with `reference-gate check` **red**. Its 9 failures are pre-existing, confined to `work/research/herdr.md`, verified byte-identical against HEAD, and unrelated to anything M2 touched; a bug is filed and the fix is deferred. The amendment is bounded — **charter success criterion 7 still requires a green gate before mission close**, so the deferral expires at v4's close and cannot lapse into permanence.*
+8. **The guard's allowlist limitation is recorded, not just accepted** — operator ruling 26-07-29 set the guard's allowlist to the six names the harness actually grants (`Read`, `Grep`, `Glob`, `ReportFindings`, `Skill`, `ToolSearch`), so the predicate asks "did anything beyond the granted set run." The consequence is that the allowlist mirrors the harness's grant and therefore goes stale on harness upgrade exactly as `DENY` does. It must be stated at the allowlist in code and carried as a second surface on the ADR's DENY-drift hazard entry.
 
 ## Depends on
 
