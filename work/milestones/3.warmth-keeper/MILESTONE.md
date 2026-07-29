@@ -24,6 +24,15 @@ Build the scheduler that holds registered superior handles warm by firing trivia
 
 M1's held economics cells land here rather than as a standalone matrix, because the keeper's own telemetry *is* the measurement: its first beats on a cold prefix are the cold cells, its steady-state beats are the warm cells, and the instrumented consult (M2) captures all of it. Required: warmth held across **≥2 TTL windows**, **refresh-on-read** confirmed, and **one expiry cell** as negative control.
 
+## Design inputs recorded at the M2 phase-1 gate (26-07-29)
+
+Supplied by the mission architect as named inputs to this milestone's hardening dialog — a stub that anticipates these is better than one that meets them in production:
+
+- **Rate limiting is a first-class beat outcome, not an error.** M2 phase 1 found the wire carries a `rate_limit_event` type M1 never enumerated. A cadence-firing keeper is the textbook caller to meet rate limiting, and the economics are asymmetric: beats are pure overhead, so a rate-limited beat that tight-retries converts an efficiency mechanism into a cost source and feeds the very limit it hit. **Response is defer-to-next-window — skip the beat, never retry inside it.** The designed failure bound already absorbs this: a skipped beat's worst case is one cold reload, exactly the stall-semantics ceiling this milestone's scope pins.
+- **Count rate-limited beats distinctly from failed beats.** Charter success criterion 5 requires residual cold events to be *enumerable*; a rate-limited beat window is one of the enumerable causes, and M4's warm-share analysis can only attribute it if the telemetry separates it.
+- **Beat failure is a returned state, not an exception.** On bun 1.3.14 `spawnSync` returns with `run.error` set and `status: 143` rather than throwing. A keeper written around try/catch would miss the real failure shape.
+- **Inherit the parser's posture.** M2's deliberate non-exhaustive switch on event `type` is the right contract for a wire that gains types without notice; anything built on it tolerates unknown types the same way.
+
 ## Depends on
 
 M2 — the keeper's beats are consult-shaped children and its acceptance evidence is usage telemetry, so it is built *on* the instrument and measured *by* it.
