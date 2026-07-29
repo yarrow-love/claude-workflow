@@ -5,11 +5,11 @@ sessions:
 
 # Milestone 5 — batching: the conditional optimization
 
-> Stubbed at charter (26-07-28). **Conditional** (operator ruling at charter): this milestone opens with a gate read against M4's measurements and may be **skipped without failing the mission** — success criterion 6 requires only that the ruling is recorded either way. Hardens via `/plan work/milestones/5.batching/` only if the gate opens it.
+> Stubbed at charter (26-07-28); its compounding rationale restated at **amendment A1** (26-07-28) against the warmth-keeper rather than the superseded channel. **Conditional** (operator ruling at charter): this milestone opens with a gate read against M4's measurements and may be **skipped without failing the mission** — success criterion 6 requires only that the ruling is recorded either way. Hardens via `/plan work/milestones/5.batching/` only if the gate opens it.
 
 ## Objective
 
-Evaluate and, if warranted, land predecessor Remedy 1: consulting roles accumulate questions per handle and consult once per natural boundary (phase close, verdict, blessing) as a numbered list — larger batched exchanges are more token-efficient, and batching concentrates traffic inside the TTL window, compounding with the channel.
+Evaluate and, if warranted, land predecessor Remedy 1: consulting roles accumulate questions per handle and consult once per natural boundary (phase close, verdict, blessing) as a numbered list — larger batched exchanges are more token-efficient, and batching concentrates traffic inside the TTL window, compounding with the warmth-keeper's held TTL windows.
 
 ## Scope (gist)
 

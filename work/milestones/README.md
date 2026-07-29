@@ -4,12 +4,14 @@ The active mission's phased roadmap. Empty until the first mission is chartered 
 
 ## Roadmap — mission v4.token-efficiency
 
+> Revised at **amendment A1** (26-07-28): M1's spike confirmed the always-warm premise and established that cache residency is byte-bound, retiring the held-open intercom before it was built. The superseded `2.intercom` and `3.protocol-integration` are replaced by the instrumented consult and the warmth-keeper. Rationale: `work/MISSION.md` § Amendment A1.
+
 | # | Milestone | Gist | Depends on | Status |
 | --- | --- | --- | --- | --- |
-| 1 | [spike](1.spike/MILESTONE.md) | The always-warm theory under test, in two phases split by question: channel mechanics + read-only boundary, then the cost matrix + heartbeat — the mission's go/no-go gate | — | pending |
-| 2 | [intercom](2.intercom/MILESTONE.md) | The channel as product: `.claude/bin/` tooling, lifecycle machinery, warmth policy, routing convention, crash semantics | 1 | pending |
-| 3 | [protocol-integration](3.protocol-integration/MILESTONE.md) | Consult path + canon rewired: consult ladder's live-channel rung, callback grammar, role cards, degrade semantics, enactment | 2 | pending |
-| 4 | [measured-campaign](4.measured-campaign/MILESTONE.md) | One real campaign in `~/dev/lasers` over the intercom; per-consult measurements collected and analyzed | 3 | pending |
+| 1 | [spike](1.spike/MILESTONE.md) | The always-warm theory under test: channel mechanics + read-only boundary, then the cost matrix — the mission's go/no-go gate | — | **done (26-07-28)** — phase 1 accomplished; phase 2 superseded → A1 |
+| 2 | [instrumented-consult](2.instrumented-consult/MILESTONE.md) | `.claude/bin/consult` captures and reports per-consult `usage` from the child's event wire; DENY-drift reconciliation and the `permission_denials` false-clean-sheet fix. Small, and it unblocks all measurement | 1 | pending |
+| 3 | [warmth-keeper](3.warmth-keeper/MILESTONE.md) | The scheduler as product: registration/release, activity-windowed cadence, read-only beats via the instrumented consult, stall semantics; acceptance evidence = M1's re-homed cells; canon + role cards; proposal enactment | 2 | pending |
+| 4 | [measured-campaign](4.measured-campaign/MILESTONE.md) | One real campaign in `~/dev/lasers` over warmth-keeper + instrumented consult; per-consult measurements collected and analyzed | 3 | pending |
 | 5 | [batching](5.batching/MILESTONE.md) | Conditional: consult batching evaluated against M4's measurements; skippable at its gate without failing the mission | 4 | pending |
 
 ## Conventions

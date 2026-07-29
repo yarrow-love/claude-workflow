@@ -43,7 +43,15 @@ Operator rulings taken 26-07-28 in the planning dialog, binding on both phases:
 | # | Phase | Gist | Status |
 | --- | --- | --- | --- |
 | 1 | [channel](1.channel.md) | Harness + hold-open mechanics (session-id capture, live append, event wire, clean resume) + the read-only boundary check | **closed 26-07-28 — all 14 criteria met, no refutation** |
-| 2 | [economics](2.economics.md) | Four-cell cost matrix + heartbeat under forced 5m TTL; warm-fork corollary; break-even; the gate reading | pending |
+| 2 | [economics](2.economics.md) | Four-cell cost matrix + heartbeat under forced 5m TTL; warm-fork corollary; break-even; the gate reading | **superseded → A1** (re-homed to the warmth-keeper milestone) |
+
+## Closing status — done (26-07-28)
+
+Phase 1 closed **accomplished**; phase 2 **superseded by charter amendment A1**, its residual questions (TTL-window hold, refresh-on-read, expiry control) re-homed as [milestone 3's](../3.warmth-keeper/MILESTONE.md) acceptance evidence, where the keeper's own telemetry supplies them without a standalone matrix.
+
+**The go/no-go gate was ruled GO** — in the strongest available form: the operator re-chartered the mission in the direction the spike established. Charter success criterion 1 is thereby discharged; the gate is not left dangling.
+
+The verdict in one line: **the premise was confirmed and the mechanism was superseded.** Warm/cold measured at ~18× ($0.233 against $4.26 on the same prefix), and cache residency proved **byte-bound** — surviving process death and fork identity — which retired the held-open channel before it was built. Full record: `work/MISSION.md` § Amendment A1 and `work/todos/_done/26-07-28.execute-m1-spike.md`.
 
 ## Acceptance
 

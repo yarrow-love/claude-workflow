@@ -5,11 +5,11 @@ sessions:
 
 # Milestone 4 — measured-campaign: success demonstrated in a consuming repo
 
-> Stubbed at charter (26-07-28); hardens just-in-time via `/plan work/milestones/4.measured-campaign/`. Operator ruling at charter: success criterion 5 is discharged here — demonstrated, not projected.
+> Stubbed at charter (26-07-28), retargeted at **amendment A1** (26-07-28) from the superseded intercom to the warmth-keeper + instrumented consult; hardens just-in-time via `/plan work/milestones/4.measured-campaign/`. Operator ruling at charter: success criterion 5 is discharged here — demonstrated, not projected.
 
 ## Objective
 
-Run one real campaign in `~/dev/lasers` (milestones already queued there) over the landed intercom, collect per-consult `usage` measurements, and analyze them against the charter's measurable test: mean consult cost collapsed toward cache-read rates, warm share near total, residual cold events enumerable.
+Run one real campaign in `~/dev/lasers` (milestones already queued there) over the landed warmth-keeper and instrumented consult path, collect per-consult `usage` measurements, and analyze them against the charter's measurable test: mean consult cost collapsed toward cache-read rates, warm share near total, residual cold events enumerable.
 
 ## Scope (gist)
 
