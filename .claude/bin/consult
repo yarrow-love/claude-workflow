@@ -3,7 +3,7 @@
  * consult — resume-fork a recorded session and ask it a question, restoring the
  * transcript from the durable archive if the local cache has lost it.
  *
- *   bun .claude/bin/consult <role@machine/session-id[#msg]> "<question>" [--model fable|opus] [--dry]
+ *   bun .claude/bin/consult <role@machine/session-id[#msg]> "<question>" [--model fable|opus] [--usage-json] [--dry]
  *
  * The ladder: transcript present locally → resume; absent → restore from
  * work/sessions/<machine>/<uuid>.jsonl.gz → resume; archive miss → degrade
@@ -15,16 +15,33 @@
  * read and answer, never act. And it is repo-bound — a handle resolves only
  * where the transcript's recorded cwd matches the consulting repo.
  *
+ * The child runs with stream-json output, and its event wire is parsed here — so
+ * a consult reports what it cost. The caller-facing contract is unchanged:
+ *   stdout — the answer text, alone. No JSON envelope, no usage line, ever.
+ *   stderr — diagnostics, then usage as the last line: the raw token-counter
+ *            field names, the cache-creation TTL split, and a per-consult cost
+ *            delta. With --usage-json that last line is one JSON object instead.
+ * Fallback, never default: an answer larger than ANSWER_MAX_BYTES (256 KiB) is
+ * written to a file in the OS temp directory and its path returned on stdout in
+ * place of the text, with a loud stderr note. Real answers are far below it.
+ *
+ * A run fails when the wire carries no terminal result event, or carries one
+ * flagged as an error — never merely because stdout was empty.
+ *
  * exit codes:
  *   0  ran (or --dry)
  *   1  usage / unparseable handle
  *   2  cross-machine handle (deferred)
- *   3  transcript unusable — absent (cache + archive both miss), or present but
- *      the fork produced no answer (failed to resume). Both take the degrade path.
+ *   3  the consult cannot be relied on — the transcript is unusable (absent from
+ *      cache and archive, or it failed to resume), the fork produced no usable
+ *      answer, the child could not be run at all, or the wire reported success
+ *      while the child itself exited non-zero (there an answer HAS already been
+ *      written to stdout, and the disagreement is reported). All take the
+ *      degrade path.
  *   4  repo mismatch — transcript belongs to another repo (refuse; degrade)
  */
 import { gunzipSync } from "node:zlib";
-import { hostname } from "node:os";
+import { hostname, tmpdir } from "node:os";
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
@@ -39,17 +56,20 @@ const projectDir = join(process.env.HOME!, ".claude", "projects", slug);
 
 const args = process.argv.slice(2);
 const dry = args.includes("--dry");
+const usageJson = args.includes("--usage-json");
 const modelIdx = args.indexOf("--model");
 const model = modelIdx >= 0 ? args[modelIdx + 1] : "fable";
 const positional = args.filter(
-  (a, i) => a !== "--dry" && a !== "--model" && (modelIdx === -1 || i !== modelIdx + 1)
+  (a, i) =>
+    a !== "--dry" && a !== "--usage-json" && a !== "--model" && (modelIdx === -1 || i !== modelIdx + 1)
 );
 const [handle, question] = positional;
 
 if (!handle || (!question && !dry)) {
   console.error(
-    'usage: consult <role@machine/uuid[#msg]> "<question>" [--model fable] [--dry]\n' +
-      "  the fork is read-only (reads + answers, never acts) and repo-bound to this repo"
+    'usage: consult <role@machine/uuid[#msg]> "<question>" [--model fable] [--usage-json] [--dry]\n' +
+      "  the fork is read-only (reads + answers, never acts) and repo-bound to this repo\n" +
+      "  stdout is the answer alone; usage lands on stderr (--usage-json makes it one JSON object)"
   );
   process.exit(1);
 }
@@ -184,6 +204,15 @@ const cmd = [
   "--resume",
   uuid,
   "--fork-session",
+  // --output-format stream-json turns the child's stdout into the event wire the
+  // parser below reads. --verbose is NOT required by the pinned CLI — re-probed:
+  // the same run without it emits an identical terminal result event — but it is
+  // retained deliberately, because older versions did require it alongside -p.
+  // Both flags are non-variadic, so this position is safe; --permission-mode
+  // still goes last, ahead of the prompt.
+  "--output-format",
+  "stream-json",
+  "--verbose",
   "--model",
   model,
   "--settings",
@@ -205,39 +234,241 @@ if (dry) {
   console.log(`would run: ${cmd.map((c) => (c.includes(" ") ? JSON.stringify(c) : c)).join(" ")}`);
   process.exit(0);
 }
-// stdin from /dev/null so the fork never blocks waiting for piped input; stdout
-// captured (then echoed) so a failed *start* is caught — `claude -p` can exit 0
-// with no answer when the fork can't resume ("No conversation found"), which
-// would otherwise report a silently-failed consult as success and skip the
-// caller's degrade path (e.g. Blessing's fresh-architect fallback).
-// Capture stdout (then echo) instead of live-streaming — required so the
-// empty-output→exit-3 detection below can see the fork produced no answer. The
-// 64 MB cap is a deliberate ceiling: a fork whose stdout exceeds it ENOBUFS-
-// errors (run.status non-zero) → the failure path → degrade, not a silent truncation.
-const run = spawnSync(cmd[0], cmd.slice(1), {
-  cwd: repoRoot,
-  stdio: ["ignore", "pipe", "inherit"],
-  encoding: "utf8",
-  maxBuffer: 64 * 1024 * 1024,
-});
-const answer = run.stdout ?? "";
-if (answer) process.stdout.write(answer);
+// ── the event wire ──────────────────────────────────────────────────────────
+// Hand-ported, not imported, from the spike harness that first mapped this wire:
+// that harness lives in the process tree, which archives away, while this script
+// has to run in a bootstrapped copy that never had it. Only the parsing and the
+// trap discipline crossed over — the harness's async spawn and held-open stdin
+// solve a deadlock class a single-shot consult does not have.
+//
+// Trap 2 — the `system`/`init` event re-fires once per turn, not once per
+// process, so nothing here keys on "the init event" or assumes it is unique.
+// Nor is `type` ever switched on exhaustively: the live stream carries types the
+// wire map never enumerated (a rate-limit event, for one). Unknown types are
+// retained in `events` and ignored.
+type WireEvent = Record<string, any>;
 
-// A successful consult always emits an answer on stdout. Empty stdout means the
-// fork could not resume ("No conversation found", printed to the inherited
-// stderr) — `claude -p` reports this as exit 0 or 1; either way it's the
-// transcript-degrade case, so map it to exit 3 (not 1, which is usage) so
-// callers hit the documented fallback (e.g. Blessing's fresh-architect path).
-const failedToStart = answer.trim() === "";
-if (run.status !== 0 || failedToStart) {
-  if (model === "fable") console.error("fable consult failed — retry with: --model opus");
-  if (failedToStart) {
-    console.error(
-      `consult produced no answer for ${uuid} (the fork could not resume) —\n` +
-        `Degrade path: answer from the documents + a fresh dispatch (planner-callback policy).`
-    );
-    process.exit(3);
+const num = (v: unknown): number => (typeof v === "number" && Number.isFinite(v) ? v : 0);
+
+const parseWire = (raw: string) => {
+  const events: WireEvent[] = [];
+  let unparsedLines = 0;
+  for (const line of raw.split("\n")) {
+    const s = line.trim();
+    if (!s) continue;
+    try {
+      events.push(JSON.parse(s));
+    } catch {
+      unparsedLines++; // count, never throw: one bad line must not lose the run
+    }
   }
-  process.exit(run.status ?? 1);
+
+  const resultEvents = events.filter((e) => e?.type === "result");
+  const result = resultEvents.at(-1) ?? null;
+
+  // Trap 1 — `total_cost_usd` is cumulative per process, so the per-consult cost
+  // is a delta between the last two terminal results. A single-turn consult has
+  // exactly one, making `prev` 0 and the delta the whole value — written as a
+  // delta anyway so a future multi-turn caller inherits the right number rather
+  // than silently the wrong one.
+  const prev = resultEvents.length > 1 ? num(resultEvents.at(-2)!.total_cost_usd) : 0;
+  const costUsd = num(result?.total_cost_usd) - prev;
+
+  // Trap 3 — `assistant` events split one model call across content blocks, so
+  // summing `assistant.message.usage` double-counts. Usage is read from the
+  // terminal result instead (below); this walk is for TEXT ONLY, and it joins
+  // the blocks rather than summing anything. It is the fallback for an answer
+  // the terminal result did not carry.
+  const assistantText = events
+    .filter((e) => e?.type === "assistant" && Array.isArray(e?.message?.content))
+    .flatMap((e) => e.message.content as any[])
+    .filter((b) => b?.type === "text" && typeof b.text === "string")
+    .map((b) => b.text as string)
+    .join("");
+
+  const answer =
+    typeof result?.result === "string" && result.result.trim() !== "" ? result.result : assistantText;
+
+  // The tool_use_id → tool-name correlation. Exposed for the boundary guard that
+  // consumes it, so there is never a second parser. Built by walking CONTENT
+  // BLOCKS on any event carrying an array `message.content` — deliberately not by
+  // keying on a carrier event type, because the type carrying `tool_result`
+  // blocks was never enumerated by the wire reconnaissance and guessing one would
+  // be exactly the untested assumption this milestone was told to avoid.
+  const toolNames = new Map<string, string>();
+  const toolResults: { tool_use_id: string; name: string; is_error: boolean }[] = [];
+  for (const e of events) {
+    const content = e?.message?.content;
+    if (!Array.isArray(content)) continue;
+    for (const b of content) {
+      if (b?.type === "tool_use" && typeof b.id === "string") toolNames.set(b.id, String(b.name ?? ""));
+      else if (b?.type === "tool_result" && typeof b.tool_use_id === "string")
+        toolResults.push({
+          tool_use_id: b.tool_use_id,
+          name: toolNames.get(b.tool_use_id) ?? "",
+          is_error: b.is_error === true,
+        });
+    }
+  }
+
+  // Trap 4 — `usage.iterations[]` is not a per-call breakdown, and is therefore
+  // deliberately not read; only the flat token counters and the nested cache-
+  // creation TTL split are picked, under their raw field names. The terminal
+  // result's refusal-tally field is deliberately not read either: it was measured
+  // reporting empty across a session that genuinely refused two tools, so it is
+  // evidence of nothing.
+  const u = (result?.usage ?? {}) as Record<string, any>;
+  const cc = (u.cache_creation ?? {}) as Record<string, any>;
+  const usage = {
+    input_tokens: num(u.input_tokens),
+    output_tokens: num(u.output_tokens),
+    cache_read_input_tokens: num(u.cache_read_input_tokens),
+    cache_creation_input_tokens: num(u.cache_creation_input_tokens),
+    cache_creation: {
+      ephemeral_5m_input_tokens: num(cc.ephemeral_5m_input_tokens),
+      ephemeral_1h_input_tokens: num(cc.ephemeral_1h_input_tokens),
+    },
+  };
+
+  return { events, result, answer, usage, costUsd, toolNames, toolResults, unparsedLines };
+};
+
+// Fallback, never default: beyond this an answer is written to a file and the
+// path returned in its place. Two orders of magnitude below maxBuffer, so the two
+// failure modes stay independent, and far above any real answer.
+const ANSWER_MAX_BYTES = 256 * 1024;
+
+// Usage, last on stderr by construction — on the success path and on every
+// degrade path that got far enough to have a terminal result. --usage-json emits
+// one JSON object INSTEAD of the human line, so stderr's last line parses
+// unfiltered. Raw field names verbatim; cost carries both the per-consult delta
+// and the process cumulative under its own name, so no raw name is redefined.
+const renderUsage = (w: ReturnType<typeof parseWire>) => {
+  const u = w.usage;
+  if (usageJson) {
+    console.error(
+      JSON.stringify({ ...u, cost_usd: w.costUsd, total_cost_usd: num(w.result?.total_cost_usd) })
+    );
+  } else {
+    console.error(
+      `usage: input_tokens=${u.input_tokens} output_tokens=${u.output_tokens} ` +
+        `cache_read_input_tokens=${u.cache_read_input_tokens} ` +
+        `cache_creation_input_tokens=${u.cache_creation_input_tokens} ` +
+        `(ephemeral_5m_input_tokens=${u.cache_creation.ephemeral_5m_input_tokens} ` +
+        `ephemeral_1h_input_tokens=${u.cache_creation.ephemeral_1h_input_tokens}) ` +
+        `cost_usd=${w.costUsd.toFixed(6)}`
+    );
+  }
+};
+
+// The one degrade exit, so every failure path emits the same guidance and the
+// same retry hint. A failure that still parsed a terminal result reports that
+// result's usage — the tokens were spent whether or not an answer came back, and
+// a consult that costs money must never report nothing. Usage stays last on
+// stderr. Callers without a wire (the fork never ran; no result event at all)
+// pass none: there is no usage to report.
+const degrade = (why: string, w: ReturnType<typeof parseWire> | null = null): never => {
+  if (model === "fable") console.error("fable consult failed — retry with: --model opus");
+  console.error(
+    `${why}\nDegrade path: answer from the documents + a fresh dispatch (planner-callback policy).`
+  );
+  if (w?.result) renderUsage(w);
+  process.exit(3);
+};
+
+// stdin from /dev/null so the fork never blocks waiting for piped input; stdout
+// captured because it is the event wire, parsed above — the answer is extracted
+// from the terminal result event and re-emitted alone, so callers still see
+// nothing but answer text on stdout.
+// The 64 MB cap was re-examined for the wire and left as it is: stream-json's
+// overhead is additive per-event framing, not a multiplier on answer length. It
+// stays a deliberate ceiling — exceeding it errors rather than truncating.
+// ENOBUFS arrives in two forms and both are guarded: spawnSync may THROW, and it
+// may return with `error` set instead. Either way this fails loudly and takes the
+// degrade path (exit 3) — a buffer overflow is not a usage error.
+type SpawnResult = { status: number | null; stdout: string; error?: Error };
+let run: SpawnResult | null = null;
+let spawnThrew: Error | null = null;
+try {
+  run = spawnSync(cmd[0], cmd.slice(1), {
+    cwd: repoRoot,
+    stdio: ["ignore", "pipe", "inherit"],
+    encoding: "utf8",
+    maxBuffer: 64 * 1024 * 1024,
+  });
+} catch (err) {
+  spawnThrew = err as Error;
 }
-process.exit(0);
+const spawnFailure = spawnThrew ?? run?.error ?? null;
+if (spawnFailure || !run) {
+  // The errno (ENOBUFS, ENOENT) is what makes this diagnosable, and it rides on
+  // the error object rather than always appearing in its message.
+  const errno = (spawnFailure as NodeJS.ErrnoException | null)?.code;
+  degrade(
+    `consult could not run the fork for ${uuid}: ` +
+      `${errno ? `${errno} — ` : ""}${spawnFailure?.message ?? "spawn produced no result"}`
+  );
+}
+
+const wire = parseWire(run.stdout ?? "");
+if (wire.unparsedLines > 0)
+  console.error(`warning: ${wire.unparsedLines} unparseable line(s) on the event wire — ignored.`);
+
+// Failure detection, rekeyed onto the wire. The old discriminant — empty stdout —
+// is obsolete: under stream-json the child emits events whether or not the resume
+// worked. The error shape is observed, not assumed: a probe with a nonexistent
+// session id against the pinned CLI exited 1 having emitted exactly one stdout
+// line, a terminal result of the shape
+//     {"type":"result","subtype":"error_during_execution","is_error":true, … ,
+//      "errors":["No conversation found with session ID: <uuid>"]}
+// with the untouched fields elided here (the full transcript lives in the phase's
+// work document). So the discriminant is `is_error`/`subtype`; `errors[]` is
+// echoed as message text only, never read for control flow — it is echoed at all
+// so the reason survives a caller redirecting the child's inherited stderr away.
+if (wire.result === null)
+  degrade(`consult saw no terminal result event for ${uuid} — the fork did not complete.`);
+if (wire.result.is_error === true || wire.result.subtype !== "success") {
+  const errs = Array.isArray(wire.result.errors) ? wire.result.errors.map(String).join("; ") : "";
+  degrade(
+    `consult failed on the wire for ${uuid} (subtype: ${wire.result.subtype ?? "?"})` +
+      (errs ? `: ${errs}` : ""),
+    wire
+  );
+}
+const answer = typeof wire.answer === "string" ? wire.answer : "";
+if (answer.trim() === "")
+  degrade(`consult produced no answer for ${uuid} (the fork completed but said nothing).`, wire);
+
+const bytes = Buffer.byteLength(answer, "utf8");
+if (bytes > ANSWER_MAX_BYTES) {
+  const spillPath = join(tmpdir(), `consult-${uuid}-${Date.now()}.txt`);
+  writeFileSync(spillPath, answer);
+  console.error(
+    `consult: answer is ${bytes} bytes, over the ${ANSWER_MAX_BYTES}-byte threshold — FALLBACK:\n` +
+      `the answer was written to ${spillPath} and its path returned on stdout in place of the text.`
+  );
+  process.stdout.write(`${spillPath}\n`);
+} else {
+  process.stdout.write(answer.endsWith("\n") ? answer : `${answer}\n`);
+}
+
+// Diagnostic for the correlation above: prints each tool result resolved back to
+// the name of the tool that produced it.
+if (process.env.CONSULT_DEBUG_TOOLS) {
+  for (const r of wire.toolResults)
+    console.error(
+      `tool_result ${r.tool_use_id} → ${r.name || "(unresolved)"}${r.is_error ? " [is_error]" : ""}`
+    );
+  console.error(`tool_use ids seen: ${wire.toolNames.size}`);
+}
+
+// The wire said the consult succeeded but the CLI disagreed — reported, never
+// papered over, and the caller still takes the degrade path.
+let code = 0;
+if (run.status !== 0) {
+  console.error(`warning: the wire reported success but the child exited ${run.status ?? "null"}.`);
+  code = 3;
+}
+
+renderUsage(wire);
+process.exit(code);
