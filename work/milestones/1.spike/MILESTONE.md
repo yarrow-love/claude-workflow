@@ -42,7 +42,7 @@ Operator rulings taken 26-07-28 in the planning dialog, binding on both phases:
 
 | # | Phase | Gist | Status |
 | --- | --- | --- | --- |
-| 1 | [channel](1.channel.md) | Harness + hold-open mechanics (session-id capture, live append, event wire, clean resume) + the read-only boundary check | pending |
+| 1 | [channel](1.channel.md) | Harness + hold-open mechanics (session-id capture, live append, event wire, clean resume) + the read-only boundary check | **closed 26-07-28 — all 14 criteria met, no refutation** |
 | 2 | [economics](2.economics.md) | Four-cell cost matrix + heartbeat under forced 5m TTL; warm-fork corollary; break-even; the gate reading | pending |
 
 ## Acceptance
