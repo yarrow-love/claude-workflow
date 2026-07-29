@@ -43,7 +43,11 @@ Operator rulings, 26-07-28, binding on both phases:
 | # | Phase | Gist | Status |
 | --- | --- | --- | --- |
 | 1 | [wire](1.wire.md) | stream-json parse; answer + `usage` extraction avoiding M1's four traps; stdout contract preserved, usage to stderr + `--usage-json`; failure/exit semantics reworked; oversized-answer fallback | pending |
-| 2 | [boundary](2.boundary.md) | DENY reconciled against v2.1.220 (three confirmed, `Cd` probed); the successful-out-of-allowlist guard on phase 1's parser; ADR hazard entry reconciled | pending |
+| 2 | [boundary](2.boundary.md) | DENY reconciled against v2.1.220 (`Cd` probed, not reachable); the successful-out-of-allowlist guard on phase 1's parser; ADR hazard entry reconciled | **built + verified 26-07-29; certification outstanding** → [`work/todos/26-07-29.certify-m2-boundary.md`](../../todos/26-07-29.certify-m2-boundary.md) |
+
+## Status — 26-07-29
+
+Phase 1 **closed, accomplished**. Phase 2 **built, committed (`4486d9e`) and Executor-verified** — `guard-check.ts` passes every assertion at exit 0 and the tooling smoke test passes — with its independent review, phase doc addendum and acceptance verdict **outstanding**, filed as [`work/todos/26-07-29.certify-m2-boundary.md`](../../todos/26-07-29.certify-m2-boundary.md) after five consecutive agent deaths made further dispatch unproductive. No implementation work remains. `/initialize` is also owed at this milestone's close.
 
 ## Acceptance
 
