@@ -39,6 +39,15 @@
  *      written to stdout, and the disagreement is reported). All take the
  *      degrade path.
  *   4  repo mismatch — transcript belongs to another repo (refuse; degrade)
+ *   5  read-only boundary violation — a tool outside the allowlist executed
+ *      SUCCESSFULLY during the fork. The answer HAS already been written to
+ *      stdout (a parser false positive must not destroy a legitimate answer), and
+ *      a loud warning precedes it on stderr. Distinct from 1 by design, so "you
+ *      called me wrong" and "the read-only boundary was breached" are never the
+ *      same byte. Precedence: the warning is emitted on EVERY exit path, degrade
+ *      paths included; 5 is taken only when an answer was returned, so a
+ *      violation on a degrade path leaves degrade's own code standing with the
+ *      warning already on stderr.
  */
 import { gunzipSync } from "node:zlib";
 import { hostname, tmpdir } from "node:os";
@@ -53,6 +62,58 @@ const repoRoot = (() => {
 })();
 const slug = resolve(repoRoot).replace(/[^a-zA-Z0-9]/g, "-");
 const projectDir = join(process.env.HOME!, ".claude", "projects", slug);
+
+// ── the single exit ─────────────────────────────────────────────────────────
+// Every exit in this file routes through finish(). The boundary verdict and the
+// usage line are therefore emitted as a property of the code's STRUCTURE, not of
+// each call site remembering to — the shape a per-call-site ordering fix keeps
+// re-breaking at the next exit path someone adds.
+//
+// THE DEAD-ZONE INVARIANT, which a later reader must honour: finish() is a
+// hoisted `function`, never a `const` arrow, because most exits fire above the
+// helper stack (parseWire, renderUsage, the boundary predicate) and an arrow
+// binding would be a temporal-dead-zone error at those call sites. For the same
+// reason the helpers are reached only behind `if (wire…)`: `wire` stays null
+// until parseWire has run, which is strictly after every helper is initialized.
+// So finish() emits nothing at all on the early paths — and must not be changed
+// to emit anything wire-derived outside those guards.
+let wire: ReturnType<typeof parseWire> | null = null;
+// Whether the answer already reached stdout. Drives the exit-5 precedence: a
+// violation only overrides the exit code when there is an answer to have
+// returned; on a degrade path degrade's own code stands, warning already sent.
+let answerEmitted = false;
+
+function finish(code: number): never {
+  if (wire) {
+    // Boundary verdict FIRST, usage render LAST. --usage-json's contract is that
+    // stderr's final line parses as one JSON object, so anything emitted after
+    // the render silently breaks every --usage-json caller.
+    const unverified = boundaryUnverified(wire);
+    if (unverified.length > 0)
+      console.error(
+        `BOUNDARY UNVERIFIED: ${unverified.length} tool result(s) could not be resolved back to a ` +
+          `tool name (the originating tool_use was lost, typically to an unparseable wire line) — ` +
+          `whether the read-only boundary held for them cannot be determined from this wire.`
+      );
+    const violations = boundaryViolations(wire);
+    if (violations.length > 0) {
+      const names = [...new Set(violations.map((v) => v.name))].sort().join(", ");
+      console.error(
+        `BOUNDARY VIOLATION: ${violations.length} tool call(s) outside the read-only allowlist ` +
+          `(${[...ALLOWED_TOOLS].join(", ")}) executed SUCCESSFULLY during this consult: ${names}.\n` +
+          `The fork was supposed to be able to read and answer, never act. Treat the answer as ` +
+          `advisory and audit what that tool did.`
+      );
+      if (answerEmitted) code = 5;
+    }
+    // Guarded on `result`, not on `wire`, and deliberately a narrower condition
+    // than the two above: usage is only meaningful once a terminal result exists,
+    // whereas the boundary verdict must still fire on a stream that carried a
+    // violation and then died mid-wire.
+    if (wire.result) renderUsage(wire);
+  }
+  process.exit(code);
+}
 
 const args = process.argv.slice(2);
 const dry = args.includes("--dry");
@@ -71,7 +132,7 @@ if (!handle || (!question && !dry)) {
       "  the fork is read-only (reads + answers, never acts) and repo-bound to this repo\n" +
       "  stdout is the answer alone; usage lands on stderr (--usage-json makes it one JSON object)"
   );
-  process.exit(1);
+  finish(1);
 }
 
 const m = handle.match(
@@ -79,7 +140,7 @@ const m = handle.match(
 );
 if (!m?.groups) {
   console.error(`unparseable handle: ${handle} (expected role@machine/uuid[#msg])`);
-  process.exit(1);
+  finish(1);
 }
 const { machine = machineLocal, uuid, msg } = m.groups as Record<string, string>;
 
@@ -88,7 +149,7 @@ if (machine !== machineLocal) {
     `handle is owned by '${machine}' (this is '${machineLocal}'). Cross-machine consults are deferred —\n` +
       `either restore that machine's archive here (work/sessions/${machine}/${uuid}.jsonl.gz) or consult on the owning machine.`
   );
-  process.exit(2);
+  finish(2);
 }
 
 // The transcript's recorded cwd is the first line carrying a `cwd` field — NOT
@@ -122,7 +183,7 @@ const bindOrRefuse = (cwd: string | null) => {
         `A consult forks in place, so it may only resume a transcript from its owning repo.\n` +
         `Degrade path: consult from the owning repo, or answer from documents + a fresh dispatch.`
     );
-    process.exit(4);
+    finish(4);
   }
 };
 
@@ -142,7 +203,7 @@ if (existsSync(localPath)) {
       `no transcript for ${uuid} — not in the local cache nor in work/sessions/${machine}/.\n` +
         `Degrade path: answer from the documents + a fresh dispatch (planner-callback policy).`
     );
-    process.exit(3);
+    finish(3);
   }
 }
 
@@ -164,12 +225,19 @@ const prompt =
 // escape, or publish". For the built-in harness/deferred tool class
 // (EnterWorktree, TaskCreate, …) the boundary is NAME-DENY-ONLY: the allowlist
 // ("Read,Grep,Glob") does NOT default-deny that class, so each such tool must be
-// named here explicitly. Audited against `claude 2.1.197` (26-07-23 crux probe:
-// deny of EnterWorktree makes it ABSENT from the fork's ToolSearch registry —
-// enforcement is by name-filtering, strictly stronger than a runtime prompt).
+// named here explicitly. Audited against `claude 2.1.220` (26-07-29; the 26-07-23
+// crux probe still stands: deny of EnterWorktree makes it ABSENT from the fork's
+// ToolSearch registry — enforcement is by name-filtering, strictly stronger than
+// a runtime prompt).
 // ⚠ ON A HARNESS UPGRADE: re-enumerate the deferred/built-in tool registry and
 // reconcile DENY — a new mutating/escaping tool that isn't named here is NOT
 // caught by the allowlist and silently re-opens the boundary.
+// `Cd` was probed at the 2.1.220 audit and deliberately NOT added: invoked under
+// this exact construction it returns the bare `No such tool available: Cd`,
+// WITHOUT the "exists but is not enabled in this context" clause that every
+// denied-by-name tool returns — and a deferred-registry lookup for it finds no
+// match. It is absent from the build's registry, not merely denied, so naming it
+// here would be speculation rather than a name deny-by-name governs.
 // The deferred names aren't in the static tool registry at settings-parse time,
 // so the harness may emit an intermittent "matches no known tool" warning to
 // stderr — cosmetic; the deny still filters them from the deferred registry.
@@ -185,14 +253,15 @@ const DENY = [
   // background-task fleet
   "TaskCreate", "TaskStop", "TaskUpdate", "TaskGet", "TaskList", "TaskOutput",
   // messaging / scheduling / outward signalling (whole Cron family, incl. the read)
-  "SendMessage", "RemoteTrigger", "PushNotification", "ScheduleWakeup",
+  "SendMessage", "SendUserMessage", "ListAgents", "RemoteTrigger",
+  "PushNotification", "ScheduleWakeup",
   "CronCreate", "CronDelete", "CronList", "DesignSync", "Monitor",
   // plan-mode transitions
   "EnterPlanMode", "ExitPlanMode",
   // publishing (outward-facing web)
   "Artifact",
   // read-only MCP resource tools — moot under --strict-mcp-config, denied anyway
-  "ReadMcpResourceTool", "ListMcpResourcesTool",
+  "ReadMcpResourceTool", "ListMcpResourcesTool", "ReadMcpResourceDirTool",
 ];
 const settings = JSON.stringify({
   permissions: { defaultMode: "dontAsk", deny: DENY },
@@ -232,7 +301,7 @@ const cmd = [
 if (dry) {
   console.log(`ready: transcript present at ${localPath}`);
   console.log(`would run: ${cmd.map((c) => (c.includes(" ") ? JSON.stringify(c) : c)).join(" ")}`);
-  process.exit(0);
+  finish(0);
 }
 // ── the event wire ──────────────────────────────────────────────────────────
 // Hand-ported, not imported, from the spike harness that first mapped this wire:
@@ -361,19 +430,74 @@ const renderUsage = (w: ReturnType<typeof parseWire>) => {
   }
 };
 
+// ── the read-only boundary guard ────────────────────────────────────────────
+// The names the guard treats as sanctioned. This is NOT the --allowedTools
+// argument above: it MIRRORS THE HARNESS'S GRANTED REGISTRY as observed at
+// `claude 2.1.220` — the six names the fork's own `system`/`init` event declares.
+// --allowedTools does not bound the grant. Asking for three names leaves the
+// other three present anyway, because they are read-only harness tools nothing in
+// DENY strips; the request narrows nothing on its own. So the guard's question is
+// "did anything beyond the harness's granted set execute successfully?", and a
+// literal three-name set would fire on every ordinary consult.
+// This is a deliberate operator ruling, not drift: do NOT "correct" this back to
+// the three requested names.
+// ⚠ THE COST OF MIRRORING THE GRANT: this set goes stale on a harness upgrade,
+// and a build that grants a MUTATING tool would widen this boundary SILENTLY —
+// the guard would read the new name as sanctioned. Re-enumerate it on EVERY
+// harness upgrade, against the `init` event of a real fork, never against
+// documentation. It is kept a literal set, not derived at runtime, precisely so
+// that re-enumeration is a visible diff.
+const ALLOWED_TOOLS = new Set(["Read", "Grep", "Glob", "ReportFindings", "Skill", "ToolSearch"]);
+
+// What the guard exists to stop trusting: the terminal result event's
+// refusal-tally field. M1 measured it reporting empty across every result event
+// of a session that had genuinely refused two tools — an auditor reading it sees
+// a clean sheet on a session that was actively blocking. So the evidence is taken
+// per-`tool_result` instead, and never from the terminal result.
+//
+// THE PREDICATE IS A CONJUNCTION — the resolved name is outside the allowlist AND
+// the result is error-free. Never the error field alone: a successful allowlisted
+// `Read` is also error-free, so an error-keyed guard would flag every clean run.
+// The error-free half relies on parseWire() having already collapsed an ABSENT
+// `is_error` to `false` — a genuine success omits the field entirely rather than
+// setting it false, so absent-vs-false is a real distinction on the wire and this
+// guard only reads one value because the parser normalised it. A future reader
+// who changes that normalisation must change this predicate with it.
+//
+// A DANGLING `tool_use` — one with no matching `tool_result` — never enters
+// toolResults[] and therefore cannot trip the guard. There is no positive
+// evidence that it executed, and this guard is deliberately false-positive-averse
+// (a false positive must not discredit an otherwise legitimate answer).
+//
+// MCP AND SUBAGENT NAMES are moot by construction, not unhandled:
+// --strict-mcp-config with an empty mcpServers map means no `mcp__*` name can
+// reach the fork at all, and Task/Agent/Workflow are denied, so no nested tool
+// use is reachable to carry a name in from a child.
+const boundaryViolations = (w: ReturnType<typeof parseWire>) =>
+  w.toolResults.filter((r) => r.name !== "" && !r.is_error && !ALLOWED_TOOLS.has(r.name));
+
+// The third state: a `tool_result` whose name did not resolve through the join,
+// reachable only when an unparsed wire line ate the originating `tool_use`. It is
+// reported on its own line and is deliberately neither a violation nor silence —
+// and it must NOT move the exit code. An unverifiable boundary is not a detected
+// breach, and counting it as one would false-positive on exactly the truncated
+// stream this guard has to survive; ignoring it would re-create the false clean
+// sheet the guard exists to close.
+const boundaryUnverified = (w: ReturnType<typeof parseWire>) =>
+  w.toolResults.filter((r) => r.name === "" && !r.is_error);
+
 // The one degrade exit, so every failure path emits the same guidance and the
-// same retry hint. A failure that still parsed a terminal result reports that
-// result's usage — the tokens were spent whether or not an answer came back, and
-// a consult that costs money must never report nothing. Usage stays last on
-// stderr. Callers without a wire (the fork never ran; no result event at all)
-// pass none: there is no usage to report.
-const degrade = (why: string, w: ReturnType<typeof parseWire> | null = null): never => {
+// same retry hint. It no longer renders usage itself and takes no wire argument:
+// finish() is the single emission point for both the usage line and the boundary
+// verdict, and the module-level `wire` it reads is assigned at exactly the point
+// the old parameter began being passed. Restoring the parameter would restore
+// per-call-site ordering discipline, which is the defect class this shape closes.
+const degrade = (why: string): never => {
   if (model === "fable") console.error("fable consult failed — retry with: --model opus");
   console.error(
     `${why}\nDegrade path: answer from the documents + a fresh dispatch (planner-callback policy).`
   );
-  if (w?.result) renderUsage(w);
-  process.exit(3);
+  finish(3);
 };
 
 // stdin from /dev/null so the fork never blocks waiting for piped input; stdout
@@ -410,9 +534,17 @@ if (spawnFailure || !run) {
   );
 }
 
-const wire = parseWire(run.stdout ?? "");
-if (wire.unparsedLines > 0)
-  console.error(`warning: ${wire.unparsedLines} unparseable line(s) on the event wire — ignored.`);
+// Parsed into a local AND published to the module-level `wire` in one step: the
+// local is what the tail below narrows against (TypeScript's narrowing of
+// `wire.result` to non-null after a `never`-returning degrade does not survive on
+// a module-scope `let`), while the module binding is what finish() reads. The
+// publication happens HERE, before any exit below it, which is what makes the
+// boundary verdict reach every remaining exit path — including a stream that dies
+// with no terminal result.
+const w = parseWire(run.stdout ?? "");
+wire = w;
+if (w.unparsedLines > 0)
+  console.error(`warning: ${w.unparsedLines} unparseable line(s) on the event wire — ignored.`);
 
 // Failure detection, rekeyed onto the wire. The old discriminant — empty stdout —
 // is obsolete: under stream-json the child emits events whether or not the resume
@@ -425,19 +557,18 @@ if (wire.unparsedLines > 0)
 // work document). So the discriminant is `is_error`/`subtype`; `errors[]` is
 // echoed as message text only, never read for control flow — it is echoed at all
 // so the reason survives a caller redirecting the child's inherited stderr away.
-if (wire.result === null)
+if (w.result === null)
   degrade(`consult saw no terminal result event for ${uuid} — the fork did not complete.`);
-if (wire.result.is_error === true || wire.result.subtype !== "success") {
-  const errs = Array.isArray(wire.result.errors) ? wire.result.errors.map(String).join("; ") : "";
+if (w.result.is_error === true || w.result.subtype !== "success") {
+  const errs = Array.isArray(w.result.errors) ? w.result.errors.map(String).join("; ") : "";
   degrade(
-    `consult failed on the wire for ${uuid} (subtype: ${wire.result.subtype ?? "?"})` +
-      (errs ? `: ${errs}` : ""),
-    wire
+    `consult failed on the wire for ${uuid} (subtype: ${w.result.subtype ?? "?"})` +
+      (errs ? `: ${errs}` : "")
   );
 }
-const answer = typeof wire.answer === "string" ? wire.answer : "";
+const answer = typeof w.answer === "string" ? w.answer : "";
 if (answer.trim() === "")
-  degrade(`consult produced no answer for ${uuid} (the fork completed but said nothing).`, wire);
+  degrade(`consult produced no answer for ${uuid} (the fork completed but said nothing).`);
 
 const bytes = Buffer.byteLength(answer, "utf8");
 if (bytes > ANSWER_MAX_BYTES) {
@@ -451,15 +582,16 @@ if (bytes > ANSWER_MAX_BYTES) {
 } else {
   process.stdout.write(answer.endsWith("\n") ? answer : `${answer}\n`);
 }
+answerEmitted = true;
 
 // Diagnostic for the correlation above: prints each tool result resolved back to
 // the name of the tool that produced it.
 if (process.env.CONSULT_DEBUG_TOOLS) {
-  for (const r of wire.toolResults)
+  for (const r of w.toolResults)
     console.error(
       `tool_result ${r.tool_use_id} → ${r.name || "(unresolved)"}${r.is_error ? " [is_error]" : ""}`
     );
-  console.error(`tool_use ids seen: ${wire.toolNames.size}`);
+  console.error(`tool_use ids seen: ${w.toolNames.size}`);
 }
 
 // The wire said the consult succeeded but the CLI disagreed — reported, never
@@ -470,5 +602,10 @@ if (run.status !== 0) {
   code = 3;
 }
 
-renderUsage(wire);
-process.exit(code);
+// The usage render is NOT called here — finish() owns it, and calling it here as
+// well would double-emit every usage line (the exact cost-reporting defect the
+// hoist into degrade() was introduced to fix, re-created from the other side).
+// finish() also promotes this code to 5 if the boundary was breached: an answer
+// has already reached stdout above, so a breach outranks the incidental
+// wire/CLI-disagreement 3, which still reports in prose.
+finish(code);
