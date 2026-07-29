@@ -2,6 +2,16 @@
 
 The active mission's phased roadmap. Empty until the first mission is chartered (`/plan` at mission tier) and its milestones are laid — this README carries the conventions so `/plan <milestone>` and `/execute <milestone>` have a stable reference.
 
+## Roadmap — mission v4.token-efficiency
+
+| # | Milestone | Gist | Depends on | Status |
+| --- | --- | --- | --- | --- |
+| 1 | [spike](1.spike/MILESTONE.md) | The always-warm theory under test: hold-open mechanics, four-way cost matrix + heartbeat, boundary check — the mission's go/no-go gate | — | pending |
+| 2 | [intercom](2.intercom/MILESTONE.md) | The channel as product: `.claude/bin/` tooling, lifecycle machinery, warmth policy, routing convention, crash semantics | 1 | pending |
+| 3 | [protocol-integration](3.protocol-integration/MILESTONE.md) | Consult path + canon rewired: consult ladder's live-channel rung, callback grammar, role cards, degrade semantics, enactment | 2 | pending |
+| 4 | [measured-campaign](4.measured-campaign/MILESTONE.md) | One real campaign in `~/dev/lasers` over the intercom; per-consult measurements collected and analyzed | 3 | pending |
+| 5 | [batching](5.batching/MILESTONE.md) | Conditional: consult batching evaluated against M4's measurements; skippable at its gate without failing the mission | 4 | pending |
+
 ## Conventions
 
 - **Directory per milestone**: `<n>.<name>/` (e.g. `3.chart-refinement/`) holding `MILESTONE.md` + one `<p>.<phase>.md` per phase.

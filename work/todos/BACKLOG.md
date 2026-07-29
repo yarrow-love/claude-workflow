@@ -6,7 +6,7 @@ Prioritized ledger of the active `work/todos/` inbox. Rewritten end-to-end by `/
 
 | Item | Type | Priority | Disposition | Aligns | Note |
 |---|---|---|---|---|---|
-| [concurrent-tree-commit-absorption](bugs/26-07-25.bug.concurrent-tree-commit-absorption.md) | bug | medium | live | v3 (D5) | Interim-mitigated (v3 M2 phase 1, 26-07-27): `git commit --only <paths>` is now the documented commit idiom (root `CLAUDE.md` § Conventions) and the hazard family is standing in `.claude/ADR.md` § Standing hazards with the git instance named and this filing cited; the remedy design fork — worktree isolation vs. staging discipline — remains deferred and is named as deferred in the hazard entry. |
+| [concurrent-tree-commit-absorption](bugs/26-07-25.bug.concurrent-tree-commit-absorption.md) | bug | medium | live | — (carried through v4 charter, 26-07-28, unaligned) | Interim-mitigated (v3 M2 phase 1, 26-07-27): `git commit --only <paths>` is now the documented commit idiom (root `CLAUDE.md` § Conventions) and the hazard family is standing in `.claude/ADR.md` § Standing hazards with the git instance named and this filing cited; the remedy design fork — worktree isolation vs. staging discipline — remains deferred and is named as deferred in the hazard entry. |
 
 ## Closed in v3.memory-protocol (26-07-27, M2)
 
