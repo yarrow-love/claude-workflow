@@ -2,6 +2,7 @@
 sessions:
   - claude@play/2cc71fb6-4cdf-41b6-9397-b5d54b215500 # mission architect — stubbed at amendment A1
   - architect@play/c1378142-cf5c-4ad2-97b0-920533f97a7c # milestone architect
+  - executor@play/c1378142-cf5c-4ad2-97b0-920533f97a7c # campaign executor
 ---
 
 # Milestone 2 — instrumented-consult: make the cost observable
