@@ -194,10 +194,10 @@ const usage = (why) => {
     "usage: warmth-keeper <register|release|status|tick|watch|stop> [args]\n" +
       "  register <role@machine/uuid> [--interval 58m] [--dormancy 18h] [--timeout 180s] [--max-failures 3]\n" +
       "  release <role@machine/uuid>   unregister (idempotent — an unknown handle is a clean no-op)\n" +
-      "  status                        the registry, each handle's last beat and counters, daemon liveness\n" +
+      "  status                        the keeper's registry, each handle's last beat and counters, daemon liveness\n" +
       "  tick                          one pass: beat what is due, then exit\n" +
       "  watch                         foreground loop over tick — the daemon's body and the diagnostic path\n" +
-      "  stop                          signal a running daemon, leaving the registry intact\n" +
+      "  stop                          signal a running warmth-keeper daemon, leaving its registry intact\n" +
       "  cadence defaults are per handle and stored at register time; see the header for the seams"
   );
   process.exit(1);

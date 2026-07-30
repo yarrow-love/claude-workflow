@@ -7,7 +7,7 @@ sessions:
 
 # Milestone 3 — warmth-keeper: always-warm without a held-open superior
 
-> Stubbed at **amendment A1** (26-07-28), replacing the superseded `2.intercom` lifecycle machinery and `3.protocol-integration`. Hardened 26-07-29 into two phases under operator rulings: a **self-managed cross-platform daemon** rather than an OS-timer seam, and **no soak** — the TTL-window evidence re-homes to M4 by charter amendment A2. This is the mission's crux (charter success criterion 2).
+> **Closed accomplished 26-07-30.** Stubbed at **amendment A1** (26-07-28), replacing the superseded `2.intercom` lifecycle machinery and `3.protocol-integration`. Hardened 26-07-29 into two phases under operator rulings: a **self-managed cross-platform daemon** rather than an OS-timer seam, and **no soak** — the TTL-window evidence re-homed to M4 by charter amendment A2. This is the mission's crux (charter success criterion 2), and it discharges it: **19.94× measured** on the keeper's own telemetry.
 
 ## Objective
 
@@ -66,7 +66,7 @@ The machine registry has one row (`play`, Linux). The keeper is **written portab
 | # | Phase | Gist | Status |
 | --- | --- | --- | --- |
 | 1 | [keeper](1.keeper.md) | The script whole: registry, cadence, timeout-bounded beats through `consult`, telemetry, and the self-managed daemon. BASELINE + `package.json` in the same commit. Closed by a two-beat smoke test | **done (26-07-30)** — PASS on all 24 criteria; `b1e50aa`→`ae42379` |
-| 2 | [integration](2.integration.md) | The seams: canon + role cards, executor campaign open/close, the ADR orphan hazard, proposal enactment | pending |
+| 2 | [integration](2.integration.md) | The seams: canon + role cards, executor campaign open/close, the ADR orphan hazard, proposal enactment | **done (26-07-30)** — PASS on all 14 criteria; `c6104ee`→`b5ec294` |
 
 **Phase 1's evidence, in one line.** Beat 1 wrote 68,923 tokens to `ephemeral_1h` at **$1.3787**; beat 2, 64 seconds later, read *exactly* 68,923 with `cache_creation_input_tokens` at **zero**, for **$0.0691** — a **19.94×** ratio, independently corroborating M1's 18.26× on a different prefix and a different day. That beat 2's read equals beat 1's write byte-for-byte is a second, unlooked-for confirmation of **D7**: residency is bound to the prefix bytes, not to a process or a session id.
 
@@ -84,7 +84,7 @@ The Executor's ultimate-acceptance test for the milestone.
 4. A campaign can register and release a handle by the convention as written in canon, exercised once end-to-end.
 5. The proposal is filed to `work/proposals/_enacted/` with its reconciliation note.
 6. Quality gate: tooling smoke test green including `warmth-keeper`; `reference-gate check` adds **no new failures** beyond the nine pre-existing `herdr.md` ones (M2's amended acceptance, expiring at mission close per charter criterion 7).
-7. `/initialize` run once by the Executor at milestone close — carried forward from M2 phase 1, where it was found not headlessly invocable.
+7. `/initialize` run once by the Executor at milestone close — carried forward from M2 phase 1, where it was found not headlessly invocable. **Discharged 26-07-30: all nine checks green.** Baseline integrity (44 files, all classified — the workflow and capability directories are manifested as "all files", and `settings.local.json` is gitignored harness-local, not drift); four MCP servers connected; both hooks resolve and parse; spawn cap `"2"`; keystones present with all eight supplement sections answered; scaffold complete including `_enacted/`; git hygiene covering secrets, `tmp/` and `.codebase-memory/`; MANIFEST 151 OK with stamped handles spot-checked archived and 90-day retention; bun 1.3.14. The codebase-graph axis reads **inapplicable per declaration** — `work/PROJECT.md` § Codebase graph declares `None` — which is a third status, neither pass nor fail; `.cbmignore`'s existence is checked regardless and holds.
 
 ## Depends on
 
