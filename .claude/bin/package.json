@@ -7,6 +7,7 @@
     "session-archive": "./session-archive",
     "consult": "./consult",
     "commit-guard": "./commit-guard",
-    "reference-gate": "./reference-gate"
+    "reference-gate": "./reference-gate",
+    "warmth-keeper": "./warmth-keeper"
   }
 }

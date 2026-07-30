@@ -1,0 +1,614 @@
+#!/usr/bin/env bun
+/**
+ * warmth-keeper — hold registered consult handles warm. It fires a trivial
+ * read-only beat through .claude/bin/consult just under the measured
+ * prompt-cache TTL, so a superior session's prefix is read from cache instead
+ * of being written cold again.
+ *
+ *   bun .claude/bin/warmth-keeper register <role@machine/uuid> [--interval 58m]
+ *   bun .claude/bin/warmth-keeper release <role@machine/uuid>
+ *   bun .claude/bin/warmth-keeper status | tick | watch | stop
+ *
+ * The economics, measured (M1, 26-07-28): a warm read of a 217k-token prefix
+ * costs $0.233411, a cold write of the same prefix $4.262748 — 18.26x. Beats
+ * are NOT free, so cadence discipline is the deliverable, not an optimization
+ * on top of it. Every default below cites the cell it derives from.
+ *
+ * BEATS GO THROUGH THE INSTRUMENT. The keeper spawns consult and nothing else:
+ * it has no second parser and no second read-only boundary. It reads only the
+ * beat's exit code and the JSON object consult puts last on stderr under
+ * --usage-json.
+ *
+ * ONE FILE PER HANDLE, and it must stay that way. The registry is a directory
+ * of per-handle files, each named for that handle's uuid with a json suffix:
+ * register creates one, release unlinks one, tick reads the directory. No two
+ * sessions ever write the same byte, which DISSOLVES the shared-mutable-store
+ * hazard (.claude/ADR.md § Standing hazards) rather than managing it as a third
+ * instance of that family. A later refactor that consolidates these into a
+ * single shared registry file would silently join that hazard family — do not.
+ *
+ * THE ORPHANED GRANDCHILD IS ACCEPTED AND BOUNDED, and must not be engineered
+ * around. consult spawns claude synchronously with no timeout of its own, so
+ * killing a timed-out consult leaves its claude grandchild reparented to init.
+ * That is tolerable: a headless claude turn always terminates on its own, the
+ * tokens were already committed the moment the beat fired, and the
+ * max-consecutive-failures lapse stops a handle that keeps timing out — so
+ * orphans cannot accumulate. Killing the process group instead would need a
+ * POSIX/Windows branch and buy nothing.
+ *
+ * PORTABILITY POSTURE: written portable — no shell, no POSIX-only API, spawns
+ * are `process.execPath <script>` rather than shebang dispatch, and liveness is
+ * `process.kill(pid, 0)` plus a heartbeat, both of which Windows honours. It is
+ * nonetheless VERIFIED ON LINUX ONLY; Windows and macOS are unverified. The
+ * known Windows hazard sits one level down, in consult: consult spawns the bare
+ * string `claude`, and Windows cannot execute the extensionless bash shim in a
+ * user-local bin directory — what actually serves Bun and PowerShell there is a
+ * standalone native claude executable placed alongside the shim, pinned at
+ * install time while only the bash shim tracks Desktop auto-updates. So the
+ * binary a beat reaches on Windows can silently drift behind the one an
+ * interactive Git Bash session reaches, and a Windows host missing that native
+ * executable cannot beat at all. Provenance: `git show
+ * v4.token-efficiency-closed:work/missions/v4.token-efficiency/notes/26-07-28.consult-token-cost-evidence.md`
+ * § Secondary finding (an era-stamped pointer, not a tree reference — the note
+ * archives at mission close, so a bare path would dangle where this ships).
+ *
+ * ENVIRONMENT SEAMS — the testability surface, deliberately NOT flags. The six
+ * subcommands above are written verbatim into canon and three role cards, so
+ * the command surface stays exactly six commands and the seams stay here:
+ *   WARMTH_DIR      state directory. Default: a `warmth` directory under the
+ *                   user's home `.claude`, created on demand.
+ *   WARMTH_CONSULT  path to the consult executable, overriding the one derived
+ *                   from the handle's recorded repoRoot.
+ *   WARMTH_NOW      epoch-milliseconds clock override. EVERY "now" in this file
+ *                   reads the one now() helper that honours it. It does NOT
+ *                   override filesystem mtimes — which is exactly why the
+ *                   lock's heartbeat is a timestamp FIELD and never an mtime:
+ *                   one clock, read the same way by the staleness test and by
+ *                   the reap.
+ *
+ * exit codes:
+ *   0  ran (a failing beat is recorded state, not a failing tick)
+ *   1  usage / unparseable handle / bad flag value
+ */
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync, appendFileSync, unlinkSync, openSync, writeSync, closeSync } from "node:fs";
+import { homedir } from "node:os";
+import { join } from "node:path";
+import { spawnSync } from "node:child_process";
+
+// ── cadence defaults ────────────────────────────────────────────────────────
+// Each derives from a measured cell in milestone 3.warmth-keeper MILESTONE.md
+// § The economics this milestone is built against (M1, measured 26-07-28), not
+// from judgment. Each is overridable by its flag, per handle, at register time.
+
+// 58 min: every M1 cache write landed in the `ephemeral_1h` bucket, so the beat
+// must fall just under the one-hour window it establishes.
+const DEFAULT_INTERVAL_MS = 58 * 60 * 1000;
+// 18 h: 4.262748 (cold write) / 0.233411 (warm read) = 18.26 beats buy one
+// avoided cold reload; 18.26 beats x 58 min = 17.7 h. Past that, warmth has
+// cost more than the lapse it prevents.
+const DEFAULT_DORMANCY_MS = 18 * 60 * 60 * 1000;
+// 180 s: a cold beat on a large prefix pays a full prefill, while warm M1 turns
+// ran 8-12 s. Generous enough that a cold beat is not mistaken for a hang.
+const DEFAULT_TIMEOUT_MS = 180 * 1000;
+// 3: a handle whose transcript is gone must stop costing money rather than
+// re-paying a failed fork every interval, forever.
+const DEFAULT_MAX_FAILURES = 3;
+
+// A lock is reaped when its holder's heartbeat is older than this multiple of
+// the beat interval — the pid-reuse guard that process.kill(pid, 0) is not.
+const HEARTBEAT_STALE_MULTIPLE = 3;
+// watch's wake quantum. It wakes often (so an emptied registry and, in the
+// daemon, a heartbeat, are noticed promptly) but invokes a tick pass only when
+// something is actually due — sleeping a whole interval instead would make a
+// release take up to a full interval to be noticed.
+const WAKE_MS = 5 * 1000;
+
+// The beat's payload. Trivial and fixed: the answer is discarded, and only the
+// exit code and the --usage-json object are read.
+const PING = "Warmth beat: reply with the single word ok.";
+
+// Beat stderr is recorded for diagnosis, not archived wholesale.
+const STDERR_MAX = 4000;
+
+const OUTCOMES = ["ok", "timed_out", "failed", "skipped", "lapsed"];
+
+// consult's own handle grammar, copied so the keeper accepts exactly what the
+// instrument accepts (work/README.md § The callback grammar). Only the uuid is
+// needed here — it names the handle's file — but the whole handle string is
+// what gets passed back to consult.
+const HANDLE_RE =
+  /^(?:(?<role>[\w-]+)@)?(?:(?<machine>[\w-]+)\/)?(?<uuid>[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})(?:#(?<msg>\S+))?$/;
+const UUID_FILE_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.json$/;
+
+// ── the one clock ───────────────────────────────────────────────────────────
+const now = () => {
+  const override = process.env.WARMTH_NOW;
+  if (override !== undefined && override !== "") {
+    const n = Number(override);
+    if (Number.isFinite(n)) return n;
+  }
+  return Date.now();
+};
+const iso = (ms) => new Date(ms).toISOString();
+
+const warmthDir = process.env.WARMTH_DIR || join(homedir(), ".claude", "warmth");
+const lockPath = join(warmthDir, "lock");
+const pidPath = join(warmthDir, "daemon.pid");
+const telemetryPath = join(warmthDir, "telemetry.jsonl");
+const ensureDir = () => mkdirSync(warmthDir, { recursive: true });
+
+const usage = (why) => {
+  if (why) console.error(why);
+  console.error(
+    "usage: warmth-keeper <register|release|status|tick|watch|stop> [args]\n" +
+      "  register <role@machine/uuid> [--interval 58m] [--dormancy 18h] [--timeout 180s] [--max-failures 3]\n" +
+      "  release <role@machine/uuid>   unregister (idempotent — an unknown handle is a clean no-op)\n" +
+      "  status                        the registry, each handle's last beat and counters, daemon liveness\n" +
+      "  tick                          one pass: beat what is due, then exit\n" +
+      "  watch                         foreground loop over tick — the daemon's body and the diagnostic path\n" +
+      "  stop                          signal a running daemon, leaving the registry intact\n" +
+      "  cadence defaults are per handle and stored at register time; see the header for the seams"
+  );
+  process.exit(1);
+};
+
+// ── argument helpers ────────────────────────────────────────────────────────
+const flagValue = (args, name) => {
+  const i = args.indexOf(name);
+  return i >= 0 ? args[i + 1] : undefined;
+};
+
+const parseDuration = (text, flag) => {
+  const m = String(text).trim().match(/^(\d+(?:\.\d+)?)(ms|s|m|h)?$/);
+  if (!m) usage(`bad duration for ${flag}: ${text} (expected e.g. 90s, 58m, 18h)`);
+  const mult = { ms: 1, s: 1000, m: 60 * 1000, h: 60 * 60 * 1000 }[m[2] ?? "s"];
+  return Math.round(Number(m[1]) * mult);
+};
+
+const parseHandle = (raw) => {
+  const m = raw === undefined ? null : raw.match(HANDLE_RE);
+  if (!m?.groups) usage(`unparseable handle: ${raw} (expected role@machine/uuid)`);
+  return { handle: raw, uuid: m.groups.uuid };
+};
+
+const gitRoot = () => {
+  const r = spawnSync("git", ["rev-parse", "--show-toplevel"], { encoding: "utf8" });
+  return r.status === 0 ? r.stdout.trim() : process.cwd();
+};
+
+// ── the registry: one file per handle ───────────────────────────────────────
+// entryPath is the ONLY place a handle file's path is formed, and writeEntry the
+// only writer. Both derive the path from the entry's own uuid, so no code path
+// can open a second handle's file for write.
+const entryPath = (uuid) => join(warmthDir, `${uuid}.json`);
+
+const writeEntry = (entry) => {
+  ensureDir();
+  writeFileSync(entryPath(entry.uuid), `${JSON.stringify(entry, null, 2)}\n`);
+};
+
+const readEntry = (uuid) => {
+  const p = entryPath(uuid);
+  if (!existsSync(p)) return null;
+  try {
+    return JSON.parse(readFileSync(p, "utf8"));
+  } catch {
+    return null;
+  }
+};
+
+const readRegistry = () => {
+  if (!existsSync(warmthDir)) return [];
+  const out = [];
+  for (const name of readdirSync(warmthDir).sort()) {
+    if (!UUID_FILE_RE.test(name)) continue;
+    const entry = readEntry(name.slice(0, -".json".length));
+    if (entry?.uuid && entry?.handle) out.push(entry);
+  }
+  return out;
+};
+
+const minInterval = (entries) => {
+  const vals = entries.map((e) => e?.cadence?.intervalMs).filter((v) => Number.isFinite(v) && v > 0);
+  return vals.length > 0 ? Math.min(...vals) : DEFAULT_INTERVAL_MS;
+};
+
+// ── telemetry ───────────────────────────────────────────────────────────────
+// One JSON object per beat, appended. Written only under the tick lock, so the
+// daemon and a manual tick are never interleaved writers.
+const record = (entry, outcome, fields) => {
+  ensureDir();
+  const rec = {
+    at: iso(now()),
+    handle: entry.handle,
+    outcome,
+    exitCode: fields.exitCode ?? null,
+    stderr: (fields.stderr ?? "").slice(0, STDERR_MAX),
+    durationMs: fields.durationMs ?? 0,
+  };
+  if (fields.usage) rec.usage = fields.usage;
+  appendFileSync(telemetryPath, `${JSON.stringify(rec)}\n`);
+};
+
+// THE PARSE RULE: take stderr's last non-empty line, attempt JSON.parse, and
+// attach the object if it parses. NEVER branch on the exit code anywhere near
+// this path. consult renders usage iff a terminal `result` event reached its
+// parser, which is independent of its exit code: exit 0 emits usage, and so do
+// exit 3's error subtype (THE RATE-LIMITED CASE), exit 3's empty answer, and
+// exit 5's boundary violation — while exits 1/2/4 and a spawn failure emit
+// none. A rate-limited beat therefore carries BOTH a non-zero exit AND a usable
+// usage object, and those are exactly the records this keeper exists to
+// produce. Gating on exit 0 would discard them and silently defeat the purpose.
+const parseUsage = (stderr) => {
+  const lines = String(stderr ?? "")
+    .split("\n")
+    .map((l) => l.trim())
+    .filter((l) => l !== "");
+  if (lines.length === 0) return null;
+  try {
+    const o = JSON.parse(lines[lines.length - 1]);
+    return o && typeof o === "object" && !Array.isArray(o) ? o : null;
+  } catch {
+    return null;
+  }
+};
+
+// ── the lock ────────────────────────────────────────────────────────────────
+// Exclusive-create (throws EEXIST), so no advisory-locking API is needed and the
+// idiom is portable. Short-lived and per critical section — never held for a
+// daemon's lifetime. The heartbeat is the `heartbeatAt` field, read through the
+// same now() as everything else.
+const readLock = () => {
+  try {
+    return JSON.parse(readFileSync(lockPath, "utf8"));
+  } catch {
+    return null;
+  }
+};
+
+const lockIsStale = (intervalMs) => {
+  const info = readLock();
+  // Unreadable or half-written: reaped. The only writer of a malformed lock is
+  // a holder killed between create and write, and honouring that file forever
+  // would wedge every future tick.
+  if (!info) return true;
+  const pid = Number(info.pid);
+  if (!Number.isInteger(pid) || pid <= 0) return true;
+  if (pid !== process.pid) {
+    try {
+      process.kill(pid, 0);
+    } catch (err) {
+      // ESRCH is death. EPERM is a live process this user does not own — alive,
+      // so the lock stands on that test and only the heartbeat can reap it.
+      if (err?.code === "ESRCH") return true;
+    }
+  }
+  const beat = Date.parse(info.heartbeatAt ?? "");
+  if (!Number.isFinite(beat)) return true;
+  return now() - beat > HEARTBEAT_STALE_MULTIPLE * intervalMs;
+};
+
+const stampLock = () => {
+  writeFileSync(lockPath, `${JSON.stringify({ pid: process.pid, heartbeatAt: iso(now()) })}\n`);
+};
+
+const acquireLock = (intervalMs) => {
+  ensureDir();
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const fd = openSync(lockPath, "wx");
+      writeSync(fd, `${JSON.stringify({ pid: process.pid, heartbeatAt: iso(now()) })}\n`);
+      closeSync(fd);
+      return true;
+    } catch (err) {
+      if (err?.code !== "EEXIST") return false;
+      if (!lockIsStale(intervalMs)) return false;
+      try {
+        unlinkSync(lockPath);
+      } catch {
+        /* another process reaped it first; the retry settles who wins */
+      }
+    }
+  }
+  return false;
+};
+
+const releaseLock = () => {
+  const info = readLock();
+  if (info && Number(info.pid) !== process.pid) return;
+  try {
+    unlinkSync(lockPath);
+  } catch {
+    /* already gone */
+  }
+};
+
+// ── beats ───────────────────────────────────────────────────────────────────
+// process.execPath <consultPath>, never the shebang'd file: shebangs do not
+// execute on Windows. consultPath comes from the handle's recorded repoRoot
+// because consult is repo-bound and a detached daemon's cwd is undefined.
+const consultPathFor = (entry) =>
+  process.env.WARMTH_CONSULT || join(entry.repoRoot, ".claude", "bin", "consult");
+
+// Exactly one spawn per due handle per tick, whatever comes back. A failure is
+// NEVER retried inside the window — a cadence-firing caller that tight-retries a
+// rate limit converts an efficiency mechanism into a cost source and feeds the
+// very limit it hit. Any failure, rate limit included, defers to the next beat.
+const beat = (entry) => {
+  const startedAt = now();
+  // Failure is returned state, never an exception. spawnSync may throw AND may
+  // return with `error` set instead — consult:516-526's idiom, plus timeout and
+  // killSignal. Both halves are needed; neither is redundant.
+  let run = null;
+  let threw = null;
+  try {
+    run = spawnSync(process.execPath, [consultPathFor(entry), entry.handle, PING, "--usage-json"], {
+      cwd: entry.repoRoot,
+      timeout: entry.cadence.timeoutMs,
+      killSignal: "SIGKILL",
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+  } catch (err) {
+    threw = err;
+  }
+  const failure = threw ?? run?.error ?? null;
+  const stderr = String(run?.stderr ?? "").trim();
+  // Unconditional, and deliberately above the outcome ladder: see THE PARSE RULE.
+  const usageObj = parseUsage(run?.stderr);
+
+  // A timed-out spawn returns status: null, signal: "SIGKILL", error.code:
+  // "ETIMEDOUT" (measured, bun 1.3.14, 26-07-29). There is no status 128+15 here
+  // — that is a shell convention, not bun's, and a branch keyed on it never fires.
+  let outcome;
+  if (failure?.code === "ETIMEDOUT" || (run && run.signal != null)) outcome = "timed_out";
+  else if (failure || !run || run.status !== 0) outcome = "failed";
+  else outcome = "ok";
+
+  const exitCode = run?.status ?? null;
+  const why = failure ? `${failure.code ? `${failure.code} — ` : ""}${failure.message ?? ""}` : "";
+  record(entry, outcome, {
+    exitCode,
+    stderr: why ? `${why}\n${stderr}`.trim() : stderr,
+    durationMs: now() - startedAt,
+    usage: usageObj,
+  });
+
+  entry.lastBeatAt = iso(now());
+  entry.lastOutcome = outcome;
+  entry.consecutiveFailures = outcome === "ok" ? 0 : entry.consecutiveFailures + 1;
+  entry.counters[outcome] = (entry.counters[outcome] ?? 0) + 1;
+  writeEntry(entry);
+};
+
+// ── one tick pass ───────────────────────────────────────────────────────────
+// Lapse is a computed predicate PLUS a stamp written at the transition. Pure
+// computation would either re-emit `lapsed` on every tick or never record it;
+// the stamp makes the transition observable exactly once.
+const lapseReason = (entry, at) => {
+  const renewed = Date.parse(entry.renewedAt);
+  if (Number.isFinite(renewed) && at - renewed > entry.cadence.dormancyMs)
+    return `dormant: no renewal since ${entry.renewedAt}`;
+  if (entry.consecutiveFailures >= entry.cadence.maxFailures)
+    return `${entry.consecutiveFailures} consecutive failures`;
+  return null;
+};
+
+// Dueness is measured from the last beat, or from registration when there has
+// been none: a handle is registered because it was just used, so it is already
+// warm and its first beat falls one interval later. Beating at register time
+// would spend a beat re-warming a cache that is already hot.
+const isDue = (entry, at) => {
+  const last = Date.parse(entry.lastBeatAt ?? entry.renewedAt ?? "");
+  return !Number.isFinite(last) || at - last >= entry.cadence.intervalMs;
+};
+
+const visit = (entry) => {
+  const at = now();
+  // Already lapsed: no beat, no record. The transition was recorded once; the
+  // file stays so status can report it, and a fresh register revives it.
+  if (entry.lapsedAt) return;
+
+  const reason = lapseReason(entry, at);
+  if (reason) {
+    entry.lapsedAt = iso(at);
+    entry.lastOutcome = "lapsed";
+    entry.counters.lapsed = (entry.counters.lapsed ?? 0) + 1;
+    writeEntry(entry);
+    record(entry, "lapsed", { stderr: reason });
+    return;
+  }
+
+  if (!isDue(entry, at)) {
+    entry.counters.skipped = (entry.counters.skipped ?? 0) + 1;
+    writeEntry(entry);
+    record(entry, "skipped", {});
+    return;
+  }
+
+  beat(entry);
+};
+
+// Returns false when the lock was held by a live holder — the caller neither
+// beat nor failed. tick's own exit is 0 either way.
+const tickPass = () => {
+  const bound = minInterval(readRegistry());
+  if (!acquireLock(bound)) return false;
+  try {
+    for (const entry of readRegistry()) {
+      visit(entry);
+      stampLock(); // the holder re-touches the heartbeat after each beat
+    }
+  } finally {
+    releaseLock();
+  }
+  return true;
+};
+
+// ── daemon pidfile (read-only here; the lifecycle lands in the next phase) ──
+const readPidfile = () => {
+  try {
+    return JSON.parse(readFileSync(pidPath, "utf8"));
+  } catch {
+    return null;
+  }
+};
+
+const pidAlive = (pid) => {
+  if (!Number.isInteger(pid) || pid <= 0) return false;
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (err) {
+    return err?.code !== "ESRCH";
+  }
+};
+
+// ── commands ────────────────────────────────────────────────────────────────
+const cmdRegister = (args) => {
+  const { handle, uuid } = parseHandle(args[0]);
+  const existing = readEntry(uuid);
+  const base = existing?.cadence ?? {};
+  // Explicit flags override the cadence this handle already carries, which in
+  // turn overrides the defaults — so a renewal need not restate its cadence.
+  const cadence = {
+    intervalMs: flagValue(args, "--interval")
+      ? parseDuration(flagValue(args, "--interval"), "--interval")
+      : (base.intervalMs ?? DEFAULT_INTERVAL_MS),
+    dormancyMs: flagValue(args, "--dormancy")
+      ? parseDuration(flagValue(args, "--dormancy"), "--dormancy")
+      : (base.dormancyMs ?? DEFAULT_DORMANCY_MS),
+    timeoutMs: flagValue(args, "--timeout")
+      ? parseDuration(flagValue(args, "--timeout"), "--timeout")
+      : (base.timeoutMs ?? DEFAULT_TIMEOUT_MS),
+    maxFailures: flagValue(args, "--max-failures")
+      ? Number(flagValue(args, "--max-failures"))
+      : (base.maxFailures ?? DEFAULT_MAX_FAILURES),
+  };
+  if (!Number.isInteger(cadence.maxFailures) || cadence.maxFailures < 1)
+    usage(`bad value for --max-failures: ${flagValue(args, "--max-failures")} (expected a positive integer)`);
+
+  const at = iso(now());
+  const entry = {
+    handle,
+    uuid,
+    repoRoot: gitRoot(),
+    cadence,
+    registeredAt: existing?.registeredAt ?? at,
+    renewedAt: at,
+    lastBeatAt: existing?.lastBeatAt ?? null,
+    lastOutcome: existing?.lastOutcome ?? null,
+    consecutiveFailures: 0, // a fresh registration revives a lapsed handle
+    lapsedAt: null,
+    counters: { ...Object.fromEntries(OUTCOMES.map((o) => [o, 0])), ...(existing?.counters ?? {}) },
+  };
+  writeEntry(entry);
+  console.error(
+    `${existing ? "renewed" : "registered"}: ${handle}\n` +
+      `  ${entryPath(uuid)}\n` +
+      `  interval=${cadence.intervalMs}ms dormancy=${cadence.dormancyMs}ms timeout=${cadence.timeoutMs}ms max-failures=${cadence.maxFailures}`
+  );
+};
+
+const cmdRelease = (args) => {
+  const { handle, uuid } = parseHandle(args[0]);
+  try {
+    unlinkSync(entryPath(uuid));
+    console.error(`released: ${handle}`);
+  } catch (err) {
+    // Idempotent: releasing an unregistered handle is a clean no-op, mirroring
+    // register's idempotence.
+    if (err?.code !== "ENOENT") throw err;
+    console.error(`not registered (no-op): ${handle}`);
+  }
+};
+
+const cmdStatus = () => {
+  const entries = readRegistry();
+  console.log(`warmth dir: ${warmthDir}`);
+  const pidInfo = readPidfile();
+  const alive = pidInfo ? pidAlive(Number(pidInfo.pid)) : false;
+  console.log(
+    `daemon: ${pidInfo ? `pid ${pidInfo.pid} — ${alive ? "live" : "DEAD (stale pidfile)"}, heartbeat ${pidInfo.heartbeatAt ?? "?"}` : "not running"}`
+  );
+  console.log(`handles: ${entries.length}`);
+  for (const e of entries) {
+    const counts = OUTCOMES.map((o) => `${o}=${e.counters?.[o] ?? 0}`).join(" ");
+    console.log(
+      `  ${e.handle}${e.lapsedAt ? "  [LAPSED " + e.lapsedAt + "]" : ""}\n` +
+        `    interval=${e.cadence?.intervalMs}ms renewed=${e.renewedAt}\n` +
+        `    lastBeat=${e.lastBeatAt ?? "never"} lastOutcome=${e.lastOutcome ?? "none"} consecutiveFailures=${e.consecutiveFailures ?? 0}\n` +
+        `    ${counts}`
+    );
+  }
+};
+
+const cmdTick = () => {
+  if (!tickPass()) console.error("another tick holds the lock — exiting without beating.");
+};
+
+// The foreground loop over tick: the daemon's own body, and the diagnostic path.
+// It wakes on a short quantum but invokes a pass only when something is due, so
+// an idle registry costs a directory read rather than a telemetry record.
+const cmdWatch = async () => {
+  for (;;) {
+    const entries = readRegistry();
+    if (entries.length === 0) {
+      console.error("registry empty — watch exiting.");
+      return;
+    }
+    const at = now();
+    const pending = entries.some((e) => !e.lapsedAt && (lapseReason(e, at) || isDue(e, at)));
+    if (pending) tickPass();
+    await new Promise((r) => setTimeout(r, WAKE_MS));
+  }
+};
+
+const cmdStop = () => {
+  const info = readPidfile();
+  if (!info) {
+    console.error("no daemon pidfile — nothing to stop.");
+    return;
+  }
+  const pid = Number(info.pid);
+  try {
+    process.kill(pid, "SIGTERM");
+    console.error(`signalled daemon pid ${pid}.`);
+  } catch (err) {
+    if (err?.code !== "ESRCH") throw err;
+    console.error(`daemon pid ${pid} is already gone — clearing the stale pidfile.`);
+    try {
+      unlinkSync(pidPath);
+    } catch {
+      /* already gone */
+    }
+  }
+};
+
+// ── dispatch ────────────────────────────────────────────────────────────────
+const argv = process.argv.slice(2);
+const command = argv[0];
+const rest = argv.slice(1);
+
+switch (command) {
+  case "register":
+    cmdRegister(rest);
+    break;
+  case "release":
+    cmdRelease(rest);
+    break;
+  case "status":
+    cmdStatus();
+    break;
+  case "tick":
+    cmdTick();
+    break;
+  case "watch":
+    await cmdWatch();
+    break;
+  case "stop":
+    cmdStop();
+    break;
+  default:
+    usage(command ? `unknown command: ${command}` : undefined);
+}

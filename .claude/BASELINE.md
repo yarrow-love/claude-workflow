@@ -26,7 +26,7 @@ Cross-agent operational protocols: procedures more than one role enacts, stated 
 
 ### Tooling (`.claude/bin/`)
 
-- `.claude/bin/session-archive`, `.claude/bin/consult`, `.claude/bin/commit-guard`, `.claude/bin/reference-gate`, `.claude/bin/package.json`
+- `.claude/bin/session-archive`, `.claude/bin/consult`, `.claude/bin/commit-guard`, `.claude/bin/reference-gate`, `.claude/bin/warmth-keeper`, `.claude/bin/package.json`
 
 Workflow tooling lives *inside* the bootstrap — it travels with the copy, and its packaging file stays in its directory (nothing leaks to the repo root). The `package.json` `bin` map is the executable interface: run the scripts directly (`.claude/bin/consult …`) or `bun link` from `.claude/bin/` to put `consult` and `session-archive` on PATH.
 
