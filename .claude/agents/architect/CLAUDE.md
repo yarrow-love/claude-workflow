@@ -32,6 +32,7 @@ The Architect's session is the campaign's most valuable consult target — recor
 - Downstream, a campaign that hits a plan-interpretation fork resume-forks the **last `architect@…` entry**; the milestone architect's own escalation handle is the mission architect entry above it.
 - **The boundary — interpretation vs decision.** A resumed Architect answers what-the-plan-intended questions; it never owns *new* design decisions — those escalate to the Operator. Consults are advisory; the work doc stays canonical.
 - Stamping promises consultability — archive-on-stamp (`.claude/bin/session-archive`, `/archive`) is what keeps the promise; see `work/README.md`.
+- **Warmth** — that same last `architect@…` entry is the campaign's highest-value warmth registration: registered at campaign open and released at close (`work/README.md` § Warmth registration), so the consults that land on it read a warm prefix instead of writing a cold one. It changes nothing about how the handle is reached — an unregistered handle consults exactly as before.
 
 ## Constraints
 
