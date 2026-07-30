@@ -98,6 +98,15 @@ Conventions:
 | --- | --- | --- | --- |
 | `<machine>` | `<os>` / `<shell>` | `<repo-path>` | Single machine today; add a row per machine at bootstrap |
 
+### Warmth registration
+
+A **registered** handle is one the keeper holds warm. `.claude/bin/warmth-keeper` fires a trivial read-only beat through `.claude/bin/consult` just under the prompt cache's TTL, so the next real consult reads that session's prefix from cache instead of writing it cold again. Registration is keyed on the same `role@machine/session-id` handle above — not a second addressing scheme — and the command surface is exactly six subcommands: `register`, `release`, `status`, `tick`, `watch`, `stop`.
+
+- **Register at campaign open, release at campaign close.** `register` is idempotent start-or-attach, so a campaign never needs a separate step to start the keeper; `release` unregisters, and releasing the last handle lets the warmth-keeper daemon self-terminate, so a closed campaign leaves nothing beating. `status` answers what is held and whether the warmth-keeper daemon is alive; `tick`, `watch` and `stop` are the operational path — one pass, the foreground loop, and the signal.
+- **What to register** — the campaign's standing consult target: in practice the last `architect@…` entry, the handle the blessing and callback policies already resolve. A beat is a real, billed consult round trip, not a free ping, so registering handles nobody will consult is pure cost.
+- **Registration is machine-local**, like the consult it accelerates: the handle's `machine` segment must name this host, and a handle another machine owns is not registrable.
+- **Warmth is an optimization, never a precondition.** An unregistered handle consults exactly as before, at cold price. **The required consult path above — `.claude/bin/consult` over a `--fork-session` resume — remains the sole consult transport**: the keeper spawns no session of its own, and nothing in the consult path may come to depend on it running, so the keeper's total failure cost stays bounded at one cold reload.
+
 ## The declared-structure floor
 
 **Stated here once; referenced everywhere else.**
