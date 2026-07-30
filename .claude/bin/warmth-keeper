@@ -27,6 +27,12 @@
  * instance of that family. A later refactor that consolidates these into a
  * single shared registry file would silently join that hazard family — do not.
  *
+ * TELEMETRY GROWS WITHOUT BOUND. Every visit appends one record — `skipped`
+ * included, by ruling — so a registry left running writes a record per handle
+ * per pass, indefinitely. Nothing here prunes or rotates telemetry.jsonl:
+ * trimming it is the operator's, deliberately, so the keeper never deletes the
+ * evidence it exists to produce.
+ *
  * THE DAEMON IS SELF-MANAGED, and register owns its lifecycle. register takes
  * the same lock tick takes, and only under that lock decides start-vs-attach:
  * an existing daemon.pid whose pid is live AND whose heartbeat is inside 3x the
@@ -224,11 +230,31 @@ const readRegistry = () => {
   const out = [];
   for (const name of readdirSync(warmthDir).sort()) {
     if (!UUID_FILE_RE.test(name)) continue;
-    const entry = readEntry(name.slice(0, -".json".length));
-    if (entry?.uuid && entry?.handle) out.push(entry);
+    const stem = name.slice(0, -".json".length);
+    const entry = readEntry(stem);
+    if (!entry?.handle) continue;
+    // Filename and body uuid must agree, or the invariant the header promises
+    // breaks in the one place it can: writeEntry derives its path from the body
+    // uuid, so a disagreeing file would make the tick path write ANOTHER
+    // handle's file. A hand-edited or half-written file is dropped, not honoured.
+    if (entry.uuid !== stem) continue;
+    // cadence.intervalMs is dereferenced unguarded all down the tick path; a file
+    // without it is malformed, and dropping it here keeps the pass going.
+    if (!Number.isFinite(entry?.cadence?.intervalMs)) continue;
+    out.push(entry);
   }
   return out;
 };
+
+// THE RESURRECTION GUARD, and it is not redundant with anything. A pass holds
+// entries it snapshotted from the directory, and a beat stays in flight for as
+// long as its timeout — so `release` can unlink a handle's file between the
+// snapshot and the write that ends its visit. Writing unconditionally re-creates
+// the file the operator just retired: the handle then beats forever on real
+// tokens with no error surfaced, and a registry that should be empty keeps the
+// daemon alive. Every write on the tick path is gated on this; register's own
+// write is not, because register is what creates the file.
+const stillRegistered = (entry) => existsSync(entryPath(entry.uuid));
 
 const minInterval = (entries) => {
   const vals = entries.map((e) => e?.cadence?.intervalMs).filter((v) => Number.isFinite(v) && v > 0);
@@ -312,8 +338,18 @@ const lockIsStale = (intervalMs) => {
   return now() - beat > HEARTBEAT_STALE_MULTIPLE * intervalMs;
 };
 
+// Two properties, both load-bearing. OWNERSHIP: after a legitimate reap-and-
+// takeover this process no longer holds the lock, and re-creating the file under
+// its own pid would make the new owner's pid-guarded releaseLock a silent no-op.
+// ATOMICITY: an open-truncate-write is readable as an empty file mid-write, and
+// lockIsStale reads an unparseable lock as stale — so a plain writeFileSync here
+// invites a concurrent acquireLock to reap a perfectly live holder. Same
+// temp-and-rename idiom as writePidfile, for the same reason.
 const stampLock = () => {
-  writeFileSync(lockPath, `${JSON.stringify({ pid: process.pid, heartbeatAt: iso(now()) })}\n`);
+  if (Number(readLock()?.pid) !== process.pid) return; // reaped out from under us
+  const tmp = `${lockPath}.${process.pid}.tmp`;
+  writeFileSync(tmp, `${JSON.stringify({ pid: process.pid, heartbeatAt: iso(now()) })}\n`);
+  renameSync(tmp, lockPath);
 };
 
 const acquireLock = (intervalMs) => {
@@ -321,8 +357,13 @@ const acquireLock = (intervalMs) => {
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
       const fd = openSync(lockPath, "wx");
-      writeSync(fd, `${JSON.stringify({ pid: process.pid, heartbeatAt: iso(now()) })}\n`);
-      closeSync(fd);
+      // finally: a throwing writeSync would otherwise leak the descriptor and
+      // leave an empty lock file behind on the way to the catch.
+      try {
+        writeSync(fd, `${JSON.stringify({ pid: process.pid, heartbeatAt: iso(now()) })}\n`);
+      } finally {
+        closeSync(fd);
+      }
       return true;
     } catch (err) {
       if (err?.code !== "EEXIST") return false;
@@ -411,6 +452,7 @@ const beat = (entry) => {
     usage: usageObj,
   });
 
+  if (!stillRegistered(entry)) return; // released mid-beat — do not resurrect
   entry.lastBeatAt = iso(now());
   entry.lastOutcome = outcome;
   entry.consecutiveFailures = outcome === "ok" ? 0 : entry.consecutiveFailures + 1;
@@ -448,6 +490,7 @@ const visit = (entry) => {
 
   const reason = lapseReason(entry, at);
   if (reason) {
+    if (!stillRegistered(entry)) return; // released mid-pass — do not resurrect
     entry.lapsedAt = iso(at);
     entry.lastOutcome = "lapsed";
     entry.counters.lapsed = (entry.counters.lapsed ?? 0) + 1;
@@ -457,6 +500,7 @@ const visit = (entry) => {
   }
 
   if (!isDue(entry, at)) {
+    if (!stillRegistered(entry)) return; // released mid-pass — do not resurrect
     entry.counters.skipped = (entry.counters.skipped ?? 0) + 1;
     writeEntry(entry);
     record(entry, "skipped", {});
@@ -468,13 +512,27 @@ const visit = (entry) => {
 
 // Returns false when the lock was held by a live holder — the caller neither
 // beat nor failed. tick's own exit is 0 either way.
-const tickPass = () => {
+//
+// afterEntry is the daemon's heartbeat hook, and the asymmetry it closes is
+// real: the lock is re-stamped after every entry, while the pidfile was written
+// once per wake — so a pass long enough to outlast 3x the beat interval left a
+// live daemon looking dead to a concurrent register while its lock still looked
+// alive. The daemon passes writePidfile here so both clocks tick together.
+const tickPass = (afterEntry) => {
   const bound = minInterval(readRegistry());
   if (!acquireLock(bound)) return false;
   try {
     for (const entry of readRegistry()) {
-      visit(entry);
+      // The one uncaught throw left on this path: a malformed handle file that
+      // readRegistry's filter did not catch must cost that handle its visit, not
+      // the whole pass. Recorded, then on to the next.
+      try {
+        visit(entry);
+      } catch (err) {
+        record(entry, "failed", { stderr: `visit threw — ${err?.message ?? err}` });
+      }
       stampLock(); // the holder re-touches the heartbeat after each beat
+      afterEntry?.();
     }
   } finally {
     releaseLock();
@@ -652,8 +710,14 @@ const cmdRegister = async (args) => {
   }
 };
 
-const cmdRelease = (args) => {
+const cmdRelease = async (args) => {
   const { handle, uuid } = parseHandle(args[0]);
+  // Symmetric with register: take the tick lock so the unlink does not land in
+  // the middle of a pass. This narrows the window; it does not close it — a beat
+  // can outlast the patient wait — so correctness rests on the resurrection
+  // guard, not here. Falling through unlocked is deliberate: a release must
+  // always release, and an unreleasable handle costs real tokens every interval.
+  const took = await acquireLockPatiently(minInterval(readRegistry()));
   try {
     unlinkSync(entryPath(uuid));
     console.error(`released: ${handle}`);
@@ -662,6 +726,8 @@ const cmdRelease = (args) => {
     // register's idempotence.
     if (err?.code !== "ENOENT") throw err;
     console.error(`not registered (no-op): ${handle}`);
+  } finally {
+    if (took) releaseLock();
   }
 };
 
@@ -691,9 +757,12 @@ const cmdTick = () => {
 
 // The foreground loop over tick: the daemon's own body, and the diagnostic path.
 // It wakes on a short quantum but invokes a pass only when something is due, so
-// an idle registry costs a directory read rather than a telemetry record per
-// handle per wake — ticking every wake would write tens of thousands of
-// `skipped` records a day.
+// a FULLY IDLE registry costs a directory read rather than a telemetry record
+// per handle per wake. That is the whole of what the gate buys, and it is worth
+// stating precisely: a pass visits every entry, so one short-interval handle
+// alongside a default-cadence one still writes a `skipped` record for the latter
+// on every pass the former triggers. Skipped records are required (Manager
+// ruling), and telemetry.jsonl is unpruned — see the header.
 //
 // `--token` is register's internal handshake, not part of the command surface:
 // with it, this process IS the daemon named in daemon.pid — it verifies that
@@ -722,7 +791,10 @@ const cmdWatch = async (args) => {
 
     const at = now();
     const pending = entries.some((e) => !e.lapsedAt && (lapseReason(e, at) || isDue(e, at)));
-    if (pending) tickPass();
+    // The heartbeat must advance DURING a pass, not only between passes: a pass
+    // runs unbounded in the number of handles it beats, and each beat may run to
+    // its timeout. See tickPass.
+    if (pending) tickPass(token !== undefined ? () => writePidfile(process.pid, token) : undefined);
     await sleep(wakeMs(entries));
   }
 };
@@ -736,6 +808,15 @@ const cmdStop = () => {
     return;
   }
   const pid = Number(info.pid);
+  // Never signal an unverified pid. Every other consumer of this file gates on
+  // daemonIsHealthy — a live pid AND a fresh heartbeat — because a crashed
+  // daemon's pid gets recycled, and this is the one place the keeper could
+  // damage a process outside its own domain.
+  if (!daemonIsHealthy(info, minInterval(readRegistry()))) {
+    console.error(`stale pidfile for pid ${pid} (not a live daemon) — cleared, nothing signalled.`);
+    clearPidfile();
+    return;
+  }
   try {
     process.kill(pid, "SIGTERM");
     console.error(`signalled daemon pid ${pid}.`);
@@ -756,7 +837,7 @@ switch (command) {
     await cmdRegister(rest);
     break;
   case "release":
-    cmdRelease(rest);
+    await cmdRelease(rest);
     break;
   case "status":
     cmdStatus();
