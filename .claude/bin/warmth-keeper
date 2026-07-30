@@ -27,6 +27,17 @@
  * instance of that family. A later refactor that consolidates these into a
  * single shared registry file would silently join that hazard family — do not.
  *
+ * THE DAEMON IS SELF-MANAGED, and register owns its lifecycle. register takes
+ * the same lock tick takes, and only under that lock decides start-vs-attach:
+ * an existing daemon.pid whose pid is live AND whose heartbeat is inside 3x the
+ * beat interval is attached to, anything else is reaped and replaced. register
+ * then writes daemon.pid — the child's pid plus a fresh start token — BEFORE
+ * releasing the lock. That ordering is the whole guard: a daemon that wrote its
+ * own pidfile at startup would leave a gap between lock release and pidfile
+ * write in which a second registration sees no daemon and spawns a second one.
+ * The daemon reads its token back with a bounded grace window (see
+ * awaitOwnership) precisely because register writes the file after spawning it.
+ *
  * THE ORPHANED GRANDCHILD IS ACCEPTED AND BOUNDED, and must not be engineered
  * around. consult spawns claude synchronously with no timeout of its own, so
  * killing a timed-out consult leaves its claude grandchild reparented to init.
@@ -70,10 +81,12 @@
  *   0  ran (a failing beat is recorded state, not a failing tick)
  *   1  usage / unparseable handle / bad flag value
  */
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync, appendFileSync, unlinkSync, openSync, writeSync, closeSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync, appendFileSync, unlinkSync, renameSync, openSync, writeSync, closeSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
+import { randomUUID } from "node:crypto";
+import { spawn, spawnSync } from "node:child_process";
 
 // ── cadence defaults ────────────────────────────────────────────────────────
 // Each derives from a measured cell in milestone 3.warmth-keeper MILESTONE.md
@@ -97,11 +110,19 @@ const DEFAULT_MAX_FAILURES = 3;
 // A lock is reaped when its holder's heartbeat is older than this multiple of
 // the beat interval — the pid-reuse guard that process.kill(pid, 0) is not.
 const HEARTBEAT_STALE_MULTIPLE = 3;
-// watch's wake quantum. It wakes often (so an emptied registry and, in the
-// daemon, a heartbeat, are noticed promptly) but invokes a tick pass only when
-// something is actually due — sleeping a whole interval instead would make a
-// release take up to a full interval to be noticed.
-const WAKE_MS = 5 * 1000;
+// watch's wake quantum, computed as min(shortest registered interval, MAX). It
+// wakes often (so an emptied registry and, in the daemon, a heartbeat, are
+// noticed promptly) but invokes a tick pass only when something is actually due
+// — sleeping a whole interval instead would make a release take up to a full
+// interval to be noticed, and the heartbeat too coarse to verify. The floor
+// keeps an absurdly short registered interval from spinning the loop hot.
+const MAX_WAKE_MS = 60 * 1000;
+const MIN_WAKE_MS = 250;
+
+// The daemon's startup grace window on its own start-token check: 40 polls of
+// 50 ms. Counted rather than clocked on purpose — WARMTH_NOW can freeze now().
+const GRACE_POLLS = 40;
+const GRACE_POLL_MS = 50;
 
 // The beat's payload. Trivial and fixed: the answer is discarded, and only the
 // exit code and the --usage-json object are read.
@@ -130,6 +151,7 @@ const now = () => {
   return Date.now();
 };
 const iso = (ms) => new Date(ms).toISOString();
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const warmthDir = process.env.WARMTH_DIR || join(homedir(), ".claude", "warmth");
 const lockPath = join(warmthDir, "lock");
@@ -212,6 +234,8 @@ const minInterval = (entries) => {
   const vals = entries.map((e) => e?.cadence?.intervalMs).filter((v) => Number.isFinite(v) && v > 0);
   return vals.length > 0 ? Math.min(...vals) : DEFAULT_INTERVAL_MS;
 };
+
+const wakeMs = (entries) => Math.max(MIN_WAKE_MS, Math.min(minInterval(entries), MAX_WAKE_MS));
 
 // ── telemetry ───────────────────────────────────────────────────────────────
 // One JSON object per beat, appended. Written only under the tick lock, so the
@@ -309,6 +333,19 @@ const acquireLock = (intervalMs) => {
         /* another process reaped it first; the retry settles who wins */
       }
     }
+  }
+  return false;
+};
+
+// register cannot simply give up when a tick is mid-pass: a beat may hold the
+// lock for as long as its timeout, and the answer register needs (start or
+// attach) is only readable under the lock. So it waits a bounded moment. This is
+// the same acquireLock — and therefore the same reap — tick takes, never a
+// parallel path.
+const acquireLockPatiently = async (intervalMs, attempts = 8, pauseMs = 150) => {
+  for (let i = 0; i < attempts; i++) {
+    if (acquireLock(intervalMs)) return true;
+    await sleep(pauseMs);
   }
   return false;
 };
@@ -445,12 +482,37 @@ const tickPass = () => {
   return true;
 };
 
-// ── daemon pidfile (read-only here; the lifecycle lands in the next phase) ──
+// ── the daemon pidfile ──────────────────────────────────────────────────────
+// {pid, startToken, heartbeatAt}. REGISTER writes it — under the same lock tick
+// takes, before releasing that lock. The daemon only ever refreshes
+// heartbeatAt. The rejected alternative, a daemon that writes its own pidfile
+// when it starts, leaves a lock-release-to-pidfile-write gap in which a second
+// registration sees no daemon and spawns another.
 const readPidfile = () => {
   try {
     return JSON.parse(readFileSync(pidPath, "utf8"));
   } catch {
     return null;
+  }
+};
+
+// Written through a rename, which is atomic on all three targets. The daemon
+// rewrites this file every wake to refresh the heartbeat, and it holds no lock
+// while doing so — a register that read a truncated file mid-rewrite would
+// conclude "no daemon" and spawn a second one. Replacing the file wholesale
+// means a reader sees the old bytes or the new ones, never neither.
+const writePidfile = (pid, startToken) => {
+  ensureDir();
+  const tmp = `${pidPath}.${process.pid}.tmp`;
+  writeFileSync(tmp, `${JSON.stringify({ pid, startToken, heartbeatAt: iso(now()) })}\n`);
+  renameSync(tmp, pidPath);
+};
+
+const clearPidfile = () => {
+  try {
+    unlinkSync(pidPath);
+  } catch {
+    /* already gone */
   }
 };
 
@@ -464,8 +526,51 @@ const pidAlive = (pid) => {
   }
 };
 
+// The daemon is honoured only if it passes BOTH liveness tests the lock's reap
+// applies — a live pid AND a heartbeat inside 3x the beat interval. A pid that
+// is live but silent is a reused pid, not a daemon.
+const daemonIsHealthy = (info, intervalMs) => {
+  if (!info || !pidAlive(Number(info.pid))) return false;
+  const beat = Date.parse(info.heartbeatAt ?? "");
+  if (!Number.isFinite(beat)) return false;
+  return now() - beat <= HEARTBEAT_STALE_MULTIPLE * intervalMs;
+};
+
+// This file, spawned as itself: process.execPath is the bun binary and the
+// script is passed as an argument, never dispatched through its shebang.
+const scriptPath = fileURLToPath(import.meta.url);
+
+// stdio: "ignore" is LOAD-BEARING, not cosmetic. Inherited stdio keeps the
+// parent's event loop alive on the pipes it holds, and the registering process
+// would then not exit. detached + unref is the other half.
+const spawnDaemon = () => {
+  const startToken = randomUUID();
+  const child = spawn(process.execPath, [scriptPath, "watch", "--token", startToken], {
+    cwd: warmthDir, // the caller's cwd may vanish under a daemon that outlives it
+    detached: true,
+    stdio: "ignore",
+  });
+  child.unref();
+  return { pid: child.pid, startToken };
+};
+
+// Register's ordering is spawn -> write daemon.pid -> release lock, so a freshly
+// spawned daemon CAN wake before the pidfile carries its token. Within this
+// bounded window an absent pidfile, or one still carrying the previous daemon's
+// token, therefore means "not written yet" rather than "usurped" — without the
+// window the daemon suicides at birth on a fast boot. Only a mismatch that
+// outlasts the window is a takeover. Do not remove this as redundant.
+const awaitOwnership = async (token) => {
+  for (let i = 0; i < GRACE_POLLS; i++) {
+    const info = readPidfile();
+    if (info?.startToken === token) return info;
+    await sleep(GRACE_POLL_MS);
+  }
+  return null;
+};
+
 // ── commands ────────────────────────────────────────────────────────────────
-const cmdRegister = (args) => {
+const cmdRegister = async (args) => {
   const { handle, uuid } = parseHandle(args[0]);
   const existing = readEntry(uuid);
   const base = existing?.cadence ?? {};
@@ -508,6 +613,43 @@ const cmdRegister = (args) => {
       `  ${entryPath(uuid)}\n` +
       `  interval=${cadence.intervalMs}ms dormancy=${cadence.dormancyMs}ms timeout=${cadence.timeoutMs}ms max-failures=${cadence.maxFailures}`
   );
+
+  // Start-vs-attach is decided UNDER THE LOCK, and the pidfile is written before
+  // the lock is released, so two near-simultaneous registrations cannot both
+  // spawn: the loser waits, takes the lock, and finds a healthy daemon to attach
+  // to. Spawning outside the lock would reopen exactly that race.
+  const bound = minInterval(readRegistry());
+  if (!(await acquireLockPatiently(bound))) {
+    const info = readPidfile();
+    console.error(
+      daemonIsHealthy(info, bound)
+        ? `daemon: attached to pid ${info.pid} (tick lock busy).`
+        : "daemon: the tick lock is held elsewhere — not started. The handle is registered; re-run register to start it."
+    );
+    return;
+  }
+  try {
+    const info = readPidfile();
+    if (daemonIsHealthy(info, bound)) {
+      console.error(`daemon: attached to pid ${info.pid}.`);
+      return;
+    }
+    if (info) clearPidfile(); // reap: dead pid, or a heartbeat past 3x the interval
+    let started = null;
+    try {
+      started = spawnDaemon();
+    } catch (err) {
+      console.error(`daemon: spawn failed — ${err?.message ?? err}`);
+    }
+    if (started?.pid) {
+      writePidfile(started.pid, started.startToken);
+      console.error(`daemon: started pid ${started.pid}.`);
+    } else if (started) {
+      console.error("daemon: spawn returned no pid — not started.");
+    }
+  } finally {
+    releaseLock();
+  }
 };
 
 const cmdRelease = (args) => {
@@ -549,21 +691,44 @@ const cmdTick = () => {
 
 // The foreground loop over tick: the daemon's own body, and the diagnostic path.
 // It wakes on a short quantum but invokes a pass only when something is due, so
-// an idle registry costs a directory read rather than a telemetry record.
-const cmdWatch = async () => {
+// an idle registry costs a directory read rather than a telemetry record per
+// handle per wake — ticking every wake would write tens of thousands of
+// `skipped` records a day.
+//
+// `--token` is register's internal handshake, not part of the command surface:
+// with it, this process IS the daemon named in daemon.pid — it verifies that
+// token and refreshes the heartbeat. Without it, watch is the foreground
+// diagnostic path and touches no pidfile at all, so running one by hand can
+// neither be mistaken for the daemon nor clobber its heartbeat.
+const cmdWatch = async (args) => {
+  const token = flagValue(args, "--token");
+  const owned = async () => {
+    if (token === undefined) return true;
+    if (await awaitOwnership(token)) return true;
+    console.error("daemon.pid no longer carries this start token — superseded; exiting.");
+    return false;
+  };
+  if (!(await owned())) return;
+
   for (;;) {
     const entries = readRegistry();
     if (entries.length === 0) {
       console.error("registry empty — watch exiting.");
+      if (token !== undefined && readPidfile()?.startToken === token) clearPidfile();
       return;
     }
+    if (!(await owned())) return;
+    if (token !== undefined) writePidfile(process.pid, token);
+
     const at = now();
     const pending = entries.some((e) => !e.lapsedAt && (lapseReason(e, at) || isDue(e, at)));
     if (pending) tickPass();
-    await new Promise((r) => setTimeout(r, WAKE_MS));
+    await sleep(wakeMs(entries));
   }
 };
 
+// Signal, then drop the pidfile — the registry is never touched. stop parks the
+// handles; only release unregisters one.
 const cmdStop = () => {
   const info = readPidfile();
   if (!info) {
@@ -576,13 +741,9 @@ const cmdStop = () => {
     console.error(`signalled daemon pid ${pid}.`);
   } catch (err) {
     if (err?.code !== "ESRCH") throw err;
-    console.error(`daemon pid ${pid} is already gone — clearing the stale pidfile.`);
-    try {
-      unlinkSync(pidPath);
-    } catch {
-      /* already gone */
-    }
+    console.error(`daemon pid ${pid} is already gone.`);
   }
+  clearPidfile();
 };
 
 // ── dispatch ────────────────────────────────────────────────────────────────
@@ -592,7 +753,7 @@ const rest = argv.slice(1);
 
 switch (command) {
   case "register":
-    cmdRegister(rest);
+    await cmdRegister(rest);
     break;
   case "release":
     cmdRelease(rest);
@@ -604,7 +765,7 @@ switch (command) {
     cmdTick();
     break;
   case "watch":
-    await cmdWatch();
+    await cmdWatch(rest);
     break;
   case "stop":
     cmdStop();
