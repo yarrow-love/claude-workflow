@@ -397,6 +397,7 @@ const parseWire = (raw: string) => {
       ephemeral_5m_input_tokens: num(cc.ephemeral_5m_input_tokens),
       ephemeral_1h_input_tokens: num(cc.ephemeral_1h_input_tokens),
     },
+    rate_limit_events: events.filter((e) => e?.type === "rate_limit_event").length,
   };
 
   return { events, result, answer, usage, costUsd, toolNames, toolResults, unparsedLines };
