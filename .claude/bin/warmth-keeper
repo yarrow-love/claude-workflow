@@ -35,14 +35,31 @@
  *
  * THE DAEMON IS SELF-MANAGED, and register owns its lifecycle. register takes
  * the same lock tick takes, and only under that lock decides start-vs-attach:
- * an existing daemon.pid whose pid is live AND whose heartbeat is inside 3x the
- * beat interval is attached to, anything else is reaped and replaced. register
- * then writes daemon.pid — the child's pid plus a fresh start token — BEFORE
- * releasing the lock. That ordering is the whole guard: a daemon that wrote its
- * own pidfile at startup would leave a gap between lock release and pidfile
- * write in which a second registration sees no daemon and spawns a second one.
- * The daemon reads its token back with a bounded grace window (see
- * awaitOwnership) precisely because register writes the file after spawning it.
+ * an existing daemon.pid whose pid is live AND whose heartbeat is inside the
+ * DAEMON freshness bound (daemonStaleMs — NOT the lock's, see below) is
+ * attached to, anything else is reaped and replaced. register then writes
+ * daemon.pid — the child's pid plus a fresh start token — BEFORE releasing the
+ * lock. That ordering is the whole guard: a daemon that wrote its own pidfile
+ * at startup would leave a gap between lock release and pidfile write in which
+ * a second registration sees no daemon and spawns a second one. The daemon
+ * reads its token back with a bounded grace window (see awaitOwnership)
+ * precisely because register writes the file after spawning it.
+ *
+ * TWO STALENESS BOUNDS, AND THEY ARE NOT THE SAME BOUND. The lock is reaped at
+ * 3x the beat interval; the daemon pidfile is reaped at daemonStaleMs, a few
+ * minutes. They answer different questions and a future "cleanup" that unifies
+ * them reintroduces a real defect — the definitions and the reasoning sit at
+ * lockIsStale and daemonStaleMs.
+ *
+ * THE CADENCE INVARIANT timeoutMs < 3x intervalMs IS ADVISORY, not enforced.
+ * The lock is re-stamped after each entry, so ONE beat that runs all the way to
+ * its timeout can outlive the lock's 3x-interval stale bound; a concurrent tick
+ * then reaps a live holder and beats the same handle again — two real spawns,
+ * double spend. register warns and proceeds rather than rejecting, because the
+ * measured smoke cadence (a 60 s interval against the default 180 s timeout)
+ * sits exactly on that boundary: a keeper that refused the cadence its own
+ * evidence was gathered at would be wrong in a worse way. Tighten the timeout,
+ * or accept a rare duplicate beat.
  *
  * THE ORPHANED GRANDCHILD IS ACCEPTED AND BOUNDED, and must not be engineered
  * around. consult spawns claude synchronously with no timeout of its own, so
@@ -113,8 +130,10 @@ const DEFAULT_TIMEOUT_MS = 180 * 1000;
 // re-paying a failed fork every interval, forever.
 const DEFAULT_MAX_FAILURES = 3;
 
-// A lock is reaped when its holder's heartbeat is older than this multiple of
+// A LOCK is reaped when its holder's heartbeat is older than this multiple of
 // the beat interval — the pid-reuse guard that process.kill(pid, 0) is not.
+// This multiple governs the lock and ONLY the lock; the daemon pidfile has its
+// own, much tighter bound. See daemonStaleMs.
 const HEARTBEAT_STALE_MULTIPLE = 3;
 // watch's wake quantum, computed as min(shortest registered interval, MAX). It
 // wakes often (so an emptied registry and, in the daemon, a heartbeat, are
@@ -124,6 +143,10 @@ const HEARTBEAT_STALE_MULTIPLE = 3;
 // keeps an absurdly short registered interval from spinning the loop hot.
 const MAX_WAKE_MS = 60 * 1000;
 const MIN_WAKE_MS = 250;
+
+// Slack on the daemon's freshness bound, absorbing scheduling jitter and the
+// cost of the pass's own bookkeeping around a beat that runs to its timeout.
+const DAEMON_STALE_SLACK_MS = 30 * 1000;
 
 // The daemon's startup grace window on its own start-token check: 40 polls of
 // 50 ms. Counted rather than clocked on purpose — WARMTH_NOW can freeze now().
@@ -238,9 +261,17 @@ const readRegistry = () => {
     // uuid, so a disagreeing file would make the tick path write ANOTHER
     // handle's file. A hand-edited or half-written file is dropped, not honoured.
     if (entry.uuid !== stem) continue;
-    // cadence.intervalMs is dereferenced unguarded all down the tick path; a file
-    // without it is malformed, and dropping it here keeps the pass going.
+    // THE SHAPE THE TICK PATH DEREFERENCES UNGUARDED, validated here so a
+    // malformed file costs itself its visit rather than the pass. This is the
+    // primary guard, not a nicety: the per-entry try/catch in tickPass is a
+    // BACKSTOP, and a throw caught there after the spawn but before dueness
+    // advanced would leave the handle due on every wake — a beat-per-wake token
+    // burn out of one bad file. One line per field, dropped on the first miss.
     if (!Number.isFinite(entry?.cadence?.intervalMs)) continue;
+    if (!Number.isFinite(entry?.cadence?.dormancyMs)) continue;
+    if (!Number.isFinite(entry?.cadence?.timeoutMs)) continue;
+    if (!Number.isFinite(entry?.cadence?.maxFailures)) continue;
+    if (!entry.counters || typeof entry.counters !== "object" || Array.isArray(entry.counters)) continue;
     out.push(entry);
   }
   return out;
@@ -254,7 +285,18 @@ const readRegistry = () => {
 // tokens with no error surfaced, and a registry that should be empty keeps the
 // daemon alive. Every write on the tick path is gated on this; register's own
 // write is not, because register is what creates the file.
-const stillRegistered = (entry) => existsSync(entryPath(entry.uuid));
+//
+// IDENTITY, NOT EXISTENCE — and the difference is a second live case. Release
+// followed by a fresh register, both inside one beat's flight, leaves a file at
+// the same path that is a DIFFERENT registration: writing the snapshot back
+// rolls it away, discarding a renewal's new cadence flags and reverting the
+// dormancy clock. renewedAt is the identity: register stamps it on every
+// registration and nothing on the tick path mutates it, so the on-disk value
+// still matching the snapshot's means "the same registration is still there".
+const stillRegistered = (entry) => {
+  const onDisk = readEntry(entry.uuid);
+  return onDisk !== null && onDisk.renewedAt === entry.renewedAt;
+};
 
 const minInterval = (entries) => {
   const vals = entries.map((e) => e?.cadence?.intervalMs).filter((v) => Number.isFinite(v) && v > 0);
@@ -262,6 +304,31 @@ const minInterval = (entries) => {
 };
 
 const wakeMs = (entries) => Math.max(MIN_WAKE_MS, Math.min(minInterval(entries), MAX_WAKE_MS));
+
+const maxTimeout = (entries) => {
+  const vals = entries.map((e) => e?.cadence?.timeoutMs).filter((v) => Number.isFinite(v) && v > 0);
+  return vals.length > 0 ? Math.max(...vals) : DEFAULT_TIMEOUT_MS;
+};
+
+// THE DAEMON PIDFILE'S FRESHNESS BOUND, and it is deliberately NOT the lock's.
+// Two bounds, two different guarantees, and unifying them is a defect:
+//
+//   the lock  — reaped at HEARTBEAT_STALE_MULTIPLE x the beat interval, stated
+//               literally by this milestone's acceptance and asserted by its
+//               tests. A lock holder is a tick pass, whose pace IS the cadence.
+//   the daemon — bounded by what a live daemon actually promises, which has
+//               nothing to do with the beat interval: it rewrites its pidfile
+//               every wake (bounded by MAX_WAKE_MS) and again after every entry
+//               of a pass (bounded by that entry's beat timeout). So the bound
+//               is a function of the wake quantum and the timeout.
+//
+// Binding the daemon to 3x the beat interval made a dead daemon's pidfile look
+// fresh for 174 min at the default cadence — and just under 3 h with an EMPTY
+// registry, where minInterval falls back to the default interval. That is the
+// window in which a crashed daemon's RECYCLED pid still reads as healthy, and
+// `stop` then SIGTERMs whatever innocent process inherited it. Pid recycling on
+// a busy box takes minutes, so the bound has to be minutes, not hours.
+const daemonStaleMs = (entries) => Math.max(2 * MAX_WAKE_MS, maxTimeout(entries) + DAEMON_STALE_SLACK_MS);
 
 // ── telemetry ───────────────────────────────────────────────────────────────
 // One JSON object per beat, appended. Written only under the tick lock, so the
@@ -335,7 +402,11 @@ const lockIsStale = (intervalMs) => {
   }
   const beat = Date.parse(info.heartbeatAt ?? "");
   if (!Number.isFinite(beat)) return true;
-  return now() - beat > HEARTBEAT_STALE_MULTIPLE * intervalMs;
+  // THE LOCK's bound, and only the lock's: 3x the beat interval, literally. The
+  // daemon pidfile is judged by daemonStaleMs instead — see the reasoning there
+  // before being tempted to route both through one number.
+  const lockStaleMs = HEARTBEAT_STALE_MULTIPLE * intervalMs;
+  return now() - beat > lockStaleMs;
 };
 
 // Two properties, both load-bearing. OWNERSHIP: after a legitimate reap-and-
@@ -453,11 +524,20 @@ const beat = (entry) => {
   });
 
   if (!stillRegistered(entry)) return; // released mid-beat — do not resurrect
+  // DUENESS ADVANCES FIRST, AND IS WRITTEN EVEN IF THE BOOKKEEPING THROWS. The
+  // spawn already happened and already cost tokens; if a malformed field throws
+  // between here and the write, tickPass's catch records it and the pass goes
+  // on — but the handle would still be due on the next wake, and the crash
+  // becomes a beat-per-wake token burn. The finally makes one bad beat cost one
+  // beat. readRegistry's shape validation is what keeps this from firing.
   entry.lastBeatAt = iso(now());
   entry.lastOutcome = outcome;
-  entry.consecutiveFailures = outcome === "ok" ? 0 : entry.consecutiveFailures + 1;
-  entry.counters[outcome] = (entry.counters[outcome] ?? 0) + 1;
-  writeEntry(entry);
+  try {
+    entry.consecutiveFailures = outcome === "ok" ? 0 : (entry.consecutiveFailures ?? 0) + 1;
+    entry.counters[outcome] = (entry.counters[outcome] ?? 0) + 1;
+  } finally {
+    writeEntry(entry);
+  }
 };
 
 // ── one tick pass ───────────────────────────────────────────────────────────
@@ -514,13 +594,15 @@ const visit = (entry) => {
 // beat nor failed. tick's own exit is 0 either way.
 //
 // afterEntry is the daemon's heartbeat hook, and the asymmetry it closes is
-// real: the lock is re-stamped after every entry, while the pidfile was written
-// once per wake — so a pass long enough to outlast 3x the beat interval left a
-// live daemon looking dead to a concurrent register while its lock still looked
-// alive. The daemon passes writePidfile here so both clocks tick together.
+// real: the lock is re-stamped after every entry, while the pidfile would
+// otherwise be written once per wake — so a long pass left a live daemon
+// looking dead to a concurrent register while its lock still looked alive. This
+// hook is what lets daemonStaleMs be measured in minutes: the guarantee it
+// bounds is "refreshed every wake AND after every entry", and this is the
+// second half of that. The daemon passes writePidfile here.
 const tickPass = (afterEntry) => {
-  const bound = minInterval(readRegistry());
-  if (!acquireLock(bound)) return false;
+  const lockIntervalMs = minInterval(readRegistry());
+  if (!acquireLock(lockIntervalMs)) return false;
   try {
     for (const entry of readRegistry()) {
       // The one uncaught throw left on this path: a malformed handle file that
@@ -584,14 +666,15 @@ const pidAlive = (pid) => {
   }
 };
 
-// The daemon is honoured only if it passes BOTH liveness tests the lock's reap
-// applies — a live pid AND a heartbeat inside 3x the beat interval. A pid that
-// is live but silent is a reused pid, not a daemon.
-const daemonIsHealthy = (info, intervalMs) => {
+// The daemon is honoured only if it passes BOTH tests — a live pid AND a
+// heartbeat inside staleMs. A pid that is live but silent is a reused pid, not
+// a daemon, and the heartbeat is the only thing that can tell them apart.
+// staleMs comes from daemonStaleMs, never from the lock's 3x-interval bound.
+const daemonIsHealthy = (info, staleMs) => {
   if (!info || !pidAlive(Number(info.pid))) return false;
   const beat = Date.parse(info.heartbeatAt ?? "");
   if (!Number.isFinite(beat)) return false;
-  return now() - beat <= HEARTBEAT_STALE_MULTIPLE * intervalMs;
+  return now() - beat <= staleMs;
 };
 
 // This file, spawned as itself: process.execPath is the bun binary and the
@@ -651,6 +734,16 @@ const cmdRegister = async (args) => {
   if (!Number.isInteger(cadence.maxFailures) || cadence.maxFailures < 1)
     usage(`bad value for --max-failures: ${flagValue(args, "--max-failures")} (expected a positive integer)`);
 
+  // ADVISORY — warn and proceed, never reject. See the header's cadence
+  // invariant: the smoke cadence sits exactly on this boundary, so rejecting
+  // here would reject the configuration the milestone's own evidence needs.
+  if (cadence.timeoutMs >= HEARTBEAT_STALE_MULTIPLE * cadence.intervalMs)
+    console.error(
+      `warning: timeout=${cadence.timeoutMs}ms is not below ${HEARTBEAT_STALE_MULTIPLE}x interval=${cadence.intervalMs}ms ` +
+        `(${HEARTBEAT_STALE_MULTIPLE * cadence.intervalMs}ms). A beat that runs to its timeout can have its lock reaped by a ` +
+        `concurrent tick, producing a duplicate beat on this handle — two spawns, double spend. Registered anyway.`
+    );
+
   const at = iso(now());
   const entry = {
     handle,
@@ -676,11 +769,13 @@ const cmdRegister = async (args) => {
   // the lock is released, so two near-simultaneous registrations cannot both
   // spawn: the loser waits, takes the lock, and finds a healthy daemon to attach
   // to. Spawning outside the lock would reopen exactly that race.
-  const bound = minInterval(readRegistry());
-  if (!(await acquireLockPatiently(bound))) {
+  const registered = readRegistry();
+  const lockIntervalMs = minInterval(registered);
+  const daemonBound = daemonStaleMs(registered);
+  if (!(await acquireLockPatiently(lockIntervalMs))) {
     const info = readPidfile();
     console.error(
-      daemonIsHealthy(info, bound)
+      daemonIsHealthy(info, daemonBound)
         ? `daemon: attached to pid ${info.pid} (tick lock busy).`
         : "daemon: the tick lock is held elsewhere — not started. The handle is registered; re-run register to start it."
     );
@@ -688,11 +783,11 @@ const cmdRegister = async (args) => {
   }
   try {
     const info = readPidfile();
-    if (daemonIsHealthy(info, bound)) {
+    if (daemonIsHealthy(info, daemonBound)) {
       console.error(`daemon: attached to pid ${info.pid}.`);
       return;
     }
-    if (info) clearPidfile(); // reap: dead pid, or a heartbeat past 3x the interval
+    if (info) clearPidfile(); // reap: dead pid, or a heartbeat past daemonStaleMs
     let started = null;
     try {
       started = spawnDaemon();
@@ -718,17 +813,25 @@ const cmdRelease = async (args) => {
   // guard, not here. Falling through unlocked is deliberate: a release must
   // always release, and an unreleasable handle costs real tokens every interval.
   const took = await acquireLockPatiently(minInterval(readRegistry()));
+  let failed = false;
   try {
     unlinkSync(entryPath(uuid));
     console.error(`released: ${handle}`);
   } catch (err) {
     // Idempotent: releasing an unregistered handle is a clean no-op, mirroring
-    // register's idempotence.
-    if (err?.code !== "ENOENT") throw err;
-    console.error(`not registered (no-op): ${handle}`);
+    // register's idempotence. Anything else is a real failure, reported as one
+    // line — rethrowing here surfaces as an unhandled rejection and dumps a
+    // stack trace, which is not how this file reports anything else.
+    if (err?.code === "ENOENT") {
+      console.error(`not registered (no-op): ${handle}`);
+    } else {
+      console.error(`release failed: ${handle} — ${err?.message ?? err}`);
+      failed = true;
+    }
   } finally {
     if (took) releaseLock();
   }
+  if (failed) process.exit(1); // after the lock is released, never before
 };
 
 const cmdStatus = () => {
@@ -809,11 +912,15 @@ const cmdStop = () => {
   }
   const pid = Number(info.pid);
   // Never signal an unverified pid. Every other consumer of this file gates on
-  // daemonIsHealthy — a live pid AND a fresh heartbeat — because a crashed
-  // daemon's pid gets recycled, and this is the one place the keeper could
-  // damage a process outside its own domain.
-  if (!daemonIsHealthy(info, minInterval(readRegistry()))) {
-    console.error(`stale pidfile for pid ${pid} (not a live daemon) — cleared, nothing signalled.`);
+  // daemonIsHealthy — a live pid AND a heartbeat inside daemonStaleMs — because
+  // a crashed daemon's pid gets recycled, and this is the one place the keeper
+  // could damage a process outside its own domain. The bound is the daemon's,
+  // not the lock's: at the lock's 3x-interval bound a recycled pid stayed
+  // signallable for hours after the crash.
+  if (!daemonIsHealthy(info, daemonStaleMs(readRegistry()))) {
+    // The raw field, not Number(info.pid) — a malformed pidfile prints its
+    // actual garbage rather than the 0 that Number(null) would report.
+    console.error(`stale pidfile for pid ${info.pid} (not a live daemon) — cleared, nothing signalled.`);
     clearPidfile();
     return;
   }
