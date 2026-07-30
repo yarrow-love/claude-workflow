@@ -10,8 +10,8 @@ The active mission's phased roadmap. Empty until the first mission is chartered 
 | --- | --- | --- | --- | --- |
 | 1 | [spike](1.spike/MILESTONE.md) | The always-warm theory under test: channel mechanics + read-only boundary, then the cost matrix — the mission's go/no-go gate | — | **done (26-07-28)** — phase 1 accomplished; phase 2 superseded → A1 |
 | 2 | [instrumented-consult](2.instrumented-consult/MILESTONE.md) | Two phases: the wire (stream-json parse, `usage` extraction avoiding M1's four traps, stdout contract preserved) then the boundary (DENY reconciled, the successful-out-of-allowlist guard). Small, and it unblocks all measurement | 1 | pending |
-| 3 | [warmth-keeper](3.warmth-keeper/MILESTONE.md) | The scheduler as product: registration/release, activity-windowed cadence, read-only beats via the instrumented consult, stall semantics; acceptance evidence = M1's re-homed cells; canon + role cards; proposal enactment | 2 | pending |
-| 4 | [measured-campaign](4.measured-campaign/MILESTONE.md) | One real campaign in `~/dev/lasers` over warmth-keeper + instrumented consult; per-consult measurements collected and analyzed | 3 | pending |
+| 3 | [warmth-keeper](3.warmth-keeper/MILESTONE.md) | The scheduler as product — a self-managed cross-platform daemon: registration/release, 58-min beats with an 18 h dormancy bound, read-only beats via the instrumented consult, stall semantics; canon + role cards; proposal enactment. Two phases, closed by a two-beat smoke test | 2 | **planned (26-07-29)** — hardened to 2 phases |
+| 4 | [measured-campaign](4.measured-campaign/MILESTONE.md) | One real campaign in `~/dev/lasers` over warmth-keeper + instrumented consult; per-consult measurements collected and analyzed; **carries M1's re-homed TTL-window cells** (amendment A2) | 3 | pending |
 | 5 | [batching](5.batching/MILESTONE.md) | Conditional: consult batching evaluated against M4's measurements; skippable at its gate without failing the mission | 4 | pending |
 
 ## Conventions

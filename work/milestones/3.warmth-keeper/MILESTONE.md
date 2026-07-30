@@ -1,38 +1,86 @@
 ---
 sessions:
   - claude@play/2cc71fb6-4cdf-41b6-9397-b5d54b215500 # mission architect — stubbed at amendment A1
+  - architect@play/a3117b31-b7e0-4a55-bc48-fc6a0a163214 # milestone architect — hardened 26-07-29
 ---
 
-# Milestone 3 — warmth-keeper: always-warm without a held-open process
+# Milestone 3 — warmth-keeper: always-warm without a held-open superior
 
-> Stubbed at **amendment A1** (26-07-28), replacing the superseded `2.intercom` lifecycle machinery and `3.protocol-integration`; hardens just-in-time via `/plan work/milestones/3.warmth-keeper/`. This is the mission's crux (charter success criterion 2).
+> Stubbed at **amendment A1** (26-07-28), replacing the superseded `2.intercom` lifecycle machinery and `3.protocol-integration`. Hardened 26-07-29 into two phases under operator rulings: a **self-managed cross-platform daemon** rather than an OS-timer seam, and **no soak** — the TTL-window evidence re-homes to M4 by charter amendment A2. This is the mission's crux (charter success criterion 2).
 
 ## Objective
 
-Build the scheduler that holds registered superior handles warm by firing trivial read-only fork pings just under the measured TTL — delivering always-warm economics with none of the process-keeping machinery the original charter proposed, per **D7** (cache residency is byte-bound: it survives process death and fork identity).
+Build the scheduler that holds registered superior handles warm by firing trivial read-only fork pings just under the measured TTL — delivering always-warm economics with none of the process-keeping machinery the original charter proposed for the *superior*, per **D7** (cache residency is byte-bound: it survives process death and fork identity).
 
-## Scope (gist)
+## The economics this milestone is built against
 
-- **The keeper as product** — `.claude/bin/`, BASELINE-manifested, project-generic; machine facts route to the `work/PROJECT.md` seam.
-- **Registration lifecycle** — handles register at campaign open, release at campaign close.
-- **Activity-windowed cadence**, from M1's measured economics: beats just under 60 minutes while a campaign window is active; hold through any quiet gap shorter than the ~19-hour break-even; lapse across multi-day dormancy. Not always-on — continuous warmth costs ~2.4× per day against 2× for one cold reload, so a literally-always-on policy is roughly break-even at one-consult-per-day traffic.
-- **Stall semantics** (herdr citation) — a beat that hangs must **return**, never wedge. Failure degrades harmlessly: a missed or failed beat costs at most one cold reload, never a lost consult.
+Every default in the deliverable derives from M1's measured cells, not from judgment:
+
+| Quantity | Measured (M1, 26-07-28) | What it fixes |
+| --- | --- | --- |
+| Warm read of a 217k-token prefix | **$0.233411** | the price of one beat |
+| Cold write of the same prefix | **$4.262748** | the price of one lapse |
+| Ratio | **18.26×** | why the keeper exists at all |
+| Cache bucket | `ephemeral_1h` on every write | why the beat interval is sub-60-minute |
+
+**Break-even follows arithmetically**: 4.262748 / 0.233411 = 18.26 beats buy one avoided cold reload. At a 58-minute beat that is **17.7 hours** — the charter's "~19-hour break-even", and the derivation behind this milestone's 18-hour dormancy bound. Continuous warmth costs ~2.4× the prefix's input price per day against 2× for a single cold write, so an always-on keeper is roughly break-even at one-consult-per-day traffic. **Beats are not free, and cadence discipline is the deliverable** — not an optimization on top of it.
+
+## D7 reconciliation — why a daemon is not the machinery A1 deleted
+
+D7's closing clause reads *"no deliverable may justify process-keeping machinery on warmth grounds"*, and this milestone ships a daemon justified on warmth grounds. The tension is real on its face and is settled here rather than left to surface at mission close.
+
+**The discriminator: kill the process and fire the same beat by hand at the same instant — is the consult's price identical?**
+
+- **A1's channel: no.** It held the superior's live context; killing it forced the cold degrade path. The process *was* the warmth mechanism, which is exactly what D7's evidence (byte-bound residency) made unnecessary.
+- **The keeper: yes.** It holds no prefix and no context. Its entire state is a directory of registry files; any timer, or a human running `tick`, substitutes for it without changing a single token of cost. Its aliveness schedules warmth; it does not constitute it.
+
+The keeper is also **outside the consult path entirely** (D3 unchanged — the fork ladder remains the sole transport). Nothing ever waits on it, and its total failure cost is bounded at one cold reload — the ceiling the charter's stall semantics already pin. That is a categorically cheaper object than the channel was, and D7 does not reach it.
+
+## Scope
+
+- **The keeper as product** — `.claude/bin/warmth-keeper`, BASELINE-manifested, project-generic. A **self-managed daemon**, portable across Linux/macOS/Windows by construction rather than by an OS-timer recipe per platform: `spawn(…, {detached, stdio: 'ignore'}).unref()`, `process.kill(pid, 0)` liveness, exclusive-create locking. Operator ruling 26-07-29 — the seam alternative would have been three deliverables with two unwritten, and a portable daemon leaves *no* machine fact to route, satisfying the genericity test more fully than the seam would.
+- **`tick` stays the core.** The daemon is `while (true) { tick(); sleep(); }` and nothing more, so cadence logic is synchronously testable with a clock override instead of through wall clock, and `tick` remains exposed for manual and diagnostic use.
+- **Registration lifecycle** — handles register at campaign open and release at campaign close. `register` **starts-or-attaches** the daemon so no campaign can forget to start it; releasing the last handle lets the daemon **self-terminate**, so none can orphan one.
+- **Activity-windowed cadence**, from the table above: 58-minute beats while registered; an 18-hour dormancy bound past which a registration lapses unrenewed; re-registration renews. Reboot lapses warmth, which is correct behavior under a policy that already lapses across dormancy — not a gap to close.
+- **Stall semantics** (herdr citation) — a beat that hangs must **return**, never wedge: every beat is timeout-bounded, and beat failure is a *returned state*, never an exception (M2's bun finding — `spawnSync` returns `run.error` with `status: 143` rather than throwing). A missed or failed beat costs at most one cold reload, never a wedged scheduler and never a lost consult. Rate limiting is **defer-to-next-window** — never a retry inside the window, which would feed the limit it hit.
 - **Canon + role cards** — the registration convention in `work/README.md` § The callback grammar and the consulting role cards (architect, executor, manager); the fork ladder stays the sole consult transport (D3).
-- **Proposal enactment** — `work/proposals/26-07-28.always-warm-intercom.md` files to `_enacted/` with a reconciliation note recording that its premise was confirmed and its mechanism superseded by A1.
+- **Proposal enactment** — `work/proposals/26-07-28.always-warm-intercom.md` files to `_enacted/` with a reconciliation note recording that its premise was confirmed and its mechanism superseded twice: the channel by A1, the OS-timer seam by this milestone's daemon ruling.
 
-## Acceptance evidence — re-homed from M1 phase 2
+## Out of scope
 
-M1's held economics cells land here rather than as a standalone matrix, because the keeper's own telemetry *is* the measurement: its first beats on a cold prefix are the cold cells, its steady-state beats are the warm cells, and the instrumented consult (M2) captures all of it. Required: warmth held across **≥2 TTL windows**, **refresh-on-read** confirmed, and **one expiry cell** as negative control.
+- **The soak.** Operator ruling 26-07-29: the team is burning tokens on the broken workflow now, and a real feature is a better test than synthetic beats. The chartered TTL-window evidence re-homes to M4 (**charter amendment A2**), and the deliberate-expiry negative control is **dropped** — it costs a cold reload to re-prove what M1 already measured at 18×. What M3 owes instead is a ~3-minute two-beat smoke test, which is sufficient for every fact except cadence-clears-expiry.
+- **An OS-timer recipe printer** (systemd unit / launchd plist / Task Scheduler). It buys reboot survival, which this cadence policy does not want.
+- **Reopening M2 beyond one field.** Phase 1 adds `rate_limit_events` to `consult --usage-json` — a strict key addition, no other behavior touched — because the keeper cannot otherwise separate a rate-limited beat from a failed one, which charter criterion 5's enumerability requires.
+- **`integrator.md`'s dangling "the scheduler"** (`.claude/agents/integrator.md:26,35`) — an undefined merge-queue actor, unrelated to this one despite the name collision. Named here so the two are never conflated; reconciling it is not this milestone's work.
+- **The nine pre-existing `reference-gate` failures** in `work/research/herdr.md`, red since before M2. Charter criterion 7 still requires a green gate before *mission* close; this milestone must add no new failures.
 
-## Design inputs recorded at the M2 phase-1 gate (26-07-29)
+## Portability posture — stated, not implied
 
-Supplied by the mission architect as named inputs to this milestone's hardening dialog — a stub that anticipates these is better than one that meets them in production:
+The machine registry has one row (`play`, Linux). The keeper is **written portable and verified on Linux only**; Windows and macOS are unverified, and acceptance must not imply coverage this mission cannot produce. One known inherited hazard is carried in the script header rather than discovered later: `consult` spawns the bare string `claude`, and on Windows only a pinned native `claude.exe` serves that, drifting behind the bash shim after a Desktop update (`work/notes/26-07-28.consult-token-cost-evidence.md` § Secondary finding).
 
-- **Rate limiting is a first-class beat outcome, not an error.** M2 phase 1 found the wire carries a `rate_limit_event` type M1 never enumerated. A cadence-firing keeper is the textbook caller to meet rate limiting, and the economics are asymmetric: beats are pure overhead, so a rate-limited beat that tight-retries converts an efficiency mechanism into a cost source and feeds the very limit it hit. **Response is defer-to-next-window — skip the beat, never retry inside it.** The designed failure bound already absorbs this: a skipped beat's worst case is one cold reload, exactly the stall-semantics ceiling this milestone's scope pins.
-- **Count rate-limited beats distinctly from failed beats.** Charter success criterion 5 requires residual cold events to be *enumerable*; a rate-limited beat window is one of the enumerable causes, and M4's warm-share analysis can only attribute it if the telemetry separates it.
-- **Beat failure is a returned state, not an exception.** On bun 1.3.14 `spawnSync` returns with `run.error` set and `status: 143` rather than throwing. A keeper written around try/catch would miss the real failure shape.
-- **Inherit the parser's posture.** M2's deliberate non-exhaustive switch on event `type` is the right contract for a wire that gains types without notice; anything built on it tolerates unknown types the same way.
+## Phases
+
+| # | Phase | Gist | Status |
+| --- | --- | --- | --- |
+| 1 | [keeper](1.keeper.md) | The script whole: registry, cadence, timeout-bounded beats through `consult`, telemetry, and the self-managed daemon. BASELINE + `package.json` in the same commit. Closed by a two-beat smoke test | pending |
+| 2 | [integration](2.integration.md) | The seams: canon + role cards, executor campaign open/close, the ADR orphan hazard, proposal enactment | pending |
+
+**Why two, and why this cut.** Phase 1 is the value: the moment it lands, a handle can be registered *by hand* and the token burn stops — phase 2 is what makes it automatic rather than remembered. The cut also keeps a code convergence loop away from a prose-editing one. Against the instinct to split further: M2's log records five consecutive agent deaths, four of them 600-second stalls including one on a fresh dispatch that did nothing at all before dying. That failure is environmental and uncorrelated with task size, so each extra dispatch is another exposure — which argues for fewer phases, while the "lose the most work at 90%" risk caps how large any one may be.
+
+**Cross-phase premise.** Phase 2 assumes phase 1 leaves true: `.claude/bin/warmth-keeper` exists and is BASELINE-manifested; its subcommand names (`register`, `release`, `status`, `tick`, `watch`, `stop`) are final, because phase 2 writes them verbatim into canon and three role cards; and `register` is idempotent start-or-attach, because the campaign-open convention phase 2 authors depends on a campaign never needing a separate start step.
+
+## Acceptance
+
+The Executor's ultimate-acceptance test for the milestone.
+
+1. Both phases' `## Acceptance` blocks pass, with addenda written.
+2. `.claude/bin/warmth-keeper` is product: project-generic (no repo-specific or machine-specific facts), BASELINE-manifested, and listed in `.claude/bin/package.json`'s `bin` map.
+3. The two-beat smoke-test readings are recorded in phase 1's addendum: a second beat on a registered handle shows `cache_read_input_tokens > 0` against `cache_creation_input_tokens ≈ 0` — warmth demonstrated, not asserted.
+4. A campaign can register and release a handle by the convention as written in canon, exercised once end-to-end.
+5. The proposal is filed to `work/proposals/_enacted/` with its reconciliation note.
+6. Quality gate: tooling smoke test green including `warmth-keeper`; `reference-gate check` adds **no new failures** beyond the nine pre-existing `herdr.md` ones (M2's amended acceptance, expiring at mission close per charter criterion 7).
+7. `/initialize` run once by the Executor at milestone close — carried forward from M2 phase 1, where it was found not headlessly invocable.
 
 ## Depends on
 
-M2 — the keeper's beats are consult-shaped children and its acceptance evidence is usage telemetry, so it is built *on* the instrument and measured *by* it.
+M2 — the keeper's beats are consult-shaped children and its telemetry is the instrument's own output, so it is built *on* the instrument and measured *by* it. M2 phase 2 is built, committed and Executor-verified with certification outstanding (`work/todos/26-07-29.certify-m2-boundary.md`); the instrument itself is landed and usable.

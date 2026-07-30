@@ -1,11 +1,12 @@
 ---
 mission: v4.token-efficiency
 branch: v4.token-efficiency
-status: chartered (amended A1, 26-07-28)
+status: chartered (amended A2, 26-07-29)
 sessions:
   - claude@play/2cc71fb6-4cdf-41b6-9397-b5d54b215500 # mission architect — chartered at operator commission; ruled amendment A1
   - architect@play/c1378142-cf5c-4ad2-97b0-920533f97a7c # milestone architect (M1) — authored amendment A1
   - executor@play/c1378142-cf5c-4ad2-97b0-920533f97a7c # campaign executor (M1) — produced A1's evidence
+  - architect@play/a3117b31-b7e0-4a55-bc48-fc6a0a163214 # milestone architect (M3) — authored amendment A2
 ---
 
 # Mission v4 — token efficiency: the always-warm intercom
@@ -94,8 +95,8 @@ Recorded so M1's plan descended from an honest boundary between what was known a
 | --- | --- | --- | --- | --- |
 | 1 | [spike](milestones/1.spike/MILESTONE.md) | The always-warm theory under test: hold-open mechanics, cost matrix, boundary check — go/no-go gate | — | **done (26-07-28)** — phase 1 accomplished; phase 2 superseded → A1 |
 | 2 | [instrumented-consult](milestones/2.instrumented-consult/MILESTONE.md) | `.claude/bin/consult` captures and reports per-consult `usage` from the child's event wire (M1's wire map); DENY-drift reconciliation and the `permission_denials` false-clean-sheet fix. Small, and it unblocks all measurement | 1 | pending |
-| 3 | [warmth-keeper](milestones/3.warmth-keeper/MILESTONE.md) | The scheduler as product: handle registration/release, activity-windowed cadence (sub-60-min beats, ~19 h hold, multi-day lapse), read-only beats via the instrumented consult, stall semantics; acceptance evidence = M1's re-homed cells (≥2 TTL windows, refresh-on-read, one expiry control) from its own telemetry; canon + role cards; proposal enactment | 2 | pending |
-| 4 | [measured-campaign](milestones/4.measured-campaign/MILESTONE.md) | One real campaign in `~/dev/lasers` over warmth-keeper + instrumented consult; per-consult measurements analyzed; warm-fork latency and refresh-on-read observed free at production TTL | 3 | pending |
+| 3 | [warmth-keeper](milestones/3.warmth-keeper/MILESTONE.md) | The scheduler as product — a self-managed cross-platform daemon: handle registration/release, activity-windowed cadence (58-min beats, 18 h dormancy bound), read-only beats via the instrumented consult, stall semantics; canon + role cards; proposal enactment. Two phases, closed by a two-beat smoke test (**A2**) | 2 | **planned (26-07-29)** — hardened to 2 phases |
+| 4 | [measured-campaign](milestones/4.measured-campaign/MILESTONE.md) | One real campaign in `~/dev/lasers` over warmth-keeper + instrumented consult; per-consult measurements analyzed; warm-fork latency and refresh-on-read observed free at production TTL. **Carries M1's re-homed TTL-window cells (A2)**: warmth held across ≥2 TTL windows and refresh-on-read, observed from the keeper's own telemetry during the campaign | 3 | pending |
 | 5 | [batching](milestones/5.batching/MILESTONE.md) | Conditional (operator ruling at charter): consult batching evaluated against M4's measurements; skippable at its gate | 4 | pending |
 
 **Ordering rationale for 2-before-3**: the keeper's beats are consult-shaped children and its acceptance evidence is usage telemetry, so instrumenting first means the keeper is built *on* the instrument and measured *by* it, rather than carrying ad-hoc capture that M2 would then duplicate.
@@ -119,3 +120,30 @@ Recorded so M1's plan descended from an honest boundary between what was known a
 **Evidence.** `work/todos/_done/26-07-28.execute-m1-spike.md` § Phase 2 — economics: HELD (findings 1–7) and § Phase-gate architect consult; `work/notes/26-07-28.consult-token-cost-evidence.md` (M1 phase 1 section); `work/milestones/1.spike/1.channel.md` § Addendum.
 
 **Design inputs cited, not absorbed.** `work/research/herdr.md` contributes three mechanisms to the milestone docs — the stall detector (a beat or consult that hangs must return, never wedge), bounded on-demand reads over transcript streaming (the consult returns answer plus usage, never the child's raw wire into the parent's context), and path-as-message as documented fallback for oversized answers. Its larger thesis routes to the queued coordination-plane candidate.
+
+---
+
+## Amendment A2 (26-07-29)
+
+> architect@play/a3117b31-b7e0-4a55-bc48-fc6a0a163214 — authored at M3 hardening (`/plan work/milestones/3.warmth-keeper`)
+>
+> **Ruled directly by the Operator in the hardening dialog**, on two explicit rulings. Unlike A1, no delegation was involved: the operator settled both forks personally and this amendment records them.
+
+**What changed.** Two rulings, both narrowing M3, neither touching the mission's ends.
+
+1. **The keeper is a self-managed cross-platform daemon**, not a machine-declared tick behind the `work/PROJECT.md` seam. The M3 roadmap row's cadence gist is restated in the deliverable's own measured terms (58-minute beats, 18-hour dormancy bound).
+2. **M3's soak is dropped.** The re-homed M1 cells — warmth across ≥2 TTL windows and refresh-on-read — **move from M3 to M4**, where a real campaign produces them for free. The deliberate-expiry negative control is **dropped outright**. M3 closes instead on a two-beat smoke test.
+
+Roadmap rows 3 and 4 amended accordingly. No success criterion is altered: criterion 2 chartered the keeper's *policy*, never its scheduling substrate, and the TTL evidence was pinned to M3 by the roadmap row and the milestone stub rather than by a criterion.
+
+**Why — the daemon.** The seam was the charter's own suggested shape ("machine facts route to the `work/PROJECT.md` seam"). The operator's objection is decisive and was accepted against the architect's initial recommendation: the product must run on Windows, macOS and Linux, so a seam expands to three OS recipes of which two are unwritten. A portable daemon leaves **no machine fact to route at all**, which satisfies the genericity test — the acceptance test for every `.claude/` change — more fully than routing one would. The architect's contrary recommendation had been calibrated against *this* machine, where systemd is live, rather than against the product's portability requirement. Recorded because the reasoning, not the verdict, is what a later reader needs.
+
+The A1 tension this raises is settled in the milestone doc rather than here, with a one-line discriminator: kill the process, fire the same beat by hand at the same instant, and ask whether the consult's price changed. For A1's channel it did; for the keeper it does not. `work/milestones/3.warmth-keeper/MILESTONE.md` § D7 reconciliation.
+
+**Why — the soak.** The operator's ruling, verbatim in substance: *there is no time for a soak; the team is actively running the broken workflow and burning an extreme number of tokens.* Under that pressure the soak is also the weakest evidence in the milestone. Two beats sixty seconds apart establish registry lifecycle, repeated firing, and refresh-on-read — beat #2 shows a high `cache_read_input_tokens` against ~0 cache creation. The **only** fact needing real wall clock is that a 58-minute cadence clears the 60-minute expiry, and M4's campaign shows exactly that at production scale for free. The dropped expiry control would have spent a deliberate cold reload re-proving M1's already-measured 18× ratio.
+
+So: **M3 proves the machinery, M4 proves the cadence.** The evidence is deferred, not forfeited — and it lands on better evidence than a synthetic soak would have produced.
+
+**What this amendment does not do.** It does not relax charter success criterion 5 (one measured campaign, per-consult `usage` collected, residual cold events enumerable) or criterion 7 (green gate at mission close). It moves evidence between milestones; it removes none from the mission.
+
+**Evidence.** `work/notes/26-07-28.consult-token-cost-evidence.md` § Cost data — carried for phase 2 (the 18.26× ratio and the `ephemeral_1h` finding every M3 default derives from); `work/todos/26-07-29.execute-m2-instrumented-consult.md` § Phase Ledger (the five-agent-death record behind M3's phase count and its orphaned-registration hazard).
