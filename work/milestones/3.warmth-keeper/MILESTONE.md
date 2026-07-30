@@ -2,6 +2,7 @@
 sessions:
   - claude@play/2cc71fb6-4cdf-41b6-9397-b5d54b215500 # mission architect — stubbed at amendment A1
   - architect@play/a3117b31-b7e0-4a55-bc48-fc6a0a163214 # milestone architect — hardened 26-07-29
+  - executor@play/a3117b31-b7e0-4a55-bc48-fc6a0a163214 # campaign executor — same session, executor hat
 ---
 
 # Milestone 3 — warmth-keeper: always-warm without a held-open superior
