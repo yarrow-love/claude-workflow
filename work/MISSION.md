@@ -11,7 +11,7 @@ sessions:
 
 # Mission v4 — token efficiency: the always-warm intercom
 
-> Chartered 26-07-28 by operator commission, founded on the adopted proposal [`work/proposals/26-07-28.always-warm-intercom.md`](proposals/26-07-28.always-warm-intercom.md) — the revision that superseded the rejected resume-era proposal (`work/proposals/_rejected/26-07-28.persistent-intercom-and-consult-economy.md`) at this mission's founding. Fourth mission this repo has chartered (predecessor: `v3.memory-protocol`, closed accomplished 26-07-27); rides branch `v4.token-efficiency` off `dev` (mission = branch). Operator rulings at charter: batching is a **conditional final milestone**; the v3 close's link-gate recommendation is a **queued non-goal**; success requires **one measured campaign** in a consuming repo; spike refutation closes the mission **unaccomplished**.
+> Chartered 26-07-28 by operator commission, founded on the adopted proposal [`work/proposals/_enacted/26-07-28.always-warm-intercom.md`](proposals/_enacted/26-07-28.always-warm-intercom.md) — the revision that superseded the rejected resume-era proposal (`work/proposals/_rejected/26-07-28.persistent-intercom-and-consult-economy.md`) at this mission's founding. Fourth mission this repo has chartered (predecessor: `v3.memory-protocol`, closed accomplished 26-07-27); rides branch `v4.token-efficiency` off `dev` (mission = branch). Operator rulings at charter: batching is a **conditional final milestone**; the v3 close's link-gate recommendation is a **queued non-goal**; success requires **one measured campaign** in a consuming repo; spike refutation closes the mission **unaccomplished**.
 
 ## Objective / why now
 
@@ -68,7 +68,7 @@ Recorded so M1's plan descended from an honest boundary between what was known a
 
 - **Footguns**: the fresh ledger is empty — the normal starting state, not a gap. v3's entries stay archived; the durable reference-integrity statement lives in `.claude/agents/janitor.md` § The reference-integrity method, exactly as the v3 close provisioned. Nothing to carry.
 - **Todos**: `bugs/26-07-25.bug.concurrent-tree-commit-absorption.md` — **live, unaligned with v4**: it stays live because the ADR hazard entry names it as deferred (a hazard pointing at an archived bug promises a liveness it does not have), but no v4 milestone touches it. Backlog row's alignment updated at charter.
-- **Proposals**: `26-07-28.always-warm-intercom.md` — **adopted at this charter** (operator-directed at filing); stays in the root until the enacting work completes, then files to `_enacted/`. The rejected predecessor stays in `_rejected/` with its rejection record. `_deferred/` is empty.
+- **Proposals**: `26-07-28.always-warm-intercom.md` — **adopted at this charter** (operator-directed at filing); **enacted 26-07-30** at M3 phase 2 and filed to `work/proposals/_enacted/26-07-28.always-warm-intercom.md`. The rejected predecessor stays in `_rejected/` with its rejection record. `_deferred/` is empty.
 - **Runbooks**: none live (v3's close authored none forward).
 - **Design**: no canon founded — nothing to triage.
 - **Notes**: both live notes stay live. `26-07-25.child-collection-evidence.md` — re-affirmed a third time, and now *aligned*: a persistent superior is a collection point that cannot be abandoned by a turn ending; this mission records whether that expected secondary benefit holds. `26-07-28.consult-token-cost-evidence.md` — the mission's evidence surface (D6).
