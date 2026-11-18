@@ -23,8 +23,13 @@ Everything else is left to the harness: built-in `Explore`, `Plan` and `general-
 
 ## Adopt it in a repo
 
+With the `/scaffold-repo` user skill installed (it lives in the `terminal` repo, `claude/skills/scaffold-repo/`), run `/scaffold-repo` in the new repo: it extracts the template, fills in the skeletons with you, and commits.
+
+By hand:
+
 ```sh
-git -C ~/dev/claude-workflow archive main CLAUDE.md .claude work | tar -x -C <repo>
+git -C ~/dev/claude-workflow fetch origin main
+git -C ~/dev/claude-workflow archive origin/main CLAUDE.md .claude work | tar -x -C <repo>
 ```
 
 Then start a session in the repo and ask Claude to fill in `CLAUDE.md` and `work/PROJECT.md` with you (the gate, the structure, the machines, what is reserved to you). Add your gate's commands to `.claude/settings.json` if you want them pre-approved. File the first work order, or write notes and proposals toward a first mission.
