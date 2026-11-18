@@ -1,29 +1,5 @@
 {
   "permissions": {
-    "defaultMode": "bypassPermissions",
-    "allow": ["Bash(ast-grep:*)", "Bash(sg:*)", "Bash(claude:*)"]
-  },
-  "hooks": {
-    "SessionEnd": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bun run \"$CLAUDE_PROJECT_DIR/.claude/bin/session-archive\" --from-hook"
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bun run \"$CLAUDE_PROJECT_DIR/.claude/bin/commit-guard\""
-          }
-        ]
-      }
-    ]
-  },
-  "env": { "CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH": "2" }
+    "allow": ["Bash(git status:*)", "Bash(git diff:*)", "Bash(git log:*)"]
+  }
 }

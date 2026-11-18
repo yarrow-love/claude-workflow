@@ -1,15 +1,13 @@
-# proposals/
+# work/proposals/ — design before decision
 
-Pre-decision design thinking. The root is the **standing set** — proposals still open, or adopted with enacting work pending. State directories carry the rest:
+The root holds the **standing** proposals: still open, or adopted with the enacting work pending. State directories hold the rest, created on first use:
 
-| Directory | State | Meaning |
-| --- | --- | --- |
-| `_deferred/` | deferred | Accepted in principle, not now |
-| `_rejected/` | rejected | Declined |
-| `_enacted/` | enacted | **Accepted and applied** — the decision was made and the enacting work landed |
+| Directory    | Meaning                                |
+| ------------ | -------------------------------------- |
+| `_deferred/` | Accepted in principle, not now         |
+| `_rejected/` | Declined                               |
+| `_enacted/`  | Accepted, and the enacting work landed |
 
-**Adoption and enactment are two steps.** Adoption is a *decision*: `status:` frontmatter updates (with reconciliation notes as needed) and the file stays in the root while the enacting work pends — the root remains the honest list of proposals still generating work. Enactment is a *completion*: whoever closes the enacting work (the work order's closer, or the operator session that applies the proposal directly) moves the file to `_enacted/`, sets `status: enacted (<date> — <what landed>)`, and appends a `sessions:` stamp (`work/README.md` § The callback grammar).
+A proposal is `<yy-mm-dd>.<slug>.md` with frontmatter `status:` (`open` · `adopted (<date>)` · `deferred` · `rejected` · `enacted (<date> — <what landed>)`) and `relates-to:`. It states the problem, the options with their costs, a recommendation and its reasoning, and the determinations it asks the operator to rule.
 
-Series subdirectories (`<date>.<series>/`) are preserved inside state directories — enacted members of a series move to `_enacted/<series>/`, keeping same-directory cross-links intact; links that cross the boundary are repaired at move time.
-
-At mission close, `_enacted/` archives wholesale with the mission (`work/missions/<v>/proposals/`) — enactment filed the close-time triage in advance; standing and `_deferred/` proposals persist unless the close triages them otherwise.
+Adoption is a decision: update `status:` and leave the file in the root while work pends. Enactment is a completion: whoever closes the enacting work moves the file to `_enacted/` with `status: enacted (<date> — <what landed>)`. Proposals are never rewritten after a decision; a changed mind is a new proposal.
